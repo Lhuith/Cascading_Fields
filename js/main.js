@@ -18,6 +18,7 @@ var direction = new THREE.Vector3();
 var vertex = new THREE.Vector3();
 var color = new THREE.Color();
 var skyMaterial;
+
 // Custom global variables
 var mouse = { x: 0, y: 0 };
 var resolution = 3;
@@ -125,7 +126,7 @@ function init() {
 
     ////MainScene.background = new THREE.Color(0x42c5ff);
     // M//ainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 2000);
-    camera.position.y = 40;
+    //camera.position.set(textureSize * 5, 40, textureSize * 5);
     dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
     var vector = new THREE.Vector3(750, 500, 1000);
     dirLight.position.set(vector);
@@ -174,20 +175,15 @@ function init() {
     });
 
     MainScene.add(controls.getObject());
-    camera.position.x = textureSize;
-    camera.position.z = textureSize;
+    controls.getObject().position.set(((textureSize/2.0) - 5)*50, 40, ((textureSize/2.0) - 5)*50);
+
     worldObjects = new THREE.Object3D();
     MainScene.add(worldObjects);
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
 
     var gridHelper = new THREE.GridHelper(1000, 20);
-    //MainScene.add(gridHelper);
-
-    var geometry = new THREE.BoxGeometry(100, 100, 100);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    cubeTest = new THREE.Mesh(geometry, material);
-    MainScene.add(cubeTest);
+    MainScene.add(gridHelper);
 
     var onKeyDown = function (event) {
 
@@ -254,8 +250,8 @@ function init() {
     document.addEventListener('keyup', onKeyUp, false);
 
     raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
-    raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 10);
-    raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
+    raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1000);
+    raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0, 1000);
     //LoadAssets();
     //Load Shaders and Setup Planet
     ShaderLoader('js/Shaders/Planet/Planet.vs.glsl',
@@ -319,6 +315,29 @@ function LoadAssets() {
     // //AstPalleteColorGrab = AstoColorPalleteGrab[randomRangeRound(0, AstoColorPalleteGrab.length - 1)].RGB;
 }
 
+function GetHeight(){
+
+    var vector = new THREE.Vector3(
+        controls.getObject().position.x, 
+        0, 
+        controls.getObject().position.z);
+
+    raycaster_U.ray.origin.copy(vector);
+    raycaster_U.ray.origin.y -= 1;
+
+    var intersections = raycaster_U.intersectObjects(objects);
+
+    var onObject = intersections.length > 0;
+    var height = 0;
+
+    if(intersections[0] !== undefined)
+        height = intersections[0].point.y + 40;
+    else
+        height = 40;
+
+    return height;
+}
+
 function setUpSky(start, vertex_text, fragment_text) {
 
     var texterLoader = new THREE.TextureLoader();
@@ -363,12 +382,12 @@ function SortWorldObjects() {
 
                 var distance = childvector.distanceTo(vector);
                 //console.log(distance);
-                if (distance < 3000 || FrustrumIntersection(child) == true) {
+                if (distance < 1000|| FrustrumIntersection(child) == true) {
                     child.visible = true;
                     child.traverse(function (children) {
                         children.visible = true;
                     });
-                } else if (distance >= 3000 || FrustrumIntersection(child) == false) {
+                } else if (distance >= 1000 || FrustrumIntersection(child) == false) {
                     child.visible = false;
                     child.traverse(function (children) {
                         children.visible = false;
@@ -416,6 +435,9 @@ function animate() {
 
     if (controls.isLocked === true) {
 
+        var height = GetHeight();
+        console.log(height);
+
         raycaster.ray.origin.copy(controls.getObject().position);
         raycaster.ray.origin.y -= 10;
 
@@ -429,7 +451,7 @@ function animate() {
         velocity.x -= velocity.x * 1.0 * delta;
         velocity.z -= velocity.z * 1.0 * delta;
 
-        velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+        //velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveLeft) - Number(moveRight);
@@ -447,14 +469,18 @@ function animate() {
         controls.getObject().translateY(velocity.y * delta);
         controls.getObject().translateZ(velocity.z * delta);
 
-        if (controls.getObject().position.y < 10) {
+       //if (controls.getObject().position.y <= height) {
 
-            velocity.y = 0;
-            controls.getObject().position.y = 10;
+       //    velocity.y = 0;
+       //    controls.getObject().position.y = height;
 
-            canJump = true;
+       //    canJump = true;
 
-        }
+       //}
+       // console.log(height);
+        
+        if(controls.getObject().position.y !== height)
+            controls.getObject().position.y = height;
 
         prevTime = time;
         skyBox.position.copy(controls.getObject().position);
@@ -512,8 +538,6 @@ function CalculateParametres(vertex_text, fragment_text) {
 }
 
 function FrustrumIntersection(object) {
-
-
     var frustum = new THREE.Frustum();
     var cameraViewProjectionMatrix = new THREE.Matrix4();
 
