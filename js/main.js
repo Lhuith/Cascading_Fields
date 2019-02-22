@@ -315,6 +315,28 @@ function LoadAssets() {
     // //AstPalleteColorGrab = AstoColorPalleteGrab[randomRangeRound(0, AstoColorPalleteGrab.length - 1)].RGB;
 }
 
+function SimpleCollision(){
+    var vector = controls.getObject().position;
+
+    worldObjects.updateMatrixWorld();
+
+    if (worldObjects !== undefined) {
+        worldObjects.traverse(function (child) {
+
+            if (child !== worldObjects) {
+                var childvector = new THREE.Vector3();
+                childvector.setFromMatrixPosition(child.matrixWorld);
+
+                var distance = childvector.distanceTo(vector);
+                //console.log(distance);
+                if (distance < 40) {
+                    //velocity
+                } 
+            }
+        });
+    }
+}
+
 function GetHeight(){
 
     var vector = new THREE.Vector3(
@@ -438,12 +460,12 @@ function animate() {
         var height = GetHeight();
         console.log(height);
 
-        raycaster.ray.origin.copy(controls.getObject().position);
-        raycaster.ray.origin.y -= 10;
+        //raycaster.ray.origin.copy(controls.getObject().position);
+        //raycaster.ray.origin.y -= 10;
 
-        var intersections = raycaster.intersectObjects(objects);
+        //var intersections = raycaster.intersectObjects(objects);
 
-        var onObject = intersections.length > 0;
+        //var onObject = intersections.length > 0;
 
         var time = performance.now();
         var delta = (time - prevTime) / 1000;
@@ -460,10 +482,10 @@ function animate() {
         if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
 
-        if (onObject === true) {
-            velocity.y = Math.max(0, velocity.y);
-            canJump = true;
-        }
+        //if (onObject === true) {
+        //    velocity.y = Math.max(0, velocity.y);
+        //    canJump = true;
+        //}
 
         controls.getObject().translateX(velocity.x * delta);
         controls.getObject().translateY(velocity.y * delta);
