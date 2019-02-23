@@ -103,7 +103,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
                     //Flower(world, flower01, x - (segment_width / 2.0), finalP, y - (segment_height / 2.0));
             }
 
-            if ((iy * widthSegments + ix) % 4 == 0) {
+            if ((iy * widthSegments + ix) % 12 == 0) {
 
                 //Vegetation
                 if (hPoint >= .5 && hPoint <= .55) {
@@ -118,7 +118,6 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     // indices
 
     for (iy = 0; iy < gridY; iy++) {
-
         for (ix = 0; ix < gridX; ix++) {
 
             var a = ix + gridX1 * iy;
@@ -160,7 +159,6 @@ function Tree(world, texture, x, y, z, cross) {
     trunk.position.set(pos.x, pos.y, pos.z);
     //cross.setLength(14);
     for (var i = 0; i < 3; i++) {
-
         var material = new THREE.MeshBasicMaterial({map: texture, color: 0xffffff });
         var geometry = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 1), material);
         material.alphaTest = 0.5;
@@ -186,6 +184,7 @@ function Tree(world, texture, x, y, z, cross) {
     //trunk.add(sprite);
     //LEAVES---------------------------------------------------
     trunk.add(sprite);
+    world.add(sprite);
 
     material.side = THREE.DoubleSide;
 

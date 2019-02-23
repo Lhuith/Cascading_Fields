@@ -12,6 +12,7 @@ var moveLeft = false;
 var moveRight = false;
 var canJump = false;
 var worldObjects;
+var colliding;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
@@ -32,6 +33,9 @@ var textureSize = 256;
 var mouseDown = false;
 var boxsize = 25;
 var skyboxuniforms;
+
+var playerBox;
+
 //var textureList = [];
 
 var planetSize, planetData, inPlanet, planet,
@@ -175,12 +179,17 @@ function init() {
     });
 
     MainScene.add(controls.getObject());
-    controls.getObject().position.set(((textureSize/2.0) - 5)*50, 40, ((textureSize/2.0) - 5)*50);
+    controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
 
     worldObjects = new THREE.Object3D();
     MainScene.add(worldObjects);
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
+
+    var geometry = new THREE.BoxGeometry(5, 5, 5);
+    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    playerBox = new THREE.Mesh(geometry, material);
+    MainScene.add(playerBox);
 
     var gridHelper = new THREE.GridHelper(1000, 20);
     MainScene.add(gridHelper);
@@ -315,33 +324,46 @@ function LoadAssets() {
     // //AstPalleteColorGrab = AstoColorPalleteGrab[randomRangeRound(0, AstoColorPalleteGrab.length - 1)].RGB;
 }
 
-function SimpleCollision(){
-    var vector = controls.getObject().position;
-
-    worldObjects.updateMatrixWorld();
-
+function SimpleCollision() {
+    colliding = false;
+    var friction = 0.1;
     if (worldObjects !== undefined) {
         worldObjects.traverse(function (child) {
-
             if (child !== worldObjects) {
-                var childvector = new THREE.Vector3();
-                childvector.setFromMatrixPosition(child.matrixWorld);
-
-                var distance = childvector.distanceTo(vector);
-                //console.log(distance);
-                if (distance < 40) {
-                    //velocity
-                } 
+                if (!child.isSprite) {
+                    if (detectCollisionCubes(child, playerBox)) {
+                        colliding = true;
+                        var reflection = velocity.reflect(direction);
+                        velocity.x -= reflection.x * friction;
+                        velocity.z -= reflection.z * friction;
+                        this.stop();
+                    }
+                }
             }
         });
     }
 }
 
-function GetHeight(){
+function detectCollisionCubes(object1, object2) {
+    object1.geometry.computeBoundingBox(); //not needed if its already calculated
+    object2.geometry.computeBoundingBox();
+    object1.updateMatrixWorld();
+    object2.updateMatrixWorld();
+
+    var box1 = object1.geometry.boundingBox.clone();
+    box1.applyMatrix4(object1.matrixWorld);
+
+    var box2 = object2.geometry.boundingBox.clone();
+    box2.applyMatrix4(object2.matrixWorld);
+
+    return box1.intersectsBox(box2);
+}
+
+function GetHeight() {
 
     var vector = new THREE.Vector3(
-        controls.getObject().position.x, 
-        0, 
+        controls.getObject().position.x,
+        0,
         controls.getObject().position.z);
 
     raycaster_U.ray.origin.copy(vector);
@@ -352,7 +374,7 @@ function GetHeight(){
     var onObject = intersections.length > 0;
     var height = 0;
 
-    if(intersections[0] !== undefined)
+    if (intersections[0] !== undefined)
         height = intersections[0].point.y + 40;
     else
         height = 40;
@@ -404,7 +426,7 @@ function SortWorldObjects() {
 
                 var distance = childvector.distanceTo(vector);
                 //console.log(distance);
-                if (distance < 1000|| FrustrumIntersection(child) == true) {
+                if (distance < 1000 || FrustrumIntersection(child) == true) {
                     child.visible = true;
                     child.traverse(function (children) {
                         children.visible = true;
@@ -438,7 +460,7 @@ function onWindowResize() {
 
 function animate() {
     SortWorldObjects();
-
+    SimpleCollision();
     var delta = clock.getDelta();
     timer = timer + delta;
 
@@ -458,7 +480,7 @@ function animate() {
     if (controls.isLocked === true) {
 
         var height = GetHeight();
-        console.log(height);
+        //console.log(height);
 
         //raycaster.ray.origin.copy(controls.getObject().position);
         //raycaster.ray.origin.y -= 10;
@@ -470,18 +492,20 @@ function animate() {
         var time = performance.now();
         var delta = (time - prevTime) / 1000;
 
+
         velocity.x -= velocity.x * 1.0 * delta;
         velocity.z -= velocity.z * 1.0 * delta;
+
 
         //velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveLeft) - Number(moveRight);
         direction.normalize(); // this ensures consistent movements in all directions
-
-        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
-
+        if (!colliding) {
+            if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+            if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+        }
         //if (onObject === true) {
         //    velocity.y = Math.max(0, velocity.y);
         //    canJump = true;
@@ -491,34 +515,24 @@ function animate() {
         controls.getObject().translateY(velocity.y * delta);
         controls.getObject().translateZ(velocity.z * delta);
 
-       //if (controls.getObject().position.y <= height) {
+        //if (controls.getObject().position.y <= height) {
 
-       //    velocity.y = 0;
-       //    controls.getObject().position.y = height;
+        //    velocity.y = 0;
+        //    controls.getObject().position.y = height;
 
-       //    canJump = true;
+        //    canJump = true;
 
-       //}
-       // console.log(height);
-        
-        if(controls.getObject().position.y !== height)
+        //}
+        // console.log(height);
+
+        if (controls.getObject().position.y !== height)
             controls.getObject().position.y = height;
 
         prevTime = time;
         skyBox.position.copy(controls.getObject().position);
+        playerBox.position.copy(controls.getObject().position);
     }
     render();
-}
-
-function updateTargetBox() {
-    vector = new THREE.Vector3();
-}
-
-function HandleCursor() {
-}
-
-
-function ShowHideInfo() {
 }
 
 
@@ -573,7 +587,7 @@ function FrustrumIntersection(object) {
     // frustum is now ready to check all the objects you need
 
     if (object.isSprite) {
-        return frustum.intersectsSprite (object);
+        return frustum.intersectsSprite(object);
     } else {
         return frustum.intersectsObject(object);
     }
@@ -650,12 +664,12 @@ function createDataMap(map, size) {
 
     dataTexture = new THREE.DataTexture
         (
-            Uint8Array.from(map),
-            size,
-            size,
-            THREE.RGBFormat,
-            THREE.UnsignedByteType,
-        );
+        Uint8Array.from(map),
+        size,
+        size,
+        THREE.RGBFormat,
+        THREE.UnsignedByteType,
+    );
 
     dataTexture.needsUpdate = true;
 
@@ -670,12 +684,12 @@ function createPlantiodData(octaves, persistance, lacunarity, seed, noiseScale, 
 
     dataTexture = new THREE.DataTexture
         (
-            Uint8Array.from(planetInfo.map),
-            size,
-            size,
-            THREE.RGBFormat,
-            THREE.UnsignedByteType,
-        );
+        Uint8Array.from(planetInfo.map),
+        size,
+        size,
+        THREE.RGBFormat,
+        THREE.UnsignedByteType,
+    );
 
     dataTexture.needsUpdate = true;
     //textureList.push(dataTexture);
