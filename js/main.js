@@ -324,7 +324,7 @@ function LoadAssets() {
     // //AstPalleteColorGrab = AstoColorPalleteGrab[randomRangeRound(0, AstoColorPalleteGrab.length - 1)].RGB;
 }
 
-function SimpleCollision() {
+function SimpleCollision(delta) {
     colliding = false;
     var friction = 1.0;
     if (worldObjects !== undefined) {
@@ -335,15 +335,16 @@ function SimpleCollision() {
                     if (detectCollisionCubes(child, playerBox)) {
                         var childvector = new THREE.Vector3();
                         childvector.setFromMatrixPosition(child.matrixWorld);
-        
+
                         colliding = true;
-                        //var 
-                        var dir = controls.getObject().position - (childvector);
-                        console.log(dir);
-                        //dir.normalize();
-                        var reflection = velocity.reflect(dir);
-                        velocity.x -= reflection.x;
-                        velocity.z -= reflection.z;
+
+                        var reflection = new THREE.Vector3();//velocity.reflect(dir);
+                        reflection.copy(velocity)
+                        reflection.reflect(velocity.normalize());
+
+
+                        velocity.x += reflection.x * 1.15;
+                        velocity.z += reflection.z * 1.15;
                         this.stop();
                     }
                 }
@@ -468,7 +469,7 @@ function onWindowResize() {
 
 function animate() {
     SortWorldObjects();
-    SimpleCollision();
+
     var delta = clock.getDelta();
     timer = timer + delta;
 
@@ -501,22 +502,23 @@ function animate() {
         var delta = (time - prevTime) / 1000;
 
 
-        velocity.x -= velocity.x * 1.0 * delta;
-        velocity.z -= velocity.z * 1.0 * delta;
+        if (!colliding) {
+            velocity.x -= velocity.x * 2.0 * delta;
+            velocity.z -= velocity.z * 2.0 * delta;
+        }
         //velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveLeft) - Number(moveRight);
         direction.normalize(); // this ensures consistent movements in all directions
-       
-        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
-        
+
+        if (moveForward && !colliding || moveBackward && !colliding) velocity.z -= direction.z * 400.0 * delta;
+        if (moveLeft && !colliding || moveRight && !colliding) velocity.x -= direction.x * 400.0 * delta;
+
         //if (onObject === true) {
         //    velocity.y = Math.max(0, velocity.y);
         //    canJump = true;
         //}
-
         controls.getObject().translateX(velocity.x * delta);
         controls.getObject().translateY(velocity.y * delta);
         controls.getObject().translateZ(velocity.z * delta);
@@ -537,6 +539,7 @@ function animate() {
         prevTime = time;
         skyBox.position.copy(controls.getObject().position);
         playerBox.position.copy(controls.getObject().position);
+        SimpleCollision(delta);
     }
     render();
 }
@@ -670,12 +673,12 @@ function createDataMap(map, size) {
 
     dataTexture = new THREE.DataTexture
         (
-        Uint8Array.from(map),
-        size,
-        size,
-        THREE.RGBFormat,
-        THREE.UnsignedByteType,
-    );
+            Uint8Array.from(map),
+            size,
+            size,
+            THREE.RGBFormat,
+            THREE.UnsignedByteType,
+        );
 
     dataTexture.needsUpdate = true;
 
@@ -690,12 +693,12 @@ function createPlantiodData(octaves, persistance, lacunarity, seed, noiseScale, 
 
     dataTexture = new THREE.DataTexture
         (
-        Uint8Array.from(planetInfo.map),
-        size,
-        size,
-        THREE.RGBFormat,
-        THREE.UnsignedByteType,
-    );
+            Uint8Array.from(planetInfo.map),
+            size,
+            size,
+            THREE.RGBFormat,
+            THREE.UnsignedByteType,
+        );
 
     dataTexture.needsUpdate = true;
     //textureList.push(dataTexture);
