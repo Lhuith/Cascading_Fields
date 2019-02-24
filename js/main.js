@@ -326,16 +326,24 @@ function LoadAssets() {
 
 function SimpleCollision() {
     colliding = false;
-    var friction = 0.1;
+    var friction = 1.0;
     if (worldObjects !== undefined) {
         worldObjects.traverse(function (child) {
             if (child !== worldObjects) {
                 if (!child.isSprite) {
+
                     if (detectCollisionCubes(child, playerBox)) {
+                        var childvector = new THREE.Vector3();
+                        childvector.setFromMatrixPosition(child.matrixWorld);
+        
                         colliding = true;
-                        var reflection = velocity.reflect(direction);
-                        velocity.x -= reflection.x * friction;
-                        velocity.z -= reflection.z * friction;
+                        //var 
+                        var dir = controls.getObject().position - (childvector);
+                        console.log(dir);
+                        //dir.normalize();
+                        var reflection = velocity.reflect(dir);
+                        velocity.x -= reflection.x;
+                        velocity.z -= reflection.z;
                         this.stop();
                     }
                 }
@@ -495,17 +503,15 @@ function animate() {
 
         velocity.x -= velocity.x * 1.0 * delta;
         velocity.z -= velocity.z * 1.0 * delta;
-
-
         //velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveLeft) - Number(moveRight);
         direction.normalize(); // this ensures consistent movements in all directions
-        if (!colliding) {
-            if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-            if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
-        }
+       
+        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+        
         //if (onObject === true) {
         //    velocity.y = Math.max(0, velocity.y);
         //    canJump = true;
