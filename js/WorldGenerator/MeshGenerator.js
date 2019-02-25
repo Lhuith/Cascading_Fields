@@ -192,8 +192,8 @@ function Tree(world, texture, x, y, z, cross) {
     trunk.rotation.y = (randomRange(0,Math.PI));
     trunk.visible = false;
     trunk.lookAt(cross);
-    var box = new THREE.BoxHelper( trunk, 0xffff00 );
-    world.add(box);
+    //var box = new THREE.BoxHelper( trunk, 0xffff00 );
+    world.add(trunk);
 }
 
 function Flower(world, texture, x, y, z) {
