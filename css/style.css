@@ -71,6 +71,10 @@
 
     }
     
+    #Map{
+        position: absolute;
+        top: 0;
+    }
     .h-adjust {
         height: 70px!important;
     }

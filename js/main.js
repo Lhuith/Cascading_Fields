@@ -1,6 +1,6 @@
 
-var container, stats, controls, lineUI, gui;
-var camera, MainScene, BackgroundScene, renderer, clock, composer;
+var container, mapcontainer, stats, controls, lineUI, gui;
+var camera, mapCamera, MainScene, BackgroundScene, renderer, MapRenderer, clock, composer, Mapcomposer;
 var lightpos, dirLight, angle;
 var skyBox;
 
@@ -19,6 +19,7 @@ var direction = new THREE.Vector3();
 var vertex = new THREE.Vector3();
 var color = new THREE.Color();
 var skyMaterial;
+var landMassObject;
 
 // Custom global variables
 var mouse = { x: 0, y: 0 };
@@ -124,11 +125,21 @@ function init() {
 
     BackgroundScene = new THREE.Scene();
 
+    //
+    var sizex = window.innerWidth * 35;
+    var sizey = window.innerHeight * 35;
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-
+    mapCamera = new THREE.OrthographicCamera( sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000 );
+    //camera.add(mapCamera);
+    mapCamera.position.set(0, 0, 0);
+    mapCamera.rotation.x = -90 * (Math.PI / 180);
+    mapCamera.position.y = 100;
     MainScene = new THREE.Scene();
 
-    ////MainScene.background = new THREE.Color(0x42c5ff);
+
+    MainScene.add(mapCamera);
+    //mapCamera.lookAt(MainScene);
+    MainScene.background = new THREE.Color(0x42c5ff);
     // M//ainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 2000);
     //camera.position.set(textureSize * 5, 40, textureSize * 5);
     dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -177,22 +188,29 @@ function init() {
         instructions.style.display = '';
 
     });
-
     MainScene.add(controls.getObject());
-    controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
-
+    //controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
+  
     worldObjects = new THREE.Object3D();
     MainScene.add(worldObjects);
+    //MainScene.add(mapCamera);
+    //mapCamera.lookAt(controls.getObject());
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
 
     var geometry = new THREE.BoxGeometry(5, 5, 5);
     var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     playerBox = new THREE.Mesh(geometry, material);
+
+    var geometry = new THREE.BoxGeometry(100, 100, 100);
+    var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    playerMarkerBox = new THREE.Mesh(geometry, material);
+
+    playerBox.add(playerMarkerBox);
     MainScene.add(playerBox);
 
     var gridHelper = new THREE.GridHelper(1000, 20);
-    MainScene.add(gridHelper);
+    //MainScene.add(gridHelper);
 
     var onKeyDown = function (event) {
 
@@ -286,23 +304,43 @@ function init() {
     renderer.shadowMap.renderReverseSided = false;
     renderer.shadowMap.renderSingleSided = false;
 
+    //Map Canvas
+
+    mapcontainer = document.getElementById('webGL-container-map_view');
+    document.body.appendChild(mapcontainer);
+
+    MapRenderer = new THREE.WebGLRenderer({ antialias: false });
+    MapRenderer.setSize(window.innerWidth/3, window.innerWidth/4);
+    MapRenderer.setClearColor(0x000000, 1);
+    MapRenderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(MapRenderer.domElement);
+    MapRenderer.domElement.id = "Map";
+
     //Composer
     composer = new THREE.EffectComposer(renderer);
+    Mapcomposer = new THREE.EffectComposer(MapRenderer);
     //Passes
-
-    var StarsRenderPass = new THREE.RenderPass(BackgroundScene, camera);
-    composer.addPass(StarsRenderPass);
-
-    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    composer.addPass(effectCopy);
-    effectCopy.renderToScreen = true;
-
-    var MainRenderPass = new THREE.RenderPass(MainScene, camera);
-    MainRenderPass.clear = false;
-    MainRenderPass.clearDepth = true;
-    composer.addPass(MainRenderPass);
-
-    MainRenderPass.renderToScreen = true;
+    
+    //var StarsRenderPass = new THREE.RenderPass(BackgroundScene, camera);
+    //composer.addPass(StarsRenderPass);
+    //
+    //var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+    //composer.addPass(effectCopy);
+    //effectCopy.renderToScreen = true;
+//
+    //var MainRenderPass = new THREE.RenderPass(MainScene, camera);
+    //MainRenderPass.clear = false;
+    //MainRenderPass.clearDepth = true;
+    //composer.addPass(MainRenderPass);
+//
+    //MainRenderPass.renderToScreen = true;
+//
+    //var MainRenderPass = new THREE.RenderPass(MainScene, mapCamera);
+    //MainRenderPass.clear = false;
+    //MainRenderPass.clearDepth = true;
+    //composer.addPass(MainRenderPass);
+//
+    //MainRenderPass.renderToScreen = true;
 
     //Load Shaders and Setup SkyBox
     ShaderLoader('js/Shaders/Sky/Sky.vs.glsl', 'js/Shaders/Sky/Sky.fs.glsl', setUpSky, true);
@@ -420,27 +458,25 @@ function setUpSky(start, vertex_text, fragment_text) {
 }
 
 
-function SortWorldObjects() {
-
+function ShowHideObjects(ObjectList, Threshold){
     var vector = controls.getObject().position;
 
-    worldObjects.updateMatrixWorld();
+    if (ObjectList !== undefined) {
+        ObjectList.updateMatrixWorld();
+        ObjectList.traverse(function (child) {
 
-    if (worldObjects !== undefined) {
-        worldObjects.traverse(function (child) {
-
-            if (child !== worldObjects) {
+            if (child !== ObjectList) {
                 var childvector = new THREE.Vector3();
                 childvector.setFromMatrixPosition(child.matrixWorld);
 
                 var distance = childvector.distanceTo(vector);
                 //console.log(distance);
-                if (distance < 1000 || FrustrumIntersection(child) == true) {
+                if (distance < Threshold || FrustrumIntersection(child) == true) {
                     child.visible = true;
                     child.traverse(function (children) {
                         children.visible = true;
                     });
-                } else if (distance >= 1000 || FrustrumIntersection(child) == false) {
+                } else if (distance >= Threshold || FrustrumIntersection(child) == false) {
                     child.visible = false;
                     child.traverse(function (children) {
                         children.visible = false;
@@ -450,8 +486,8 @@ function SortWorldObjects() {
             }
         });
     }
-
 }
+
 function onWindowResize() {
     // notify the renderer of the size change
     // update the camera
@@ -468,13 +504,14 @@ function onWindowResize() {
 }
 
 function animate() {
-    SortWorldObjects();
+    //ShowHideObjects(landMassObject, 100);
+    ShowHideObjects(worldObjects, 1000);
 
     var delta = clock.getDelta();
     timer = timer + delta;
 
     angle += 0.1;
-
+    //mapCamera.rotation.x  += delta;
     if (planet !== undefined) {
         dirLight.lookAt(planet.position);
         var elapsedMilliseconds = Date.now() - startTime;
@@ -502,10 +539,10 @@ function animate() {
         var delta = (time - prevTime) / 1000;
 
 
-        if (!colliding) {
-            velocity.x -= velocity.x * 2.0 * delta;
-            velocity.z -= velocity.z * 2.0 * delta;
-        }
+
+        velocity.x -= velocity.x * 2.0 * delta;
+        velocity.z -= velocity.z * 2.0 * delta;
+
         //velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
         direction.z = Number(moveForward) - Number(moveBackward);
@@ -539,6 +576,10 @@ function animate() {
         prevTime = time;
         skyBox.position.copy(controls.getObject().position);
         playerBox.position.copy(controls.getObject().position);
+
+        //var CameraVector = new THREE.Vector3(controls.getObject().position.x, mapCamera.position.y, controls.getObject().position.z)
+        //mapCamera.position.copy(controls.getObject().position);
+
         SimpleCollision(delta);
     }
     render();
@@ -546,7 +587,10 @@ function animate() {
 
 
 function render() {
-    composer.render();
+    MapRenderer.render(MainScene, mapCamera);
+    //composer.render();
+    renderer.render(MainScene, camera);
+ 
 }
 
 
@@ -628,22 +672,28 @@ function createPlanet(start, vertex_text, fragment_text) {
     //new THREE.PlaneGeometry(200, 200, 32);//
     //
 
+    landMassObject = new THREE.Object3D();
 
-    planet = new THREE.Mesh(planetData.meshData,
-        PlanetMaterial);
-    planet.castShadow = true; //default is false
-    planet.receiveShadow = true; //default
-    planet.scale.set(1, 1, 1);
-    MainScene.add(planet);
-    //planet.scale.z = -1;
-    //planet.scale.x = -1;
-    //planet.rotation.x = Math.PI / 2;
-    PlanetMaterial.uniforms.texture.value = planetData.map;
-    planetData.map.wrapS = THREE.RepeatWrapping;
-    planetData.map.repeat.x = -1;
-    PlanetMaterial.side = THREE.DoubleSide;
-    dirLight.target = planet;
-    objects.push(planet);
+    for (var i = 0; i < planetData.LandMass.length; i++) {
+        var chunk = new THREE.Mesh(planetData.LandMass[i],
+            PlanetMaterial);
+        chunk.castShadow = true; //default is false
+        chunk.receiveShadow = true; //default
+        chunk.scale.set(1, 1, 1);
+        //MainScene.add(planet);
+        //planet.scale.z = -1;
+        //planet.scale.x = -1;
+        //planet.rotation.x = Math.PI / 2;
+        PlanetMaterial.uniforms.texture.value = planetData.map;
+        planetData.map.wrapS = THREE.RepeatWrapping;
+        planetData.map.repeat.x = -1;
+        PlanetMaterial.side = THREE.DoubleSide;
+        dirLight.target = landMassObject;
+        landMassObject.add(chunk)
+        objects.push(chunk);
+    }
+
+    MainScene.add(landMassObject);
 }
 
 function doDispose(obj) {
@@ -706,7 +756,7 @@ function createPlantiodData(octaves, persistance, lacunarity, seed, noiseScale, 
     // worldObjects.scale.x = -1;
     return new PlanetInformation(dataTexture, planetInfo.hasAtmo,
         planetInfo.hasLiquad, planetInfo.colors, planetInfo.url,
-        planetInfo.regionsInfo, planetInfo.meshData);
+        planetInfo.regionsInfo, planetInfo.LandMass);
 }
 
 // Credit to THeK3nger - https://gist.github.com/THeK3nger/300b6a62b923c913223fbd29c8b5ac73

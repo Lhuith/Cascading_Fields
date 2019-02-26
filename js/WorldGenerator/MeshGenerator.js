@@ -1,5 +1,5 @@
 
-function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, size, world) {
+function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, size, Worldx, Worldy, world, fullsize, gridsize) {
 
     var bufferGeometry = new THREE.BufferGeometry();
 
@@ -11,7 +11,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
     var widthSegments = levelOfDetial;
     var heightSegments = levelOfDetial;
-
+    
     var gridX = Math.floor(widthSegments) || 1;
     var gridY = Math.floor(heightSegments) || 1;
 
@@ -46,52 +46,63 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             //console.log(heightMap[i][j]);
         }
     }
+    //console.log("Poop", gridX1);
+    //console.log("size",size);
+
     var hPoint = 0;
     var hPoint1 = 0;
-    var offsetTest = 0;
+    //65536
 
     for (iy = 0; iy < gridY1; iy++) {
 
-        var y = iy * segment_height - height_half;
+        var worldCoordY = (Worldy * (size) - fullsize/2);
 
-        var y1 = (iy + 1) * segment_height - height_half;
+        var y = (iy * (segment_height) - height_half) + worldCoordY;
+
+        var y1 = ((iy + 1) * (segment_height) - height_half) + worldCoordY;
 
         for (ix = 0; ix < gridX1; ix++) {
 
-            var x = ix * segment_width - width_half;
+            var worldCoordX = (Worldx * (size) - fullsize/2);
 
-            var x1 = (ix + 1) * segment_width - width_half;
-            
+            var x = (ix * (segment_width) - width_half) + worldCoordX;
 
+            var x1 = ((ix + 1) * (segment_width) - width_half) + worldCoordX;
+            //console.log;
             //Current Hpoint
-            var index = ((iy * widthSegments + ix));
+
+            var index  = (((iy + (Worldy * size)) * fullsize + (ix + (Worldx * size))) % size) ;
             hPoint = heightMap[index];
+
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
 
             //Next HPoint
-            var index1 = (((iy + 1) * widthSegments + (ix + 1)));
+            var index1 = (((iy + (Worldy * size)) * fullsize + (ix + (Worldx * size))) % size) ;
             hPoint1 = heightMap[index1];
 
+            //console.log(index);
             var finalP1 = EasingFunctions.easeInQuint(hPoint1) * heightMultiplier;
 
             var vector = new THREE.Vector3(x, finalP, y);
             var vector1 = new THREE.Vector3(x1, finalP1, y1);
 
             var midVector = new THREE.Vector3(
-            (vector1.x - vector.x) / 2 + vector.x,
-            (vector1.y - vector.y) / 2 + vector.y,
-            (vector1.z - vector.z) / 2 + vector.z)
+            ((vector1.x - vector.x) / 2) + vector.x,
+            ((vector1.y - vector.y) / 2) + vector.y,
+            ((vector1.z - vector.z) / 2) + vector.z)
             
             vertices.push(vector.x, vector.y, vector.z);
             //(2nd - 1st) / 2 + 1st)
             var cross = new THREE.Vector3(vector1.x, vector1.y, vector1.z).cross(vector).normalize();
 
             normals.push(cross.x, cross.y, cross.z);
+            
+            //console.log(((ix * Worldx)/2.0)/fullsize);
 
-            uvs.push((ix / gridX));
-            uvs.push((iy / gridY));
-
-            if (hPoint > .3 && hPoint < .65) {
+            uvs.push(ix/segment_width);
+            uvs.push(iy/segment_height);
+            
+            if (hPoint > .2 && hPoint < .65) {
                 var roll = randomRange(0, 10);
 
                // if (roll > 9)
@@ -107,7 +118,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
                 //Vegetation
                 if (hPoint >= .5 && hPoint <= .55) {
-                    Tree(world, tree00, midVector.x, midVector.y , midVector.z, cross);
+                    //Tree(world, tree00, midVector.x, midVector.y , midVector.z, cross);
                 }
             }
 
