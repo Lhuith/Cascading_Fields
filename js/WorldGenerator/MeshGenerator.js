@@ -46,9 +46,9 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             //console.log(heightMap[i][j]);
         }
     }
-    //console.log("Poop", gridX1);
-    //console.log("size",size);
-
+    console.log("Poop", gridX1);
+    console.log("size",size);
+    console.log("World", Worldx)
     var hPoint = 0;
     var hPoint1 = 0;
     //65536
@@ -97,10 +97,10 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
             normals.push(cross.x, cross.y, cross.z);
             
-            //console.log(((ix * Worldx)/2.0)/fullsize);
+            console.log(ix/(size/2.0));
 
-            uvs.push(ix/segment_width);
-            uvs.push(iy/segment_height);
+            uvs.push(((ix/(size/2.0))/gridsize));
+            uvs.push(((iy/gridY)/gridsize));
             
             if (hPoint > .2 && hPoint < .65) {
                 var roll = randomRange(0, 10);
