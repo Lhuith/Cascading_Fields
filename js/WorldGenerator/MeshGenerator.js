@@ -41,6 +41,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     var tree00 = new THREE.TextureLoader().load("img/Game_File/tree_Trunk_00.png");
     tree00.magFilter = THREE.NearestFilter;
     tree00.minFilter = THREE.NearestFilter;
+
     for (var i = 0; i < width; i++) {
         for (var j = 0; j < height; j++) {
             //console.log(heightMap[i][j]);
@@ -68,16 +69,18 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             var x = (ix * (segment_width) - width_half) + worldCoordX;
 
             var x1 = ((ix + 1) * (segment_width) - width_half) + worldCoordX;
-            //console.log;
-            //Current Hpoint
+            
+            var xIndex = (((ix/width_half/(gridsize/4.0)) + (Worldx) ) / gridsize) * fullsize;
+            var yIndex = (((iy/height_half/(gridsize/4.0)) + (Worldy) ) / gridsize) * fullsize;
 
-            var index  = (((iy + (Worldy * size)) * fullsize + (ix + (Worldx * size))) % size) ;
-            hPoint = heightMap[index];
+            var index  = (yIndex - 1 * fullsize + xIndex - 1);
+            console.log(Math.round(index));
+            hPoint = heightMap[Math.round(index)];
 
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
 
             //Next HPoint
-            var index1 = (((iy + (Worldy * size)) * fullsize + (ix + (Worldx * size))) % size) ;
+            var index1 = (yIndex * heightMap.length + xIndex) % size;
             hPoint1 = heightMap[index1];
 
             //console.log(index);
@@ -95,12 +98,12 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             //(2nd - 1st) / 2 + 1st)
             var cross = new THREE.Vector3(vector1.x, vector1.y, vector1.z).cross(vector).normalize();
 
-            normals.push(cross.x, cross.y, cross.z);
+            normals.push(0.0, 1.0, 0.0);
             
-            //console.log(((ix * Worldx)/2.0)/fullsize);
+            //console.log( ( (ix/width_half) + (Worldx) ) / gridsize);
 
-            uvs.push(ix/segment_width);
-            uvs.push(iy/segment_height);
+            uvs.push(((ix/ width_half/ (gridsize/4.0)) + (Worldx) ) / gridsize);
+            uvs.push(((iy/height_half/ (gridsize/4.0)) + (Worldy) ) / gridsize);
             
             if (hPoint > .2 && hPoint < .65) {
                 var roll = randomRange(0, 10);
