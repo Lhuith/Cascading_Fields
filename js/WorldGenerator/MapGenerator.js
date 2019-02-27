@@ -51,7 +51,15 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
                 for (var i = 0; i < regions.Data.length; i++) {
                     if (currentHeight >= regions.Data[i].height) {
-                        colorMap[y * size + x] = regions.ColorPallette[i % regions.ColorPallette.length].RGB;
+
+                        var r = regions.ColorPallette[i % regions.ColorPallette.length].RGB.r ;
+                        var g = regions.ColorPallette[i % regions.ColorPallette.length].RGB.g ;
+                        var b = regions.ColorPallette[i % regions.ColorPallette.length].RGB.b;
+
+                        var color = new THREE.Color(r, g, b, 1.0);
+
+                        console.log();
+                        colorMap[y * size + x] = color;
 
                     }
                     else {
@@ -71,21 +79,20 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
         var finalGeo = new THREE.Object3D();
 
-        var scale = 1.0;
-        var gridsize = 8;
+        var scale = 4.0;
+        var gridsize = 4;
         var LandMass = new Array();
-        var detial = 32;
-
 
         var chunkSize = (size * scale);
         var size = chunkSize;
-        
+        var detial = (chunkSize/gridsize)/scale; 
+
         //Cant start at 0 or else vertices will be pos * 0 <--- big nono
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
                 LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, 
-                Math.round(chunkSize/gridsize), x, y, world, size * scale, gridsize, scale));
+                chunkSize/gridsize, x, y, world, size * scale, gridsize, scale));
             }
     }
 

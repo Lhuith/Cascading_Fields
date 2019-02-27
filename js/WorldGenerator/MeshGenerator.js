@@ -1,10 +1,10 @@
 
-function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, size, Worldx, Worldy, world, fullsize, gridsize) {
+function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world, mapsize, gridsize, scale) {
 
     var bufferGeometry = new THREE.BufferGeometry();
 
-    var width = size;
-    var height = size;
+    var width = ChunkSize;
+    var height = ChunkSize;
 
     var width_half = width / 2;
     var height_half = height / 2;
@@ -48,15 +48,16 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
         }
     }
     //console.log("Poop", gridX1);
-    //console.log("size",size);
+    //console.log("ChunkSize",ChunkSize);
 
     var hPoint = 0;
     var hPoint1 = 0;
     //65536
 
+    //console.log( mapsize);
     for (iy = 0; iy < gridY1; iy++) {
 
-        var worldCoordY = (Worldy * (size) - fullsize/2);
+        var worldCoordY = (Worldy * (ChunkSize) - mapsize/scale);
 
         var y = (iy * (segment_height) - height_half) + worldCoordY;
 
@@ -64,26 +65,55 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
         for (ix = 0; ix < gridX1; ix++) {
 
-            var worldCoordX = (Worldx * (size) - fullsize/2);
+            var worldCoordX = (Worldx * (ChunkSize) - mapsize/scale);
 
             var x = (ix * (segment_width) - width_half) + worldCoordX;
 
             var x1 = ((ix + 1) * (segment_width) - width_half) + worldCoordX;
             
-            var xIndex = (((ix/width_half/(gridsize/4.0)) + (Worldx) ) / gridsize) * fullsize;
-            var yIndex = (((iy/height_half/(gridsize/4.0)) + (Worldy) ) / gridsize) * fullsize;
+            //65536
+            //proper section sampling
+            //(iy * (mapsize - 1) + ix)
 
-            var index  = (yIndex - 1 * fullsize + xIndex - 1);
-            console.log(Math.round(index));
-            hPoint = heightMap[Math.round(index)];
+            //256 <---- mapsize
+            //64 <---- mapsize / 4 <-- gridsize = 4
+            //64 <------ ChunkSize mapsize/gridsize
+
+            //4 x 4 chunks
+            //256 x 256 
+            //256 is 1 side length
+            
+            //gridsmaple ChunkSize should be (256/no. of grids/scale)
+
+            //heightMap.length  = 65536 = 256x256
+            //4x4 = 16
+            //map ChunkSize / grid ChunkSize = 1 chunk sample ChunkSize
+
+            //32 is per chunk, 32*4
+
+            var GridSampleSize = ((mapsize)/(gridsize));
+            //GridSampleSize = 64
+            //iy needs to take 64 + steps per chunk iterration
+
+            var worldGridX = ((Worldx + 1) * GridSampleSize) - GridSampleSize;
+            var worldGridY = ((Worldy + 1) * GridSampleSize) - GridSampleSize;
+
+            var yMapIndex = (iy + worldGridY);
+            var xMapIndex = (ix + worldGridX);
+
+            var index = (yMapIndex * (mapsize) + xMapIndex); 
+            
+            //console.log(iy + worldGridY);
+
+            hPoint = heightMap[(index)];
 
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
 
             //Next HPoint
-            var index1 = (yIndex * heightMap.length + xIndex) % size;
+            var index1 = index;// ((iy + Worldy) * sampleSize + (ix + Worldx));
             hPoint1 = heightMap[index1];
 
-            //console.log(index);
+            console.log(xMapIndex);
             var finalP1 = EasingFunctions.easeInQuint(hPoint1) * heightMultiplier;
 
             var vector = new THREE.Vector3(x, finalP, y);
@@ -102,9 +132,18 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             
             //console.log( ( (ix/width_half) + (Worldx) ) / gridsize);
 
-            uvs.push(((ix/ width_half/ (gridsize/4.0)) + (Worldx) ) / gridsize);
-            uvs.push(((iy/height_half/ (gridsize/4.0)) + (Worldy) ) / gridsize);
             
+            var uvX = (ix/ChunkSize)/(gridsize/scale);
+            var uvY = (iy/ChunkSize)/(gridsize/scale);
+            
+            var worldUVX = (Worldx/ (gridsize));
+            var worldUVY = (Worldy/ (gridsize));
+
+            uvs.push((uvX + worldUVX) );
+            uvs.push((uvY + worldUVY) );
+
+           // console.log(worldUVX);
+
             if (hPoint > .2 && hPoint < .65) {
                 var roll = randomRange(0, 10);
 
