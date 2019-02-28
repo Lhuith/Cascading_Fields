@@ -57,7 +57,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     //console.log( mapsize);
     for (iy = 0; iy < gridY1; iy++) {
 
-        var worldCoordY = (Worldy * (ChunkSize) - mapsize/scale);
+        var worldCoordY = (Worldy * (ChunkSize) - (mapsize/2.0)/scale);
 
         var y = (iy * (segment_height) - height_half) + worldCoordY;
 
@@ -65,7 +65,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
         for (ix = 0; ix < gridX1; ix++) {
 
-            var worldCoordX = (Worldx * (ChunkSize) - mapsize/scale);
+            var worldCoordX = (Worldx * (ChunkSize) - (mapsize/2.0)/scale);
 
             var x = (ix * (segment_width) - width_half) + worldCoordX;
 
@@ -91,19 +91,19 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
             //32 is per chunk, 32*4
 
-            var GridSampleSize = ((mapsize)/(gridsize));
+            var GridSampleSize = (mapsize/scale)/(gridsize);
             //GridSampleSize = 64
             //iy needs to take 64 + steps per chunk iterration
 
-            var worldGridX = ((Worldx + 1) * GridSampleSize) - GridSampleSize;
-            var worldGridY = ((Worldy + 1) * GridSampleSize) - GridSampleSize;
+            var worldGridX = (((Worldx + 1) * GridSampleSize) - GridSampleSize);
+            var worldGridY = (((Worldy + 1) * GridSampleSize) - GridSampleSize);
 
             var yMapIndex = (iy + worldGridY);
             var xMapIndex = (ix + worldGridX);
 
-            var index = (yMapIndex * (mapsize) + xMapIndex); 
+            var index = Math.round((yMapIndex * (mapsize/scale) + xMapIndex)); 
             
-            //console.log(iy + worldGridY);
+            console.log(mapsize);
 
             hPoint = heightMap[(index)];
 
@@ -113,7 +113,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             var index1 = index;// ((iy + Worldy) * sampleSize + (ix + Worldx));
             hPoint1 = heightMap[index1];
 
-            console.log(xMapIndex);
+            //console.log(xMapIndex);
             var finalP1 = EasingFunctions.easeInQuint(hPoint1) * heightMultiplier;
 
             var vector = new THREE.Vector3(x, finalP, y);
@@ -210,6 +210,7 @@ function Tree(world, texture, x, y, z, cross) {
     var trunk = new THREE.Mesh(trunkGeo, material);
     var pos = new THREE.Vector3(x, y , z);
     trunk.position.set(pos.x, pos.y, pos.z);
+
     //cross.setLength(14);
     for (var i = 0; i < 3; i++) {
         var material = new THREE.MeshBasicMaterial({map: texture, color: 0xffffff });

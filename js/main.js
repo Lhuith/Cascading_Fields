@@ -660,7 +660,7 @@ function createPlanet(start, vertex_text, fragment_text) {
         vertexShader: (vertex),
         fragmentShader: (fragment),
         lights: true,
-        //wireframe:true
+        wireframe:true
     });
 
 

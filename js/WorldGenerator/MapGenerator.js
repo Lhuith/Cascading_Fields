@@ -79,20 +79,20 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
         var finalGeo = new THREE.Object3D();
 
-        var scale = 4.0;
-        var gridsize = 4;
+        var scale = 100.0;
+        var gridsize = 16;
         var LandMass = new Array();
 
         var chunkSize = (size * scale);
-        var size = chunkSize;
+        //var size = chunkSize;
         var detial = (chunkSize/gridsize)/scale; 
+        console.log(detial);
 
         //Cant start at 0 or else vertices will be pos * 0 <--- big nono
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, 
-                chunkSize/gridsize, x, y, world, size * scale, gridsize, scale));
+                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, size * scale, gridsize, scale));
             }
     }
 
