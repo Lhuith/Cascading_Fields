@@ -11,6 +11,10 @@ uniform int noTexture;
 uniform vec4 customColor;
 uniform int customColorSwitch;
 
+uniform vec3 fogColor;
+uniform float fogNear;
+uniform float fogFar;
+
 		//Refer the Text Parse in Main.js, replaced this Sexy Text with Dither Methods,
 		//I just didnt want it cluttering shizz up
 		//Basicaling just pointers to the shadow and dither methods
@@ -36,16 +40,16 @@ uniform int customColorSwitch;
 		void main()
 		{
 			vec3 sumDirLights = ((dot(normalize(directionalLights[0].direction), 
-			vecNormal)) * directionalLights[0].color) * 1.5;
+			vecNormal)) * directionalLights[0].color) * 2.0;
 
 			float shadowValue = getShadow(directionalShadowMap[ 0 ], directionalLights[0].shadowMapSize, 
 			directionalLights[0].shadowBias, directionalLights[0].shadowRadius, vDirectionalShadowCoord[0] );
 
 			vec3 shadowVal = vec3(shadowValue,shadowValue,shadowValue);
 			vec4 shadowDither = vec4(dither(shadowVal), 1.0);
-			vec4 light = vec4(dither(sumDirLights), 1.0);
+			vec4 light = vec4((sumDirLights), 1.0);
 			vec4 color;
-
+			//dither
 			if(customColorSwitch == 1)
 			{
 				color = customColor;
@@ -56,6 +60,17 @@ uniform int customColorSwitch;
 			}
 
 			vec4 tex = texture2D(texture, vUv);
-			//  
-			gl_FragColor = color * (tex) * (shadowDither) * vec4(light.rgb,1.0);
+			//  * (shadowDither)
+			//* vec4(light.rgb,1.0)
+			gl_FragColor = (tex);
+
+			#ifdef USE_FOG
+          #ifdef USE_LOGDEPTHBUF_EXT
+              float depth = gl_FragDepthEXT / gl_FragCoord.w;
+          #else
+              float depth = gl_FragCoord.z / gl_FragCoord.w;
+          #endif
+          float fogFactor = smoothstep( fogNear, fogFar, depth );
+          gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
+      #endif
 		}

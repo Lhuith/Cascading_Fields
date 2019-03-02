@@ -1,9 +1,36 @@
+        /**
+     * Creates a pseudo-random value generator. The seed must be an integer.
+     *
+     * Uses an optimized version of the Park-Miller PRNG.
+     * http://www.firstpr.com.au/dsp/rand31/
+     */
+    function PRNGRandom(seed) {
+        this._seed = seed % 2147483647;
+        if (this._seed <= 0) this._seed += 2147483646;
+    }
 
+    /**
+     * Returns a pseudo-random value between 1 and 2^32 - 2.
+     */
+    PRNGRandom.prototype.next = function (min, max) {
+        return this._seed = (this._seed * 16807 % 2147483647) * (max - min) + min;;
+    };
+
+
+    /**
+     * Returns a pseudo-random floating point number in range [0, 1).
+     */
+    PRNGRandom.prototype.nextFloat = function (opt_minOrMax, opt_max) {
+        // We know that result of next() will be 1 to 2147483646 (inclusive).
+        return (this.next() - 1) / 2147483646;
+    };
+    
+    
     function GenerateNoise2DMap(mapWidth, mapHeight, seed, scale, octaves, persistance, lacunarity, offset)
     {
         var  noiseMap =  new Array();
         
-        var prng = Math.random(seed);
+        var prng = new PRNGRandom(seed);//Math.random(seed);
 
         var octaveOffsets = new Array(octaves);
         
@@ -13,8 +40,8 @@
 
         for(var i = 0; i < octaves; i ++)
         {
-            var offsetX = randomRange(-100000, 100000) + offset.x;
-            var offsetY = randomRange(-100000, 100000) - offset.y;
+            var offsetX = prng.next(-100000, 100000) + offset.x;
+            var offsetY = prng.next(-100000, 100000) - offset.y;
             octaveOffsets[i] = new Vector2 (offsetX, offsetY);
             
             maxPossibleHeight += amplitude;

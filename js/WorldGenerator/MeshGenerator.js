@@ -1,5 +1,5 @@
 
-function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world, mapsize, gridsize, scale) {
+function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world, collision, SpriteManager, mapsize, gridsize, scale, Assets) {
 
     var bufferGeometry = new THREE.BufferGeometry();
 
@@ -11,7 +11,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
     var widthSegments = levelOfDetial;
     var heightSegments = levelOfDetial;
-    
+
     var gridX = Math.floor(widthSegments) || 1;
     var gridY = Math.floor(heightSegments) || 1;
 
@@ -30,70 +30,30 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     var normals = [];
     var uvs = [];
 
-    var flower00 = new THREE.TextureLoader().load("img/Game_File/flower_00.png");
-    flower00.magFilter = THREE.NearestFilter;
-    flower00.minFilter = THREE.NearestFilter;
-
-    var flower01 = new THREE.TextureLoader().load("img/Game_File/flower_01.png");
-    flower01.magFilter = THREE.NearestFilter;
-    flower01.minFilter = THREE.NearestFilter;
-
-    var tree00 = new THREE.TextureLoader().load("img/Game_File/tree_Trunk_00.png");
-    tree00.magFilter = THREE.NearestFilter;
-    tree00.minFilter = THREE.NearestFilter;
-
-    for (var i = 0; i < width; i++) {
-        for (var j = 0; j < height; j++) {
-            //console.log(heightMap[i][j]);
-        }
-    }
-    //console.log("Poop", gridX1);
-    //console.log("ChunkSize",ChunkSize);
+    var flowerOffsets = [];
+    var flowerOrientations = [];
+    var treeVector = new THREE.Vector4();
+    var flowerScale = [];
+    var FlowerColor = [];
+    var treex, treey, treez, treew;
 
     var hPoint = 0;
-    var hPoint1 = 0;
     //65536
+    var treeinstances = 0;
 
-    //console.log( mapsize);
     for (iy = 0; iy < gridY1; iy++) {
 
-        var worldCoordY = (Worldy * (ChunkSize) - (mapsize/2.0)/scale);
+        var worldCoordY = (Worldy * (ChunkSize) - (mapsize / 2.0));
 
         var y = (iy * (segment_height) - height_half) + worldCoordY;
 
-        var y1 = ((iy + 1) * (segment_height) - height_half) + worldCoordY;
-
         for (ix = 0; ix < gridX1; ix++) {
 
-            var worldCoordX = (Worldx * (ChunkSize) - (mapsize/2.0)/scale);
+            var worldCoordX = (Worldx * (ChunkSize) - (mapsize / 2.0));
 
             var x = (ix * (segment_width) - width_half) + worldCoordX;
 
-            var x1 = ((ix + 1) * (segment_width) - width_half) + worldCoordX;
-            
-            //65536
-            //proper section sampling
-            //(iy * (mapsize - 1) + ix)
-
-            //256 <---- mapsize
-            //64 <---- mapsize / 4 <-- gridsize = 4
-            //64 <------ ChunkSize mapsize/gridsize
-
-            //4 x 4 chunks
-            //256 x 256 
-            //256 is 1 side length
-            
-            //gridsmaple ChunkSize should be (256/no. of grids/scale)
-
-            //heightMap.length  = 65536 = 256x256
-            //4x4 = 16
-            //map ChunkSize / grid ChunkSize = 1 chunk sample ChunkSize
-
-            //32 is per chunk, 32*4
-
-            var GridSampleSize = (mapsize/scale)/(gridsize);
-            //GridSampleSize = 64
-            //iy needs to take 64 + steps per chunk iterration
+            var GridSampleSize = ((mapsize / scale) / gridsize);
 
             var worldGridX = (((Worldx + 1) * GridSampleSize) - GridSampleSize);
             var worldGridY = (((Worldy + 1) * GridSampleSize) - GridSampleSize);
@@ -101,75 +61,54 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             var yMapIndex = (iy + worldGridY);
             var xMapIndex = (ix + worldGridX);
 
-            var index = Math.round((yMapIndex * (mapsize/scale) + xMapIndex)); 
-            
-            console.log(mapsize);
+            var index = Math.round(yMapIndex * (mapsize / scale) + xMapIndex);
+
+            //console.log(mapsize);
 
             hPoint = heightMap[(index)];
 
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
 
-            //Next HPoint
-            var index1 = index;// ((iy + Worldy) * sampleSize + (ix + Worldx));
-            hPoint1 = heightMap[index1];
-
-            //console.log(xMapIndex);
-            var finalP1 = EasingFunctions.easeInQuint(hPoint1) * heightMultiplier;
-
             var vector = new THREE.Vector3(x, finalP, y);
-            var vector1 = new THREE.Vector3(x1, finalP1, y1);
 
-            var midVector = new THREE.Vector3(
-            ((vector1.x - vector.x) / 2) + vector.x,
-            ((vector1.y - vector.y) / 2) + vector.y,
-            ((vector1.z - vector.z) / 2) + vector.z)
-            
             vertices.push(vector.x, vector.y, vector.z);
             //(2nd - 1st) / 2 + 1st)
-            var cross = new THREE.Vector3(vector1.x, vector1.y, vector1.z).cross(vector).normalize();
+            //var cross = new THREE.Vector3(vector1.x, vector1.y, vector1.z).cross(vector).normalize();
 
-            normals.push(0.0, 1.0, 0.0);
-            
-            //console.log( ( (ix/width_half) + (Worldx) ) / gridsize);
+            //this is useless
+            normals.push(0, 1, 0);
 
-            
-            var uvX = (ix/ChunkSize)/(gridsize/scale);
-            var uvY = (iy/ChunkSize)/(gridsize/scale);
-            
-            var worldUVX = (Worldx/ (gridsize));
-            var worldUVY = (Worldy/ (gridsize));
+            var uvX = (ix / ChunkSize) / (gridsize / scale);
+            var uvY = (iy / ChunkSize) / (gridsize / scale);
 
-            uvs.push((uvX + worldUVX) );
-            uvs.push((uvY + worldUVY) );
+            var worldUVX = (Worldx / (gridsize));
+            var worldUVY = (Worldy / (gridsize));
 
-           // console.log(worldUVX);
+            uvs.push((uvX + worldUVX));
+            uvs.push((uvY + worldUVY));
 
-            if (hPoint > .2 && hPoint < .65) {
-                var roll = randomRange(0, 10);
+            //Tree(Assets, world, vector.x, vector.y, vector.z, SpriteManager, treeinstances, flowerOffsets, flowerOrientations, vector);
 
-               // if (roll > 9)
-                   // Flower(world, flower00, x - (segment_width / 2.0), finalP, y - (segment_height / 2.0));
+            //var w = 1;
+            //instance += 1;
+            treex = x;
+            treey = finalP;
+            treez = y;
+            treew = 0;
 
-                var roll = randomRange(0, 10);
-
-                //if (roll > 8)
-                    //Flower(world, flower01, x - (segment_width / 2.0), finalP, y - (segment_height / 2.0));
-            }
-
-            if ((iy * widthSegments + ix) % 12 == 0) {
-
-                //Vegetation
-                if (hPoint >= .5 && hPoint <= .55) {
-                    //Tree(world, tree00, midVector.x, midVector.y , midVector.z, cross);
-                }
-            }
-
+            treeVector.set(treex, treey, treez, 0).normalize();
+            //treeVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+            flowerOffsets.push(treex + treeVector.x, treey + treeVector.y, treez + treeVector.z);
+            treeVector.set(treex, treey, treez, treew).normalize();
+            flowerOrientations.push(0, 0, 0, 0);
+            flowerScale.push(25, 25, 25);
+            var col = new THREE.Color(0xffffff);
+            col.setHex( Math.random() * 0xffffff);
+            FlowerColor.push(col.r, col.g, col.b);
+            treeinstances += 1;
         }
 
     }
-
-    // indices
-
     for (iy = 0; iy < gridY; iy++) {
         for (ix = 0; ix < gridX; ix++) {
 
@@ -198,67 +137,97 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     geo.computeFaceNormals();
     geo.computeVertexNormals();
 
+    CreateFlowerInstance(world, flowerOffsets, flowerOrientations, FlowerColor, flowerScale, treeinstances, Assets);    
+    
     return geo;
 }
 
-function Tree(world, texture, x, y, z, cross) {
+function CreateFlowerInstance(world, offsets, orientations, colors, scale, instances, assets) {
+    var bufferGeometry = assets['flower00'];//new THREE.BoxBufferGeometry( 2, 2, 2 );
+    //console.log(instances);
 
-    var scaleY = 100;
-    var trunkGeo = new THREE.Geometry();
-    var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    var geometry = new THREE.InstancedBufferGeometry();
+			geometry.index = bufferGeometry.index;
+			geometry.attributes.position = bufferGeometry.attributes.position;
+            geometry.attributes.uv = bufferGeometry.attributes.uv;
+            
+    offsetAttribute = new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 );
+    orientationAttribute = new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 );
+    colorAttribute = new THREE.InstancedBufferAttribute( new Float32Array( colors ), 3 );
 
-    var trunk = new THREE.Mesh(trunkGeo, material);
-    var pos = new THREE.Vector3(x, y , z);
-    trunk.position.set(pos.x, pos.y, pos.z);
+    geometry.addAttribute( 'offset', offsetAttribute );
+    geometry.addAttribute( 'orientation', orientationAttribute );
+    geometry.addAttribute( 'col', colorAttribute );
 
-    //cross.setLength(14);
-    for (var i = 0; i < 3; i++) {
-        var material = new THREE.MeshBasicMaterial({map: texture, color: 0xffffff });
-        var geometry = new THREE.Mesh(new THREE.PlaneGeometry(1, 1, 1), material);
-        material.alphaTest = 0.5;
-        material.transparent = false;
-        geometry.rotation.y = (Math.PI / 3) * i;
-        //geometry.scale.set(25, 50, 25)
-        material.side = THREE.DoubleSide;
-        geometry.position.set(0, 0.5, 0);
-        trunk.add(geometry);
+    var roll = randomRange(0, 10);
+    var texture;
+
+    if(roll > 5){
+        texture = new THREE.TextureLoader().load( 'img/Game_File/flower_0.png');
+    } else {
+        texture =  new THREE.TextureLoader().load( 'img/Game_File/flower_1.png');
     }
 
-    //LEAVES---------------------------------------------------
-    var leaves = new THREE.TextureLoader().load("img/Game_File/Tree_Leaves_00.png");
-    leaves.magFilter = THREE.NearestFilter;
-    leaves.minFilter = THREE.NearestFilter;
-    var spriteMaterial = new THREE.SpriteMaterial({ map: leaves, color: Math.random() * 0x5cdf49 });
 
-    var sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(125, scaleY, 100)
-   
-    sprite.position.set(pos.x, pos.y + scaleY, pos.z);
-    sprite.visible = false;
-    //trunk.add(sprite);
-    //LEAVES---------------------------------------------------
-    trunk.add(sprite);
-    world.add(sprite);
+    var material = new THREE.RawShaderMaterial( {
+        uniforms: 
+            THREE.UniformsUtils.merge([
+            THREE.UniformsLib['fog'],
+            {map: { value: texture}}]),
+            
+        vertexShader: document.getElementById( 'vertexShader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        fog: true,
+    } );
 
-    material.side = THREE.DoubleSide;
+    mesh = new THREE.Mesh( geometry, material );
 
-    trunk.scale.set(50, scaleY, 50);
-    trunk.rotation.y = (randomRange(0,Math.PI));
-    trunk.visible = false;
-    trunk.lookAt(cross);
-    //var box = new THREE.BoxHelper( trunk, 0xffff00 );
-    world.add(trunk);
+    material.uniforms.map.value = texture;
+
+    mesh.frustumCulled = false;
+    world.add(mesh);
 }
 
-function Flower(world, texture, x, y, z) {
+function Tree(assets, world, x, y, z, instance, offsets, orientation) {
+
+    ////pos = new THREE.Vector3(x, y + 1, z);
+    ////var newTree = assets['tree00'].clone();
+    ////newTree.position.set(pos.x, pos.y + newTree.scale.y/2.0, pos.z);
+    ////
+    ////world.add(newTree);
+    ////newTree.traverse(function (child) {
+    ////    if(child.isSprite){
+    ////        SpriteManager.add(child);
+    ////        child.position.set(pos.x, pos.y + newTree.scale.y, pos.z);
+    ////        world.add(child);
+    ////    }
+    ////});
+//
+//
+    //var vector = new THREE.Vector4();
+    //var w = 1;
+    //instance += 1;
+    //vector.set(x, y, z, 0).normalize();
+    //vector.multiplyScalar(115); // move out at least 5 units from center in current direction
+    //offsets.push(x + vector.x, y + vector.y, z + vector.z);
+    //vector.set(x, y, z, w).normalize();
+    //orientation.push(vector.x, vector.y, vector.z, vector.w);
+}
+
+function Flower(assets, world, x, y, z, SpriteManager) {
     var scaleY = 25;
 
-    var spriteMaterial = new THREE.SpriteMaterial({ map: texture, color: Math.random() * 0xffffff });
-    var sprite = new THREE.Sprite(spriteMaterial);
-    //scene.add( sprite );
-    sprite.scale.set(25, 25, 25)
-    sprite.position.set(x + (randomRange(-125,125)), y + scaleY/2.0, z + (randomRange(-125,125)))
-    sprite.visible = false;
+    var sprite;
+    var roll = randomRange(0, 10);
+
+    if (roll > 5) {
+        sprite = assets['flower00'].clone();
+    } else {
+        sprite = assets['flower01'].clone();
+    }
+
+    SpriteManager.add(sprite);
+    sprite.position.set(x, y + 1, z);
     world.add(sprite);
 }
 /*
@@ -266,6 +235,10 @@ function Flower(world, texture, x, y, z) {
  * only considering the t value for the range [0, 1] => [0, 1]
  * source : https://gist.github.com/gre/1650294
  */
+
+function CalculateNormals() {
+
+}
 EasingFunctions = {
     // no easing, no acceleration
     linear: function (t) { return t },

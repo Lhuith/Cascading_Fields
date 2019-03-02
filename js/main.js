@@ -1,5 +1,5 @@
 
-var container, mapcontainer, stats, controls, lineUI, gui;
+var container, mapcontainer, stats, controls, lineUI, gui, stats;
 var camera, mapCamera, MainScene, BackgroundScene, renderer, MapRenderer, clock, composer, Mapcomposer;
 var lightpos, dirLight, angle;
 var skyBox;
@@ -20,6 +20,8 @@ var vertex = new THREE.Vector3();
 var color = new THREE.Color();
 var skyMaterial;
 var landMassObject;
+var LoadedWorldObjects;
+var collisionCheck;
 
 // Custom global variables
 var mouse = { x: 0, y: 0 };
@@ -27,15 +29,16 @@ var resolution = 3;
 var octaves;
 var persistance;
 var lacunarity;
-var seed = 1;
+var seed = 13;
 var noiseScale;
 var offset = { x: 0, y: 0 };
-var textureSize = 256;
+var textureSize = 512;
 var mouseDown = false;
 var boxsize = 25;
 var skyboxuniforms;
 
 var playerBox;
+var SpriteGroupManage;
 
 //var textureList = [];
 
@@ -56,8 +59,10 @@ var atmoGrad;
 var showMoonOrbits;
 
 var startexture;
+var SkyColors = [];
 
 var cubeTest;
+var skyColor;
 
 var skyboxuniforms =
 {
@@ -125,23 +130,24 @@ function init() {
 
     BackgroundScene = new THREE.Scene();
 
-    //
     var sizex = window.innerWidth * 35;
     var sizey = window.innerHeight * 35;
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    mapCamera = new THREE.OrthographicCamera( sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000 );
-    //camera.add(mapCamera);
-    mapCamera.position.set(0, 0, 0);
-    mapCamera.rotation.x = -90 * (Math.PI / 180);
-    mapCamera.position.y = 100;
+
+    //mapCamera = new THREE.OrthographicCamera(sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000);
+    ////camera.add(mapCamera);
+    //mapCamera.position.set(0, 0, 0);
+    //mapCamera.rotation.x = -90 * (Math.PI / 180);
+    //mapCamera.position.y = 1000;
+
     MainScene = new THREE.Scene();
 
+    //SpriteGroupManage = new THREE.RemoveInvisibleGroup(camera);
+    //MainScene.add(SpriteGroupManage); 
 
-    MainScene.add(mapCamera);
-    //mapCamera.lookAt(MainScene);
     MainScene.background = new THREE.Color(0x42c5ff);
-    // M//ainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 2000);
-    //camera.position.set(textureSize * 5, 40, textureSize * 5);
+    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 4000);
+
     dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
     var vector = new THREE.Vector3(750, 500, 1000);
     dirLight.position.set(vector);
@@ -164,7 +170,7 @@ function init() {
 
     MainScene.add(dirLight);
     dirLight.position.set(1000, 1000, 1);
-    controls = new THREE.PointerLockControls(camera);//new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new THREE.PointerLockControls(camera);
 
     var blocker = document.getElementById('blocker');
     var instructions = document.getElementById('instructions');
@@ -190,9 +196,12 @@ function init() {
     });
     MainScene.add(controls.getObject());
     //controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
-  
+
     worldObjects = new THREE.Object3D();
+    collisionCheck = new Array();
+
     MainScene.add(worldObjects);
+
     //MainScene.add(mapCamera);
     //mapCamera.lookAt(controls.getObject());
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
@@ -202,7 +211,7 @@ function init() {
     var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     playerBox = new THREE.Mesh(geometry, material);
 
-    var geometry = new THREE.BoxGeometry(100, 100, 100);
+    var geometry = new THREE.BoxGeometry(1000, 1000, 1000);
     var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     playerMarkerBox = new THREE.Mesh(geometry, material);
 
@@ -278,7 +287,7 @@ function init() {
 
     raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
     raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1000);
-    raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0, 1000);
+    raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
     //LoadAssets();
     //Load Shaders and Setup Planet
     ShaderLoader('js/Shaders/Planet/Planet.vs.glsl',
@@ -309,38 +318,32 @@ function init() {
     mapcontainer = document.getElementById('webGL-container-map_view');
     document.body.appendChild(mapcontainer);
 
-    MapRenderer = new THREE.WebGLRenderer({ antialias: false });
-    MapRenderer.setSize(window.innerWidth/3, window.innerWidth/4);
-    MapRenderer.setClearColor(0x000000, 1);
-    MapRenderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(MapRenderer.domElement);
-    MapRenderer.domElement.id = "Map";
+    //MapRenderer = new THREE.WebGLRenderer({ antialias: false });
+    //MapRenderer.setSize(window.innerWidth / 3, window.innerWidth / 4);
+    //MapRenderer.setClearColor(0x000000, 1);
+    //MapRenderer.setPixelRatio(window.devicePixelRatio);
+    //document.body.appendChild(MapRenderer.domElement);
+    //MapRenderer.domElement.id = "Map";
 
     //Composer
     composer = new THREE.EffectComposer(renderer);
-    Mapcomposer = new THREE.EffectComposer(MapRenderer);
+    // Mapcomposer = new THREE.EffectComposer(MapRenderer);
     //Passes
-    
-    //var StarsRenderPass = new THREE.RenderPass(BackgroundScene, camera);
-    //composer.addPass(StarsRenderPass);
-    //
-    //var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
-    //composer.addPass(effectCopy);
-    //effectCopy.renderToScreen = true;
-//
-    //var MainRenderPass = new THREE.RenderPass(MainScene, camera);
-    //MainRenderPass.clear = false;
-    //MainRenderPass.clearDepth = true;
-    //composer.addPass(MainRenderPass);
-//
-    //MainRenderPass.renderToScreen = true;
-//
-    //var MainRenderPass = new THREE.RenderPass(MainScene, mapCamera);
-    //MainRenderPass.clear = false;
-    //MainRenderPass.clearDepth = true;
-    //composer.addPass(MainRenderPass);
-//
-    //MainRenderPass.renderToScreen = true;
+
+    var StarsRenderPass = new THREE.RenderPass(BackgroundScene, camera);
+    composer.addPass(StarsRenderPass);
+
+    var effectCopy = new THREE.ShaderPass(THREE.CopyShader);
+    composer.addPass(effectCopy);
+    effectCopy.renderToScreen = true;
+
+    var MainRenderPass = new THREE.RenderPass(MainScene, camera);
+    MainRenderPass.clear = false;
+    MainRenderPass.clearDepth = true;
+    composer.addPass(MainRenderPass);
+
+    MainRenderPass.renderToScreen = true;
+
 
     //Load Shaders and Setup SkyBox
     ShaderLoader('js/Shaders/Sky/Sky.vs.glsl', 'js/Shaders/Sky/Sky.fs.glsl', setUpSky, true);
@@ -351,43 +354,48 @@ function init() {
 
 
     window.addEventListener("resize", onWindowResize, false);
+
+    stats = new Stats()
+
+    stats.domElement.style.position = 'absolute'
+    stats.domElement.style.left = '0px'
+    stats.domElement.style.bottom = '0px'
+    container.appendChild(stats.domElement)
+
+    LoadAssets();
 }
 
 function LoadAssets() {
-    // var texterLoader = new THREE.TextureLoader();
-    //
-    // starMap01 = texterLoader.load("img/Game_File/StarField.png");
-    // starMap01.magFilter = THREE.NearestFilter;
-    // starMap01.minFilter = THREE.NearestFilter;
-    // //AstPalleteColorGrab = AstoColorPalleteGrab[randomRangeRound(0, AstoColorPalleteGrab.length - 1)].RGB;
+
+    LoadedWorldObjects = GenerateEnviromentalObjects();
 }
 
 function SimpleCollision(delta) {
     colliding = false;
     var friction = 1.0;
-    if (worldObjects !== undefined) {
-        worldObjects.traverse(function (child) {
-            if (child !== worldObjects) {
-                if (!child.isSprite) {
 
-                    if (detectCollisionCubes(child, playerBox)) {
-                        var childvector = new THREE.Vector3();
-                        childvector.setFromMatrixPosition(child.matrixWorld);
+    for (var i = 0; i < collisionCheck.length; i++) {
 
-                        colliding = true;
+        var child = collisionCheck[i];
+        //console.log(child);
+        if (!child.isSprite) {
 
-                        var reflection = new THREE.Vector3();//velocity.reflect(dir);
-                        reflection.copy(velocity)
-                        reflection.reflect(velocity.normalize());
+            if (detectCollisionCubes(child, playerBox)) {
+                var childvector = new THREE.Vector3();
+                childvector.setFromMatrixPosition(child.matrixWorld);
+
+                colliding = true;
+
+                var reflection = new THREE.Vector3();//velocity.reflect(dir);
+                reflection.copy(velocity)
+                reflection.reflect(velocity.normalize());
 
 
-                        velocity.x += reflection.x * 1.15;
-                        velocity.z += reflection.z * 1.15;
-                        this.stop();
-                    }
-                }
+                velocity.x += reflection.x * 1.15;
+                velocity.z += reflection.z * 1.15;
+                break;
             }
-        });
+        }
     }
 }
 
@@ -457,8 +465,7 @@ function setUpSky(start, vertex_text, fragment_text) {
     skyboxuniforms.resolution.value.y = window.innerHeight;
 }
 
-
-function ShowHideObjects(ObjectList, Threshold){
+function DistanceCollisionManage(ObjectList, Threshold) {
     var vector = controls.getObject().position;
 
     if (ObjectList !== undefined) {
@@ -469,18 +476,62 @@ function ShowHideObjects(ObjectList, Threshold){
                 var childvector = new THREE.Vector3();
                 childvector.setFromMatrixPosition(child.matrixWorld);
 
-                var distance = childvector.distanceTo(vector);
-                //console.log(distance);
-                if (distance < Threshold || FrustrumIntersection(child) == true) {
-                    child.visible = true;
-                    child.traverse(function (children) {
-                        children.visible = true;
-                    });
-                } else if (distance >= Threshold || FrustrumIntersection(child) == false) {
+                if ((childvector.distanceTo(vector) > Threshold)) {
+
+                    var index = collisionCheck.indexOf(child);
+                    if (index > -1) {
+                        collisionCheck.splice(index, 1);
+                    }
+
+                } else if ((childvector.distanceTo(vector) < (Threshold - 0.01))) {
+
+                    var index = collisionCheck.indexOf(child);
+                    if (index == -1) {
+                        collisionCheck.push(child);
+                    }
+
+                }
+
+            }
+        });
+    }
+}
+
+function ShowHideObjects(ObjectList, Threshold, doChildren = false, doDistance = true) {
+    var vector = controls.getObject().position;
+
+    if (ObjectList !== undefined) {
+        ObjectList.updateMatrixWorld();
+        ObjectList.traverse(function (child) {
+
+            if (child !== ObjectList) {
+                var childvector = new THREE.Vector3();
+                childvector.setFromMatrixPosition(child.matrixWorld);
+
+                if ((childvector.distanceTo(vector) > Threshold && doDistance) || FrustrumIntersection(child) == false) {
                     child.visible = false;
-                    child.traverse(function (children) {
-                        children.visible = false;
-                    });
+
+                    if (doChildren) {
+                        child.traverse(function (children) {
+
+                            if(child.visible)
+                            children.visible = false;
+                            
+                        });
+                    }
+                    
+                    //MainScene.remove(child);
+                } else if ((childvector.distanceTo(vector) < (Threshold - 0.01) && doDistance) || FrustrumIntersection(child) == true) {
+                    child.visible = true;
+                    //MainScene.add(child);
+
+                    if (doChildren) {
+                        child.traverse(function (children) {
+
+                            if(!child.visible)
+                            children.visible = true;
+                        });
+                    }
                 }
 
             }
@@ -504,11 +555,23 @@ function onWindowResize() {
 }
 
 function animate() {
-    //ShowHideObjects(landMassObject, 100);
-    ShowHideObjects(worldObjects, 1000);
 
+    //console.log(collisionCheck.length);
+    stats.begin();
+    //console.log(worldObjects);
     var delta = clock.getDelta();
     timer = timer + delta;
+
+    //Landmass ChunkManagement
+    //ShowHideObjects(landMassObject, 2000, false, false, false);
+
+    //Scene and Collsion World Managment
+    //ShowHideObjects(worldObjects, 1000, true);
+    //DistanceCollisionManage(worldObjects, 300);
+
+    //SimpleCollision(delta);
+
+
 
     angle += 0.1;
     //mapCamera.rotation.x  += delta;
@@ -521,7 +584,17 @@ function animate() {
     if (skyMaterial !== undefined) {
         skyMaterial.uniforms.time.value = timer;
     }
+
+    Movement(delta);
+
+    stats.end();
     requestAnimationFrame(animate);
+
+    render();
+
+}
+
+function Movement(delta) {
 
     if (controls.isLocked === true) {
 
@@ -579,18 +652,14 @@ function animate() {
 
         //var CameraVector = new THREE.Vector3(controls.getObject().position.x, mapCamera.position.y, controls.getObject().position.z)
         //mapCamera.position.copy(controls.getObject().position);
-
-        SimpleCollision(delta);
     }
-    render();
 }
 
-
 function render() {
-    MapRenderer.render(MainScene, mapCamera);
-    //composer.render();
     renderer.render(MainScene, camera);
- 
+    //composer.render();
+    //renderer.render(MainScene, camera);
+
 }
 
 
@@ -647,20 +716,22 @@ function FrustrumIntersection(object) {
 
 }
 
-function createPlanet(start, vertex_text, fragment_text) {
+function CreateLand(start, vertex_text, fragment_text) {
 
     var vertex = vertex_text;
     var fragment = fragment_text;
-    var ico = new THREE.PlaneGeometry(1000, 1000, 32);//new THREE.IcosahedronGeometry(planetSize, 4);
+    //var ico = new THREE.PlaneGeometry(1000, 1000, 32);//new THREE.IcosahedronGeometry(planetSize, 4);
 
     PlanetMaterial = new THREE.ShaderMaterial({
         uniforms: THREE.UniformsUtils.merge([
             THREE.UniformsLib['lights'],
+            THREE.UniformsLib['fog'],
             planetUniform]),
         vertexShader: (vertex),
         fragmentShader: (fragment),
         lights: true,
-        wireframe:true
+        //wireframe:true
+        fog: true
     });
 
 
@@ -677,6 +748,8 @@ function createPlanet(start, vertex_text, fragment_text) {
     for (var i = 0; i < planetData.LandMass.length; i++) {
         var chunk = new THREE.Mesh(planetData.LandMass[i],
             PlanetMaterial);
+
+
         chunk.castShadow = true; //default is false
         chunk.receiveShadow = true; //default
         chunk.scale.set(1, 1, 1);
@@ -693,7 +766,53 @@ function createPlanet(start, vertex_text, fragment_text) {
         objects.push(chunk);
     }
 
+    PostImageData(planetData.map);
     MainScene.add(landMassObject);
+}
+
+function PostImageData(map) {
+    // create off-screen canvas element
+    var canvastest = document.createElement('canvas');
+    var ctx = canvastest.getContext('2d');
+    document.getElementById("webGL-container-map_view").appendChild(canvastest);
+
+    canvastest.width = textureSize;
+    canvastest.height = textureSize;
+
+    // create imageData object
+    var idata = ctx.createImageData(textureSize, textureSize);
+
+    // set our buffer as source
+    //idata.data.set(map.image);
+    //console.log(map);
+    for (var x = 0; x < textureSize; x++) {
+        for (var y = 0; y < textureSize; y++) {
+            var idx = (x + y * textureSize) * 4;
+            var idx2 = (x + y * textureSize) * 3;
+            idata.data[idx + 0] = map.image.data[idx2 + 0];
+            idata.data[idx + 1] = map.image.data[idx2 + 1];
+            idata.data[idx + 2] = map.image.data[idx2 + 2];
+            idata.data[idx + 3] = textureSize;
+        }
+    }
+    // update canvas with new data
+    ctx.putImageData(idata, 0, 0);
+    var dataUri = canvastest.toDataURL('image/png'); // produces a PNG file
+
+
+
+    //export_object(planetobject, dataUri);
+
+    $.ajax({
+        type: 'POST',
+        url: '/planet_information_post.php',
+        data: {
+            image: dataUri,
+        },
+        success: function (d) {
+            console.log('done');
+        }
+    });
 }
 
 function doDispose(obj) {
@@ -717,7 +836,6 @@ function doDispose(obj) {
     obj = undefined;
 };
 
-
 function createDataMap(map, size) {
     var dataTexture;
 
@@ -737,7 +855,7 @@ function createDataMap(map, size) {
 
 function createPlantiodData(octaves, persistance, lacunarity, seed, noiseScale, offset, size) {
     var planetInfo = new MapGenerator(octaves, persistance, lacunarity,
-        seed, noiseScale, offset, size, false, worldObjects);
+        seed, noiseScale, offset, size, false, worldObjects, collisionCheck, LoadedWorldObjects, SpriteGroupManage);
 
     var dataTexture;
 
@@ -788,6 +906,6 @@ function ShaderLoader(vertex_url, fragment_url, onLoad, Custom, onProgress, onEr
 function setUpPlanet(init, vertex_text, fragment_text) {
     ShaderLoadList.planet.vertex = vertex_text;
     ShaderLoadList.planet.fragment = fragment_text;
-    createPlanet(init, vertex_text, fragment_text);
+    CreateLand(init, vertex_text, fragment_text);
 }
 

@@ -1,4 +1,4 @@
-function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, isclouds, world) {
+function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, isclouds, world, collision, Assets, SpriteManager) {
 
     regions = regionRoll(isclouds);
     var colorMap = new Array();
@@ -13,7 +13,7 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
     var finalmap = new Array();
     //var meshData;
     var geo;
-    console.log(size);
+    //console.log(size);
     if (regions.customUrl == '') {
         for (var x = 0; x < size + 1; x++) {
             clampedMap[x] = new Array();
@@ -52,15 +52,19 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
                 for (var i = 0; i < regions.Data.length; i++) {
                     if (currentHeight >= regions.Data[i].height) {
 
-                        var r = regions.ColorPallette[i % regions.ColorPallette.length].RGB.r ;
-                        var g = regions.ColorPallette[i % regions.ColorPallette.length].RGB.g ;
+                        var r = regions.ColorPallette[i % regions.ColorPallette.length].RGB.r;
+                        var g = regions.ColorPallette[i % regions.ColorPallette.length].RGB.g;
                         var b = regions.ColorPallette[i % regions.ColorPallette.length].RGB.b;
 
+                        if(currentHeight <= 0.2){
+                         r = r * currentHeight;
+                         g = g * currentHeight;
+                         b = b * currentHeight;
+                        }
                         var color = new THREE.Color(r, g, b, 1.0);
 
-                        console.log();
+                        //console.log();
                         colorMap[y * size + x] = color;
-
                     }
                     else {
                         break;
@@ -79,24 +83,24 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
         var finalGeo = new THREE.Object3D();
 
-        var scale = 100.0;
+        var scale = 50.0;
         var gridsize = 16;
         var LandMass = new Array();
 
         var chunkSize = (size * scale);
         //var size = chunkSize;
         var detial = (chunkSize/gridsize)/scale; 
-        console.log(detial);
+        //console.log(world);
 
         //Cant start at 0 or else vertices will be pos * 0 <--- big nono
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, size * scale, gridsize, scale));
+                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, collision, SpriteManager, size * scale, gridsize, scale, Assets));
             }
     }
 
-    console.log(LandMass);
+    //console.log(LandMass);
 
     return new PlanetInformation(finalmap, false, false, colors,
         (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);
