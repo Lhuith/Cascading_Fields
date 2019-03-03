@@ -8,6 +8,9 @@ varying vec3 normalDirection;
 varying vec3 viewDirection;
 varying vec3 vWorldPosition;
 
+uniform vec4 skyCol;
+
+
 uniform sampler2D _MainTex;	
 
 vec2 nc (in vec2 uv) {
@@ -108,7 +111,7 @@ void main()
 	//vec3 color = vec3(random(ipos,a/3.0), random(ipos,a/1.5), random(ipos,a/2.0));
 	vec4 tex = texture2D(_MainTex, vUv);
   vec4 final = mix(tex, vec4(0.478, 0.854, 1, 1.0), sin(time/25.0));
-	gl_FragColor = final ;//+  vec4(sparkles,sparkles,sparkles, 1.);
+	gl_FragColor = tex + skyCol;//+  vec4(sparkles,sparkles,sparkles, 1.);
 
 }
 

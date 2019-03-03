@@ -20,13 +20,11 @@
 		}
 
 		void main() {
+			vec4 mvPosition = modelViewMatrix * vec4( offset * 1.0, 1.0 );
+			mvPosition.xyz += (position * scaleInstance);
+			//mvPosition *= vec4(scaleInstance, 1.0);
 
-			vec3 ScaledPos = position * scaleInstance;
-			vec3 vPosition = applyQuaternionToVector( orientation, ScaledPos );
 			vUv = vec2((uv.x/spriteSheetX) + uvoffset.x, (uv.y/spriteSheetY) + uvoffset.y);
-	
-
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
-
+			gl_Position = projectionMatrix * mvPosition;
 			colorPass = col.rgb;
 		}

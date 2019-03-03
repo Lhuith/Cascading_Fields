@@ -1,5 +1,5 @@
-function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, isclouds, world, collision, Assets, SpriteManager) {
-
+function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, scale, gridsize, isclouds, world, collision, ShaderInformation) {
+    console.log(scale);
     regions = regionRoll(isclouds);
     var colorMap = new Array();
     var clampedMap = new Array();
@@ -56,10 +56,10 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
                         var g = regions.ColorPallette[i % regions.ColorPallette.length].RGB.g;
                         var b = regions.ColorPallette[i % regions.ColorPallette.length].RGB.b;
 
-                        if(currentHeight <= 0.2){
-                         r = r * currentHeight;
-                         g = g * currentHeight;
-                         b = b * currentHeight;
+                        if(currentHeight <= 0.25){
+                         r = r * currentHeight * 1.4;
+                         g = g * currentHeight * 1.4;
+                         b = b * currentHeight * 1.4;
                         }
                         var color = new THREE.Color(r, g, b, 1.0);
 
@@ -83,8 +83,7 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
         var finalGeo = new THREE.Object3D();
 
-        var scale = 50.0;
-        var gridsize = 16;
+  
         var LandMass = new Array();
 
         var chunkSize = (size * scale);
@@ -92,11 +91,10 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
         var detial = (chunkSize/gridsize)/scale; 
         //console.log(world);
 
-        //Cant start at 0 or else vertices will be pos * 0 <--- big nono
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, collision, SpriteManager, size * scale, gridsize, scale, Assets));
+                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, collision, ShaderInformation, size * scale, gridsize, scale));
             }
     }
 
@@ -105,6 +103,29 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
     return new PlanetInformation(finalmap, false, false, colors,
         (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);
 };
+
+function loadTexture(url) {
+    return new Promise(resolve => {
+      new THREE.TextureLoader().load(url, resolve);
+    });
+  }
+
+function getOtherImageData( image ) {
+
+    var canvas = document.createElement( 'canvas' );
+
+    var width = image.width || image.naturalWidth;
+    var hieght = image.height || image.naturalHeight;
+
+    canvas.width = width;
+    canvas.height = hieght;
+
+    var context = canvas.getContext( '2d' );
+    context.drawImage( image, 0, 0 );
+
+    return context.getImageData( 0, 0, width, hieght );
+
+}
 
 function PlanetInformation(map, hasAtmo, hasLiquad, colors, url, regionsInfo, landmass) {
     this.map = map;

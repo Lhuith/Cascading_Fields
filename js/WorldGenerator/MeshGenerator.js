@@ -1,5 +1,5 @@
 
-function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world, collision, SpriteManager, mapsize, gridsize, scale, Assets) {
+function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world, collision, ShaderInformation, mapsize, gridsize, scale, imagedata) {
 
     var bufferGeometry = new THREE.BufferGeometry();
 
@@ -30,17 +30,31 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     var normals = [];
     var uvs = [];
 
-    var flowerOffsets = [];
-    var flowerOrientations = [];
-    var treeVector = new THREE.Vector4();
-    var flowerScale = [];
-    var FlowerColor = [];
+    var EnviOffsets = [];
+    var EnviOrientations = [];
+    var EnviVector = new THREE.Vector4();
+    var EnviScale = [];
+    var EnviColor = [];
+    var EnviUVOffset = [];
+
+    var ForestOffsets = [];
+    var ForestOrientations = [];
+    var ForestVector = new THREE.Vector4();
+    var ForestScale = [];
+    var ForestColor = [];
+    var ForestUVOffset = [];
+
+    var SpriteSheetSizeX = 4.0;
+    var SpriteSheetSizeY = 2.0;
+
     var treex, treey, treez, treew;
+    var detialTexture;
 
     var hPoint = 0;
     //65536
     var treeinstances = 0;
 
+ 
     for (iy = 0; iy < gridY1; iy++) {
 
         var worldCoordY = (Worldy * (ChunkSize) - (mapsize / 2.0));
@@ -67,7 +81,13 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
             hPoint = heightMap[(index)];
 
+            if (finalP > 0.80) {
+                finalP = 0.80;
+            }
+
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
+
+
 
             var vector = new THREE.Vector3(x, finalP, y);
 
@@ -87,25 +107,24 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             uvs.push((uvX + worldUVX));
             uvs.push((uvY + worldUVY));
 
-            //Tree(Assets, world, vector.x, vector.y, vector.z, SpriteManager, treeinstances, flowerOffsets, flowerOrientations, vector);
+            //if(decalmap)
+            //console.log(decalmap[1]);
 
-            //var w = 1;
-            //instance += 1;
-            treex = x;
-            treey = finalP;
-            treez = y;
-            treew = 0;
+            if(imagedata != undefined){
+                //console.log("erm?");
+               // if(imagedata[index] == 60){
+               //     console.log("Tree Planted");
+               // PopulateForestBuffers(x, finalP, y, ForestVector, ForestOffsets, ForestOrientations, ForestScale,
+               //     ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, collision, world, {
+               //         EnviVector: EnviVector, EnviOffsets: EnviOffsets, EnviOrientations: EnviOrientations,
+               //         EnviScale: EnviScale, EnviColor: EnviColor, EnviUVOffset: EnviUVOffset
+               //     });
+               // }
+            }
 
-            treeVector.set(treex, treey, treez, 0).normalize();
-            //treeVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-            flowerOffsets.push(treex + treeVector.x, treey + treeVector.y, treez + treeVector.z);
-            treeVector.set(treex, treey, treez, treew).normalize();
-            flowerOrientations.push(0, 0, 0, 0);
-            flowerScale.push(25, 25, 25);
-            var col = new THREE.Color(0xffffff);
-            col.setHex( Math.random() * 0xffffff);
-            FlowerColor.push(col.r, col.g, col.b);
-            treeinstances += 1;
+
+            if (randomRange(0, 10) > 5)
+                PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY);
         }
 
     }
@@ -137,99 +156,246 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     geo.computeFaceNormals();
     geo.computeVertexNormals();
 
-    CreateFlowerInstance(world, flowerOffsets, flowerOrientations, FlowerColor, flowerScale, treeinstances, Assets);    
-    
+    //Add All the fucking flowers
+    //god what a pain in the ass
+    CreateEnviromentalInstance(world, EnviOffsets, EnviOrientations, EnviColor, EnviUVOffset, EnviScale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation);
+    //CreateForestInstance(world, ForestOffsets, ForestOrientations, ForestColor, ForestUVOffset, ForestScale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation);
+
     return geo;
 }
 
-function CreateFlowerInstance(world, offsets, orientations, colors, scale, instances, assets) {
-    var bufferGeometry = assets['flower00'];//new THREE.BoxBufferGeometry( 2, 2, 2 );
+
+function PopulateForestBuffers(x, y, z, ForestVector, ForestOffsets, ForestOrientations, ForestScale, ForestColor,
+    ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, collision, world, EnivormentalBuffer) {
+
+    w = 0;
+
+    var scaleX = 75;
+    var scaleY = 75;
+    var scaleZ = 75;
+
+    //0 or 180
+    CreateTreeFace(x, y + scaleY / 2.0, z, ForestVector, ForestOffsets, ForestOrientations,
+        ForestScale, ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY,
+        collision, world, new THREE.Vector4(0, 0, 0, 0), new THREE.Vector3(scaleX, scaleY, scaleZ));
+
+    //90
+    CreateTreeFace(x, y + scaleY / 2.0, z, ForestVector, ForestOffsets, ForestOrientations,
+        ForestScale, ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY,
+        collision, world, new THREE.Vector4(0, 0.707, 0, 0.707), new THREE.Vector3(scaleX, scaleY, scaleZ));
+
+    //45
+    CreateTreeFace(x, y + scaleY / 2.0, z, ForestVector, ForestOffsets, ForestOrientations,
+        ForestScale, ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY,
+        collision, world, new THREE.Vector4(0, 0.924, 0, 0.383), new THREE.Vector3(scaleX, scaleY, scaleZ));
+
+    CreateTreeFace(x, y + scaleY / 2.0, z, ForestVector, ForestOffsets, ForestOrientations,
+        ForestScale, ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY,
+        collision, world, new THREE.Vector4(0, 0.383, 0, 0.924), new THREE.Vector3(scaleX, scaleY, scaleZ));
+
+    PushToEnviromentBuffers(x, y + 85, z, EnivormentalBuffer, SpriteSheetSizeX, SpriteSheetSizeY,
+        new THREE.Vector2(0.5, 0.0), new THREE.Vector3(scaleX, scaleY, scaleZ), new THREE.Color(0xE1B898));
+
+    var geometry = new THREE.BoxGeometry(25, 50, 25);
+    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    var cube = new THREE.Mesh(geometry, material);
+    //scene.add( cube );
+    cube.visible = false;
+    cube.position.set(x, y + 25, z);
+
+    //boxHelper = new THREE.BoxHelper(cube);
+    //boxHelper.material.color.set(0xffffff);
+    //world.add(boxHelper);
+    world.add(cube);
+    //collision.push()
+}
+
+function CreateTreeFace(x, y, z, ForestVector, ForestOffsets, ForestOrientations, ForestScale, ForestColor,
+    ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, collision, world, orientation, scale) {
+
+    w = 0;
+    ForestScale.push(scale.x, scale.y, scale.z);
+    ForestVector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    ForestOffsets.push(x + ForestVector.x, y + ForestVector.y, z + ForestVector.z);
+    ForestVector.set(x, y, z, w).normalize();
+    ForestOrientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
+
+    var index = Math.round(randomRange(0, SpriteSheetSizeX - 1));
+    var col = new THREE.Color(0xffffff);
+    col.setHex(0xAE875E);
+    ForestUVOffset.push(0, 0);
+    ForestColor.push(col.r, col.g, col.b);
+
+
+    //----------------------------TRUNK0-------------------------------------------
+    w = 0;
+    ForestScale.push(scale.x, scale.y, scale.z);
+    ForestVector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    ForestOffsets.push(x + ForestVector.x, y + ForestVector.y, z + ForestVector.z);
+    ForestVector.set(x, y, z, w).normalize();
+    ForestOrientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
+
+
+    var index = Math.round(randomRange(0, SpriteSheetSizeX - 1));
+    var col = new THREE.Color(0xffffff);
+    col.setHex(0xAE875E);
+    ForestUVOffset.push(0.25, 0);
+    ForestColor.push(col.r, col.g, col.b);
+    //----------------------------TRUNK0-------------------------------------------
+}
+
+function PushToEnviromentBuffers(x, y, z, EnivormentalBuffer, SpriteSheetSizeX, SpriteSheetSizeY, UVlocation, Scale, color) {
+
+    //console.log(EnivormentalBuffer);
+
+    w = 0;
+    EnivormentalBuffer.EnviScale.push(Scale.x, Scale.y, Scale.z);
+
+    EnivormentalBuffer.EnviVector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    EnivormentalBuffer.EnviOffsets.push(x + EnivormentalBuffer.EnviVector.x, y + EnivormentalBuffer.EnviVector.y, z + EnivormentalBuffer.EnviVector.z);
+    EnivormentalBuffer.EnviVector.set(x, y, z, w).normalize();
+    EnivormentalBuffer.EnviOrientations.push(0, 0, 0, 0);
+
+    EnivormentalBuffer.EnviUVOffset.push(UVlocation.x, UVlocation.y);
+    EnivormentalBuffer.EnviColor.push(color.r, color.g, color.b);
+}
+
+function PopulateEnviromentBuffers(x, y, z, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY) {
+    w = 0;
+    EnviScale.push(25, 25, 25);
+
+    EnviVector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    EnviOffsets.push(x + EnviVector.x, y + EnviVector.y + (25 / 2.0), z + EnviVector.z);
+    EnviVector.set(x, y, z, w).normalize();
+    EnviOrientations.push(0, 0, 0, 0);
+
+
+    var index = Math.round(randomRange(0, SpriteSheetSizeX - 1));
+
+    var col = new THREE.Color(0xffffff);
+
+    if (index == 0) {
+        col.setHex(0xA6CA50);
+    } else if (index == 3) {
+        col.setHex(0xAE875E);
+    } else {
+        col.setHex(Math.random() * 0xffffff);
+    }
+
+    EnviUVOffset.push(index / SpriteSheetSizeX, 0.5);
+    EnviColor.push(col.r, col.g, col.b);
+}
+
+function CreateEnviromentalInstance(world, offsets, orientations, colors, uvOffset, scale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation) {
+
+    var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1); //new THREE.BoxBufferGeometry( 2, 2, 2 );
     //console.log(instances);
 
     var geometry = new THREE.InstancedBufferGeometry();
-			geometry.index = bufferGeometry.index;
-			geometry.attributes.position = bufferGeometry.attributes.position;
-            geometry.attributes.uv = bufferGeometry.attributes.uv;
-            
-    offsetAttribute = new THREE.InstancedBufferAttribute( new Float32Array( offsets ), 3 );
-    orientationAttribute = new THREE.InstancedBufferAttribute( new Float32Array( orientations ), 4 );
-    colorAttribute = new THREE.InstancedBufferAttribute( new Float32Array( colors ), 3 );
+    geometry.index = bufferGeometry.index;
+    geometry.attributes.position = bufferGeometry.attributes.position;
+    geometry.attributes.uv = bufferGeometry.attributes.uv;
 
-    geometry.addAttribute( 'offset', offsetAttribute );
-    geometry.addAttribute( 'orientation', orientationAttribute );
-    geometry.addAttribute( 'col', colorAttribute );
+    offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
+    orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
+    colorAttribute = new THREE.InstancedBufferAttribute(new Float32Array(colors), 3);
+    uvOffsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(uvOffset), 2);
+    scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(scale), 3);
 
-    var roll = randomRange(0, 10);
-    var texture;
+    geometry.addAttribute('offset', offsetAttribute);
+    geometry.addAttribute('orientation', orientationAttribute);
+    geometry.addAttribute('col', colorAttribute);
+    geometry.addAttribute('uvoffset', uvOffsetAttribute);
+    geometry.addAttribute('scaleInstance', scaleAttribute);
 
-    if(roll > 5){
-        texture = new THREE.TextureLoader().load( 'img/Game_File/flower_0.png');
-    } else {
-        texture =  new THREE.TextureLoader().load( 'img/Game_File/flower_1.png');
+    var texture = new THREE.TextureLoader().load('img/Game_File/enviromental_SpriteSheet.png');
+
+    var instanceUniforms = {
+        map: { value: texture },
+        spriteSheetX: { type: "f", value: SpriteSheetSizeX },
+        spriteSheetY: { type: "f", value: SpriteSheetSizeY },
+
     }
 
-
-    var material = new THREE.RawShaderMaterial( {
-        uniforms: 
+    var material = new THREE.RawShaderMaterial({
+        uniforms:
             THREE.UniformsUtils.merge([
-            THREE.UniformsLib['fog'],
-            {map: { value: texture}}]),
-            
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-        fog: true,
-    } );
+                THREE.UniformsLib['fog'],
+                instanceUniforms
+            ]),
 
-    mesh = new THREE.Mesh( geometry, material );
+        vertexShader: ShaderInformation.billvertex,
+        fragmentShader: ShaderInformation.billfragment,
+        fog: true,
+    });
+
+    mesh = new THREE.Mesh(geometry, material);
 
     material.uniforms.map.value = texture;
+    material.uniforms.map.repeat = new THREE.Vector2(1 / SpriteSheetSizeX, 1 / SpriteSheetSizeY);
+    material.uniforms.spriteSheetX.value = SpriteSheetSizeX;
+    material.uniforms.spriteSheetY.value = SpriteSheetSizeY;
 
     mesh.frustumCulled = false;
     world.add(mesh);
 }
 
-function Tree(assets, world, x, y, z, instance, offsets, orientation) {
+function CreateForestInstance(world, offsets, orientations, colors, uvOffset, scale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation) {
 
-    ////pos = new THREE.Vector3(x, y + 1, z);
-    ////var newTree = assets['tree00'].clone();
-    ////newTree.position.set(pos.x, pos.y + newTree.scale.y/2.0, pos.z);
-    ////
-    ////world.add(newTree);
-    ////newTree.traverse(function (child) {
-    ////    if(child.isSprite){
-    ////        SpriteManager.add(child);
-    ////        child.position.set(pos.x, pos.y + newTree.scale.y, pos.z);
-    ////        world.add(child);
-    ////    }
-    ////});
-//
-//
-    //var vector = new THREE.Vector4();
-    //var w = 1;
-    //instance += 1;
-    //vector.set(x, y, z, 0).normalize();
-    //vector.multiplyScalar(115); // move out at least 5 units from center in current direction
-    //offsets.push(x + vector.x, y + vector.y, z + vector.z);
-    //vector.set(x, y, z, w).normalize();
-    //orientation.push(vector.x, vector.y, vector.z, vector.w);
-}
+    var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1);; //new THREE.BoxBufferGeometry( 2, 2, 2 );
+    var geometry = new THREE.InstancedBufferGeometry();
+    geometry.index = bufferGeometry.index;
+    geometry.attributes.position = bufferGeometry.attributes.position;
+    geometry.attributes.uv = bufferGeometry.attributes.uv;
 
-function Flower(assets, world, x, y, z, SpriteManager) {
-    var scaleY = 25;
+    offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
+    orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
+    colorAttribute = new THREE.InstancedBufferAttribute(new Float32Array(colors), 3);
+    uvOffsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(uvOffset), 2);
+    scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(scale), 3);
 
-    var sprite;
-    var roll = randomRange(0, 10);
+    geometry.addAttribute('offset', offsetAttribute);
+    geometry.addAttribute('orientation', orientationAttribute);
+    geometry.addAttribute('col', colorAttribute);
+    geometry.addAttribute('uvoffset', uvOffsetAttribute);
+    geometry.addAttribute('scaleInstance', scaleAttribute);
 
-    if (roll > 5) {
-        sprite = assets['flower00'].clone();
-    } else {
-        sprite = assets['flower01'].clone();
+    var texture = new THREE.TextureLoader().load('img/Game_File/enviromental_SpriteSheet.png');
+
+    var instanceUniforms = {
+        map: { value: texture },
+        spriteSheetX: { type: "f", value: SpriteSheetSizeX },
+        spriteSheetY: { type: "f", value: SpriteSheetSizeY },
+
     }
 
-    SpriteManager.add(sprite);
-    sprite.position.set(x, y + 1, z);
-    world.add(sprite);
+    var material = new THREE.RawShaderMaterial({
+        uniforms:
+            THREE.UniformsUtils.merge([
+                THREE.UniformsLib['fog'],
+                instanceUniforms
+            ]),
+
+        vertexShader: ShaderInformation.instavert,
+        fragmentShader: ShaderInformation.instafrag,
+        fog: true,
+    });
+
+    mesh = new THREE.Mesh(geometry, material);
+    // object3d.castShadow = true;
+    material.uniforms.map.value = texture;
+    material.uniforms.map.repeat = new THREE.Vector2(1 / SpriteSheetSizeX, 1 / SpriteSheetSizeY);
+    material.uniforms.spriteSheetX.value = SpriteSheetSizeX;
+    material.uniforms.spriteSheetY.value = SpriteSheetSizeY;
+    material.side = THREE.DoubleSide;
+    mesh.frustumCulled = false;
+    world.add(mesh);
 }
+
 /*
  * Easing Functions - inspired from http://gizma.com/easing/
  * only considering the t value for the range [0, 1] => [0, 1]
@@ -239,6 +405,7 @@ function Flower(assets, world, x, y, z, SpriteManager) {
 function CalculateNormals() {
 
 }
+
 EasingFunctions = {
     // no easing, no acceleration
     linear: function (t) { return t },

@@ -65,100 +65,10 @@
 	<script type="text/javascript" src="js/WorldGenerator/Noise2D.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/NoiseFromTexture.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Regions.js"></script>
-	<script type="text/javascript" src="js/WorldGenerator/EnviromentalObjectGenerator.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/EnviromentGenerator.js"></script>
 
 </head>
 
-<body>
-<script id="vertexShader" type="x-shader/x-vertex">
-		precision highp float;
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-		attribute vec3 position;
-		attribute vec3 offset;
-		attribute vec3 col;
-		attribute vec2 uv;
-		attribute vec4 orientation;
-		varying vec2 vUv;
-	
-		varying vec3 colorPass;
-		// http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
-		vec3 applyQuaternionToVector( vec4 q, vec3 v ){
-			return v + 2.0 * cross( q.xyz, cross( q.xyz, v ) + q.w * v );
-		}
-		void main() {
-			
-			vec4 mvPosition = modelViewMatrix * vec4( offset, 1.0 );
-			mvPosition.xyz += position;
-			vUv = uv;
-			gl_Position = projectionMatrix * mvPosition;
-			colorPass = col.rgb;
-		}
-	</script>
-
-	<script id="fragmentShader" type="x-shader/x-fragment">
-
-
-		precision highp float;
-		uniform sampler2D map;
-		varying vec2 vUv;
-		varying vec3 colorPass;
-
-		uniform vec3 fogColor;
-		uniform float fogNear;
-		uniform float fogFar;
-
-
-		void main() {
-			vec4 tex = texture2D( map, vUv );
-
-			if (tex.a != 1.0) 
-			discard;
-
-			gl_FragColor = tex * vec4(colorPass, 1.0);
-
-			#ifdef USE_FOG
-          #ifdef USE_LOGDEPTHBUF_EXT
-              float depth = gl_FragDepthEXT / gl_FragCoord.w;
-          #else
-              float depth = gl_FragCoord.z / gl_FragCoord.w;
-          #endif
-          float fogFactor = smoothstep( fogNear, fogFar, depth );
-          gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
-      #endif
-
-		}
-	</script>
-	
-<!-- <script id="vertexShader" type="x-shader/x-vertex">
-		precision highp float;
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-		attribute vec3 position;
-		attribute vec3 offset;
-		attribute vec2 uv;
-		attribute vec4 orientation;
-		varying vec2 vUv;
-		// http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
-		vec3 applyQuaternionToVector( vec4 q, vec3 v ){
-			return v + 2.0 * cross( q.xyz, cross( q.xyz, v ) + q.w * v );
-		}
-		void main() {
-			vec3 vPosition = applyQuaternionToVector( orientation, position );
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
-		}
-	</script>
-
-	<script id="fragmentShader" type="x-shader/x-fragment">
-		precision highp float;
-		uniform sampler2D map;
-		varying vec2 vUv;
-		void main() {
-			gl_FragColor = texture2D( map, vUv );
-		}
-	</script>
--->
 	<div id="webGL-container-map_view"></div>
 	<div id="webGL-container"></div>
 	<div id="blocker">

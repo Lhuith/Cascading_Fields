@@ -26,7 +26,7 @@ function createTree(index){
         material.transparent = false;
         mesh.rotation.y = (Math.PI / 3) * i;
         //geometry.scale.set(25, 50, 25)
-        //material.side = THREE.DoubleSide;
+        material.side = THREE.DoubleSide;
         //mesh.position.set(0, 0.5, 0);
         mesh.updateMatrix(); // as needed
         trunkGeo.merge(mesh.geometry, mesh.matrix, i);
@@ -34,7 +34,7 @@ function createTree(index){
 
     var trunkBufferGeo = new THREE.BufferGeometry().fromGeometry(trunkGeo);
 
-    var trunk = new THREE.Mesh(trunkBufferGeo, material);
+    var trunk = new THREE.Mesh(trunkGeo, material);
 
     //LEAVES---------------------------------------------------
     var leaves = new THREE.TextureLoader().load("img/Game_File/Tree_Leaves_"+index+".png");
@@ -55,9 +55,6 @@ function createTree(index){
     trunk.scale.set(50, scaleY, 50);
     trunk.rotation.y = (randomRange(0, Math.PI));
     trunk.visible = false;
-    //trunk.lookAt(cross);
-
-    //world.add(trunk);
 
     return trunk;
 };

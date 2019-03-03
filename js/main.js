@@ -20,8 +20,13 @@ var vertex = new THREE.Vector3();
 var color = new THREE.Color();
 var skyMaterial;
 var landMassObject;
-var LoadedWorldObjects;
 var collisionCheck;
+
+var cycleDuration = 100;
+var dawnDuration = 5;
+var duskDuration = 5;
+var D_N_Time = 0;
+var rotation = 0;
 
 // Custom global variables
 var mouse = { x: 0, y: 0 };
@@ -34,11 +39,12 @@ var noiseScale;
 var offset = { x: 0, y: 0 };
 var textureSize = 512;
 var mouseDown = false;
-var boxsize = 25;
 var skyboxuniforms;
 
 var playerBox;
 var SpriteGroupManage;
+
+var characterList = [];
 
 //var textureList = [];
 
@@ -62,7 +68,7 @@ var startexture;
 var SkyColors = [];
 
 var cubeTest;
-var skyColor;
+var skyColor = [];
 
 var skyboxuniforms =
 {
@@ -76,6 +82,7 @@ var skyboxuniforms =
     },
     time: { type: "f", value: 1.0 },
     _MainTex: { type: "t", value: null },
+    skyCol: { type: "i", value: new THREE.Vector4(.48, .89, .90, 1) },
 }
 
 var planetUniform =
@@ -123,7 +130,87 @@ function textParse(glsl, shadow_text, dither_text) {
     return text;
 }
 
+
+function FogController() {
+    var fogFarValue = controls.getObject().position.y;
+
+    //MainScene.fog.far = fogFarValue;
+
+    //console.log(fogFarValue);
+}
+
+function DayNightCycle(delta) {
+
+    if (cycleDuration > 1) {
+        rotation = (rotation + 360 / cycleDuration * delta) % 360;
+        D_N_Time = rotation / 360;
+        // roation = Euler (r, 0, 0)
+
+        //console.log(D_N_Time);
+        SetSkyColor(D_N_Time);
+    }
+
+    var nightToDay = 0.25;
+    var dayToNight = 0.75;
+    var dawnNormalized = dawnDuration / cycleDuration / 2.0;
+    var duskNormalized = duskDuration / cycleDuration / 2.0;
+
+    D_N_Time = (D_N_Time + nightToDay) % 1.0;
+
+    // Set night and day variables depending on what time it is
+    if (D_N_Time > nightToDay + dawnNormalized && D_N_Time < dayToNight - dawnNormalized) {
+        day = true;
+        night = dawn = dusk = false;
+    } else {
+        if (D_N_Time < nightToDay - duskNormalized || D_N_Time > dayToNight + duskNormalized) {
+            night = true;
+            day = dawn = dusk = false;
+        } else {
+            if (D_N_Time < (nightToDay + dayToNight) / 2) {
+                dawn = true;
+                day = night = dusk = false;
+            } else {
+                dusk = true;
+                day = night = dawn = false;
+            }
+        }
+    }
+
+    //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
+}
+
+function SetSkyColor(d_n_time) {
+
+    var index = (skyColor.length * d_n_time);
+
+    var a = skyColor[Math.floor(index)];
+    var b = skyColor[Math.ceil(index) % skyColor.length];
+
+    var lerped = new THREE.Vector3();
+
+    lerped.lerpVectors(a, b, index - Math.floor(index));
+
+
+    //MainScene.background = new THREE.Color(lerped.x, lerped.y, lerped.z, 0.7);
+    MainScene.fog.color = new THREE.Color(lerped.x, lerped.y, lerped.z, 0.7);
+    //console.log(new THREE.Color(lerped.x, lerped.y, lerped.z, 0.7).getHex());
+
+    if (skyMaterial !== undefined) {
+        //console.log("poo");
+        skyMaterial.uniforms.skyCol.value = new THREE.Vector4(lerped.x, lerped.y, lerped.z, 0.7);
+    }
+    //console.log(index);
+}
+
 function init() {
+
+    skyColor = [
+        new THREE.Vector3(0.4, 0.588, 0.729),
+        new THREE.Vector3(0.886, 0.890, 0.545),
+        new THREE.Vector3(0.905, 0.647, 0.325),
+        new THREE.Vector3(0.494, 0.294, 0.407),
+        new THREE.Vector3(0.160, 0.160, 0.396),
+    ];
 
     clock = new THREE.Clock();
     resolution = (window.devicePixelRatio == 1) ? 3 : 4;;
@@ -134,21 +221,12 @@ function init() {
     var sizey = window.innerHeight * 35;
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
 
-    //mapCamera = new THREE.OrthographicCamera(sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000);
-    ////camera.add(mapCamera);
-    //mapCamera.position.set(0, 0, 0);
-    //mapCamera.rotation.x = -90 * (Math.PI / 180);
-    //mapCamera.position.y = 1000;
-
     MainScene = new THREE.Scene();
 
-    //SpriteGroupManage = new THREE.RemoveInvisibleGroup(camera);
-    //MainScene.add(SpriteGroupManage); 
+    //MainScene.background = new THREE.Color(0x42c5ff);
+    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 7000);
 
-    MainScene.background = new THREE.Color(0x42c5ff);
-    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 4000);
-
-    dirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
     var vector = new THREE.Vector3(750, 500, 1000);
     dirLight.position.set(vector);
 
@@ -195,7 +273,7 @@ function init() {
 
     });
     MainScene.add(controls.getObject());
-    //controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
+    controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
 
     worldObjects = new THREE.Object3D();
     collisionCheck = new Array();
@@ -219,7 +297,7 @@ function init() {
     MainScene.add(playerBox);
 
     var gridHelper = new THREE.GridHelper(1000, 20);
-    //MainScene.add(gridHelper);
+    MainScene.add(gridHelper);
 
     var onKeyDown = function (event) {
 
@@ -297,11 +375,11 @@ function init() {
     container = document.getElementById('webGL-container');
     document.body.appendChild(container);
 
-    renderer = new THREE.WebGLRenderer({ antialias: false });
+    renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
 
     renderer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
 
-    renderer.setClearColor(0x000000, 1);
+    renderer.setClearColor(0x000000, 0);
     document.body.appendChild(renderer.domElement);
     renderer.autoClear = false;
     renderer.domElement.style.width = Math.round(renderer.domElement.width * resolution) + 'px';
@@ -327,8 +405,6 @@ function init() {
 
     //Composer
     composer = new THREE.EffectComposer(renderer);
-    // Mapcomposer = new THREE.EffectComposer(MapRenderer);
-    //Passes
 
     var StarsRenderPass = new THREE.RenderPass(BackgroundScene, camera);
     composer.addPass(StarsRenderPass);
@@ -362,12 +438,28 @@ function init() {
     stats.domElement.style.bottom = '0px'
     container.appendChild(stats.domElement)
 
-    LoadAssets();
+    LoadCharacters(0);
+    //LoadAssets();
 }
 
-function LoadAssets() {
+function LoadCharacters(spriteNumber) {
+    var flower = new THREE.TextureLoader().load("img/Game_File/Ally.png");
+    flower.magFilter = THREE.NearestFilter;
+    flower.minFilter = THREE.NearestFilter;
 
-    LoadedWorldObjects = GenerateEnviromentalObjects();
+    var spriteMaterial = new THREE.SpriteMaterial({ map: flower, color: 0xffffff });
+    var sprite = new THREE.Sprite(spriteMaterial);
+    sprite.scale.set(60, 60, 60);
+
+    spriteMaterial.map.offset = new THREE.Vector2(0.25 * spriteNumber, 0);
+    spriteMaterial.map.repeat = new THREE.Vector2(1 / 4, 1);
+
+    //sprite.position.set(controls.getObject().position);
+
+    console.log(sprite.position);
+    sprite.rotation.y = 180;
+    characterList.push(sprite);
+    MainScene.add(sprite);
 }
 
 function SimpleCollision(delta) {
@@ -414,6 +506,29 @@ function detectCollisionCubes(object1, object2) {
     return box1.intersectsBox(box2);
 }
 
+function GetCharHeight(raycaster, char) {
+
+    var vector = new THREE.Vector3(
+        char.position.x,
+        0,
+        char.position.z);
+
+    raycaster.ray.origin.copy(vector);
+    raycaster.ray.origin.y -= 1;
+
+    var intersections = raycaster.intersectObjects(objects);
+
+    var onObject = intersections.length > 0;
+    var height = 0;
+
+    if (intersections[0] !== undefined)
+        height = intersections[0].point.y + 40;
+    else
+        height = 40;
+
+    return height;
+}
+
 function GetHeight() {
 
     var vector = new THREE.Vector3(
@@ -451,7 +566,7 @@ function setUpSky(start, vertex_text, fragment_text) {
             fragmentShader: fragment_text,
             uniforms: skyboxuniforms,
             side: THREE.BackSide,
-            fog: false
+            fog: true
         });
 
     skyBox = new THREE.Mesh(new THREE.SphereGeometry(10000,
@@ -461,8 +576,8 @@ function setUpSky(start, vertex_text, fragment_text) {
     skyBox.castShadow = false;
     skyBox.receiveShadow = false;
     skyMaterial.uniforms._MainTex.value = starMap01;
-    skyboxuniforms.resolution.value.x = window.innerWidth;
-    skyboxuniforms.resolution.value.y = window.innerHeight;
+    skyMaterial.uniforms.resolution.value.x = window.innerWidth;
+    skyMaterial.uniforms.resolution.value.y = window.innerHeight;
 }
 
 function DistanceCollisionManage(ObjectList, Threshold) {
@@ -514,12 +629,12 @@ function ShowHideObjects(ObjectList, Threshold, doChildren = false, doDistance =
                     if (doChildren) {
                         child.traverse(function (children) {
 
-                            if(child.visible)
-                            children.visible = false;
-                            
+                            if (child.visible)
+                                children.visible = false;
+
                         });
                     }
-                    
+
                     //MainScene.remove(child);
                 } else if ((childvector.distanceTo(vector) < (Threshold - 0.01) && doDistance) || FrustrumIntersection(child) == true) {
                     child.visible = true;
@@ -528,8 +643,8 @@ function ShowHideObjects(ObjectList, Threshold, doChildren = false, doDistance =
                     if (doChildren) {
                         child.traverse(function (children) {
 
-                            if(!child.visible)
-                            children.visible = true;
+                            if (!child.visible)
+                                children.visible = true;
                         });
                     }
                 }
@@ -554,22 +669,63 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
 }
 
+function ManageCharacters() {
+
+    for (var i = 0; i < characterList.length; i++) {
+
+        var char = characterList[i];
+        var charYAngle = (char.rotation.y) * Math.PI / 180;
+        char.position.y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), char);
+
+        var camObj = controls.getObject();
+
+        var vector = new Vector2(char.position.z - camObj.position.z, char.position.x - camObj.position.x);
+        var angle = Math.atan2(vector.y, vector.x);
+        UpdateCharacterSprite(angle + charYAngle, char);
+    }
+}
+
+function UpdateCharacterSprite(angle, char) {
+
+    //Regions mapped from -1 to 1;
+    var offset = Math.PI / 4;
+
+    var dagrees = AbsoluteAngle((angle + offset) * 180 / Math.PI);
+
+    //normaledAngle = (normaledAngle * 2) - 1;
+    var normalizedAngle = dagrees / 360;
+
+    var index = Math.ceil(((normalizedAngle * 4)) % 4) - 1;
+
+    //console.log(index);
+
+    char.material.map.offset = new THREE.Vector2(0.25 * (index), 0);
+    // char.material.map.repeat = new THREE.Vector2(1 / 2, 1);
+}
+
+function AbsoluteAngle(angle) {
+    return (angle %= 360) >= 0 ? angle : (angle + 360);
+}
 function animate() {
 
     //console.log(collisionCheck.length);
+
     stats.begin();
+    ManageCharacters();
+    FogController()
+
     //console.log(worldObjects);
     var delta = clock.getDelta();
     timer = timer + delta;
-
+    DayNightCycle(delta);
     //Landmass ChunkManagement
-    //ShowHideObjects(landMassObject, 2000, false, false, false);
+    ShowHideObjects(landMassObject, 2000, false, false, false);
 
     //Scene and Collsion World Managment
-    //ShowHideObjects(worldObjects, 1000, true);
-    //DistanceCollisionManage(worldObjects, 300);
+    //ShowHideObjects(worldObjects, 3000, true);
+    DistanceCollisionManage(worldObjects, 300);
 
-    //SimpleCollision(delta);
+    SimpleCollision(delta);
 
 
 
@@ -647,7 +803,10 @@ function Movement(delta) {
             controls.getObject().position.y = height;
 
         prevTime = time;
-        skyBox.position.copy(controls.getObject().position);
+
+        if (skyBox !== undefined)
+            skyBox.position.copy(controls.getObject().position);
+
         playerBox.position.copy(controls.getObject().position);
 
         //var CameraVector = new THREE.Vector3(controls.getObject().position.x, mapCamera.position.y, controls.getObject().position.z)
@@ -656,8 +815,8 @@ function Movement(delta) {
 }
 
 function render() {
-    renderer.render(MainScene, camera);
-    //composer.render();
+    //renderer.render(MainScene, camera);
+    composer.render();
     //renderer.render(MainScene, camera);
 
 }
@@ -683,7 +842,7 @@ function toScreenPosition(obj, camera) {
     };
 }
 
-function CalculateParametres(vertex_text, fragment_text) {
+function CalculateParametres() {
     persistance = 2.9;//randomRange(0.65, 0.85);
     lacunarity = 0.21;//randomRange(1.9, 2.2);
     octaves = 5;//Math.round(randomRange(4, 6));
@@ -735,39 +894,15 @@ function CreateLand(start, vertex_text, fragment_text) {
     });
 
 
-    CalculateParametres(vertex_text, fragment_text);
+    CalculateParametres();
 
-    planetData = createPlantiodData(octaves, persistance, lacunarity,
-        seed, noiseScale, offset, textureSize);
-    //console.log(planetData.meshData.geo);
-    //new THREE.PlaneGeometry(200, 200, 32);//
-    //
-
-    landMassObject = new THREE.Object3D();
-
-    for (var i = 0; i < planetData.LandMass.length; i++) {
-        var chunk = new THREE.Mesh(planetData.LandMass[i],
-            PlanetMaterial);
+    ShaderLoader('js/Shaders/BillBoard/BillBoard.vs.glsl',
+        'js/Shaders/BillBoard/BillBoard.fs.glsl', setUpMapFirstPass, {
+            octaves: octaves, persistance: persistance, lacunarity: lacunarity,
+            seed: seed, noiseScale: noiseScale, offset: offset, size: textureSize, scale: 50.0, gridsize: 16,
+        });
 
 
-        chunk.castShadow = true; //default is false
-        chunk.receiveShadow = true; //default
-        chunk.scale.set(1, 1, 1);
-        //MainScene.add(planet);
-        //planet.scale.z = -1;
-        //planet.scale.x = -1;
-        //planet.rotation.x = Math.PI / 2;
-        PlanetMaterial.uniforms.texture.value = planetData.map;
-        planetData.map.wrapS = THREE.RepeatWrapping;
-        planetData.map.repeat.x = -1;
-        PlanetMaterial.side = THREE.DoubleSide;
-        dirLight.target = landMassObject;
-        landMassObject.add(chunk)
-        objects.push(chunk);
-    }
-
-    PostImageData(planetData.map);
-    MainScene.add(landMassObject);
 }
 
 function PostImageData(map) {
@@ -853,28 +988,76 @@ function createDataMap(map, size) {
     return dataTexture;
 }
 
-function createPlantiodData(octaves, persistance, lacunarity, seed, noiseScale, offset, size) {
-    var planetInfo = new MapGenerator(octaves, persistance, lacunarity,
-        seed, noiseScale, offset, size, false, worldObjects, collisionCheck, LoadedWorldObjects, SpriteGroupManage);
+function createPlantiodDataFirst(data, vertexShader, fragShader) {
+    ShaderLoader('js/Shaders/Instance/Instance.vs.glsl',
+        'js/Shaders/Instance/Instance.fs.glsl', setUpMapFinal, { data: data, vertex : vertexShader, fragment : fragShader });
+}
+
+function createPlantiodDataFinal(information, vertexShader, fragShader) {
+
+    //console.log(vertexShader);
+    //console.log(information.vertex);
+    //console.log(data);
+    var planetInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
+        information.data.seed, information.data.noiseScale, information.data.offset, information.data.size, information.data.scale, information.data.gridsize, false, worldObjects,
+        collisionCheck, { billvertex : information.vertex, billfragment: information.fragment, instavert : vertexShader, instafrag: fragShader });
 
     var dataTexture;
 
     dataTexture = new THREE.DataTexture
         (
             Uint8Array.from(planetInfo.map),
-            size,
-            size,
+            information.data.size,
+            information.data.size,
             THREE.RGBFormat,
             THREE.UnsignedByteType,
         );
 
     dataTexture.needsUpdate = true;
+
     //textureList.push(dataTexture);
     //worldObjects.scale.z = -1;
     // worldObjects.scale.x = -1;
-    return new PlanetInformation(dataTexture, planetInfo.hasAtmo,
+    //console.log(planetInfo);
+    planetData = new PlanetInformation(dataTexture, planetInfo.hasAtmo,
         planetInfo.hasLiquad, planetInfo.colors, planetInfo.url,
         planetInfo.regionsInfo, planetInfo.LandMass);
+
+
+    if (planetData != undefined) {
+        landMassObject = new THREE.Object3D();
+
+        for (var i = 0; i < planetData.LandMass.length; i++) {
+            var chunk = new THREE.Mesh(planetData.LandMass[i],
+                PlanetMaterial);
+
+
+            chunk.castShadow = true; //default is false
+            chunk.receiveShadow = true; //default
+            chunk.scale.set(1, 1, 1);
+            //MainScene.add(planet);
+            //planet.scale.z = -1;
+            //planet.scale.x = -1;
+            //planet.rotation.x = Math.PI / 2;
+            PlanetMaterial.uniforms.texture.value = planetData.map;
+            planetData.map.wrapS = THREE.RepeatWrapping;
+            planetData.map.repeat.x = -1;
+            PlanetMaterial.side = THREE.DoubleSide;
+            dirLight.target = landMassObject;
+            landMassObject.add(chunk)
+            objects.push(chunk);
+        }
+
+        PostImageData(planetData.map);
+        MainScene.add(landMassObject);
+    }
+
+    var texture, imagedata;
+
+    texture = new THREE.TextureLoader().load( "img/Game_File/MapDecal.jpg", function ( event ) {
+        imagedata = getImageData( texture.image );
+        GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects, objects);
+    } );
 }
 
 // Credit to THeK3nger - https://gist.github.com/THeK3nger/300b6a62b923c913223fbd29c8b5ac73
@@ -902,6 +1085,18 @@ function ShaderLoader(vertex_url, fragment_url, onLoad, Custom, onProgress, onEr
 }
 //Methods to Setup and Save the Loaded Texts
 //Aswell as pass in extra paramaratres if needed
+
+function setUpMapFirstPass(init, vertex_text, fragment_text) {
+    ShaderLoadList.planet.vertex = vertex_text;
+    ShaderLoadList.planet.fragment = fragment_text;
+    createPlantiodDataFirst(init, vertex_text, fragment_text);
+}
+
+function setUpMapFinal(init, vertex_text, fragment_text) {
+    ShaderLoadList.planet.vertex = vertex_text;
+    ShaderLoadList.planet.fragment = fragment_text;
+    createPlantiodDataFinal(init, vertex_text, fragment_text);
+}
 
 function setUpPlanet(init, vertex_text, fragment_text) {
     ShaderLoadList.planet.vertex = vertex_text;
