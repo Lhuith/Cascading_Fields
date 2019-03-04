@@ -73,13 +73,12 @@ uniform float fogFar;
 
 			vec4 tex = texture2D(texture, vUv);
 			
-			//vec4 mask2 = vec4(1.0, 1.0, 1.0, tex.r
+
 			vec4 final = max(ext, tex);
-			//ext -= mask2;
-	// +	// + tex
+
 			gl_FragColor = ((final) + light) * vec4(shadowVal, 1.0);
 
-			#ifdef USE_FOG
+		#ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT
               float depth = gl_FragDepthEXT / gl_FragCoord.w;
           #else

@@ -16,14 +16,9 @@
 
 			gl_FragColor = tex * vec4(colorPass, 1.0);
 
-			#ifdef USE_FOG
-          #ifdef USE_LOGDEPTHBUF_EXT
-              float depth = gl_FragDepthEXT / gl_FragCoord.w;
-          #else
-              float depth = gl_FragCoord.z / gl_FragCoord.w;
-          #endif
+			float depth = (gl_FragCoord.z / gl_FragCoord.w)/2.0;
+
           float fogFactor = smoothstep( fogNear, fogFar, depth );
           gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
-      #endif
 
 		}

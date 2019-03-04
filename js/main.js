@@ -43,10 +43,13 @@ var skyboxuniforms;
 
 var playerBox;
 var SpriteGroupManage;
+var Clouds;
 
 var characterList = [];
 var mapScale = 50.0;
-var SpriteSheetSize = new THREE.Vector2(4, 2); // 4 columns, 2 rows
+var SpriteSheetSize = new THREE.Vector2(8, 8);
+var SpriteSize = 32;
+
 //var textureList = [];
 
 var planetSize, planetData, inPlanet, planet,
@@ -232,7 +235,7 @@ function init() {
     MainScene = new THREE.Scene();
 
     //MainScene.background = new THREE.Color(0x42c5ff);
-    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 7000);
+    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 5000);
 
     dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
     var vector = new THREE.Vector3(750, 500, 1000);
@@ -285,9 +288,12 @@ function init() {
     40, ((textureSize/2.0) * mapScale) - 125 * mapScale);
     
     worldObjects = new THREE.Object3D();
+    Clouds = new THREE.Object3D();
+
     collisionCheck = new Array();
 
     MainScene.add(worldObjects);
+    MainScene.add(Clouds);
 
     MainScene.add(mapCamera);
     //mapCamera.lookAt(controls.getObject());
@@ -465,7 +471,6 @@ function LoadCharacters(spriteNumber) {
 
     //sprite.position.set(controls.getObject().position);
 
-    console.log(sprite.position);
     sprite.rotation.y = 180;
     characterList.push(sprite);
     MainScene.add(sprite);
@@ -1010,7 +1015,7 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
 
     var planetInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
         information.data.seed, information.data.noiseScale, information.data.offset, information.data.size, information.data.scale, information.data.gridsize, false, worldObjects,
-        collisionCheck, ShaderInfo, SpriteSheetSize);
+        collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
 
     var dataTexture;
 
@@ -1080,8 +1085,10 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
     texture = new THREE.TextureLoader().load( "img/Game_File/Map_Decal.png", function ( event ) {
         imagedata = getImageData( texture.image );
         GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects, 
-            objects, collisionCheck, ShaderInfo, SpriteSheetSize);
+            objects, collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
     } );
+
+    GenerateClouds(Clouds, 256, ShaderInfo, SpriteSheetSize, SpriteSize);
 }
 
 // Credit to THeK3nger - https://gist.github.com/THeK3nger/300b6a62b923c913223fbd29c8b5ac73

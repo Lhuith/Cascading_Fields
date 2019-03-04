@@ -1,6 +1,6 @@
 
 function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, world,
-    collision, ShaderInformation, mapsize, gridsize, scale, SpriteSheetSize) {
+    collision, ShaderInformation, mapsize, gridsize, scale, SpriteSheetSize, SpriteSize) {
 
     var bufferGeometry = new THREE.BufferGeometry();
 
@@ -106,25 +106,14 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             uvs.push((uvX + worldUVX));
             uvs.push((uvY + worldUVY));
 
-            //if(decalmap)
-            //console.log(decalmap[1]);
-
-            //console.log("erm?");
-            // if(imagedata[index] == 60){
-            //     console.log("Tree Planted");
-            // PopulateForestBuffers(x, finalP, y, ForestVector, ForestOffsets, ForestOrientations, ForestScale,
-            //     ForestColor, ForestUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, collision, world, {
-            //         EnviVector: EnviVector, EnviOffsets: EnviOffsets, EnviOrientations: EnviOrientations,
-            //         EnviScale: EnviScale, EnviColor: EnviColor, EnviUVOffset: EnviUVOffset
-            //     });
-            // }
-
             if (hPoint > 0.35 && hPoint < 0.65) {
-                if (randomRange(0, 10) > 9.5) { PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, Math.round(randomRange(0, 2))); }
+                if (randomRange(0, 10) > 9.5) { PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, 
+                    EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, Math.round(randomRange(0, 2))); }
 
             } else if (hPoint > 0.7 && hPoint < 0.85) {
                 if (randomRange(0, 10) > 9) {
-                    PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, 3);
+                    PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, 
+                        EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, 3);
                 }
 
             }
@@ -161,7 +150,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
     //Add All the fucking flowers
     //god what a pain in the ass
-    CreateEnviromentalInstance(world, EnviOffsets, EnviOrientations, EnviColor, EnviUVOffset, EnviScale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation);
+    CreateEnviromentalInstance(world, EnviOffsets, EnviOrientations, EnviColor, EnviUVOffset, EnviScale, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, ShaderInformation);
     //CreateForestInstance(world, ForestOffsets, ForestOrientations, ForestColor, ForestUVOffset, ForestScale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation);
 
     return geo;
@@ -170,7 +159,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
 
 
-function PushToEnviromentBuffers(x, y, z, EnivormentalBuffer, SpriteSheetSizeX, SpriteSheetSizeY, UVlocation, Scale, color) {
+function PushToEnviromentBuffers(x, y, z, EnivormentalBuffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, UVlocation, Scale, color) {
 
     //console.log(EnivormentalBuffer);
 
@@ -188,7 +177,7 @@ function PushToEnviromentBuffers(x, y, z, EnivormentalBuffer, SpriteSheetSizeX, 
 }
 
 function PopulateEnviromentBuffers(x, y, z, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor,
-    EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, uvindex) {
+    EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, uvindex) {
 
     w = 0;
     var scaleX = randomRange(5, 70);
@@ -225,7 +214,7 @@ function PopulateEnviromentBuffers(x, y, z, EnviVector, EnviOffsets, EnviOrienta
     EnviColor.push(col.r, col.g, col.b);
 }
 
-function CreateEnviromentalInstance(world, offsets, orientations, colors, uvOffset, scale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation) {
+function CreateEnviromentalInstance(world, offsets, orientations, colors, uvOffset, scale, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, ShaderInformation) {
 
     var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1); //new THREE.BoxBufferGeometry( 2, 2, 2 );
     //console.log(instances);

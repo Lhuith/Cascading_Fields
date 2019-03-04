@@ -74,6 +74,7 @@
     #Map{
         position: absolute;
         top: 0;
+        right: 0;
     }
     .h-adjust {
         height: 70px!important;
