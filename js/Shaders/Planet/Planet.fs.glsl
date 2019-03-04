@@ -2,7 +2,8 @@
 
 varying vec3 lightdir;
 varying vec3 eyenorm;
-uniform sampler2D texture;		 	
+uniform sampler2D texture;	
+uniform sampler2D extra;		 	
 varying vec2 vUv;
 
 varying vec3 vecNormal;
@@ -19,7 +20,7 @@ uniform float fogFar;
 		//I just didnt want it cluttering shizz up
 		//Basicaling just pointers to the shadow and dither methods
 		AddShadow
-		//AddDither
+		AddDither
 	
 		#if NUM_DIR_LIGHTS > 0
 		struct DirectionalLight 
@@ -58,11 +59,25 @@ uniform float fogFar;
 			{
 				color = vec4(1.0, 1.0, 1.0, 1.0);
 			}
+	
+
+			vec4 extSample = texture2D(extra, vec2(vUv.x, 1.0 - vUv.y));
+			
+			float alpha = extSample.a;
+			vec4 mask = vec4(alpha, alpha, alpha, alpha);
+
+			float Invertalpha = 1.0 - extSample.a;
+			vec4 maskInvert = vec4(Invertalpha, Invertalpha, Invertalpha, Invertalpha);
+			
+			vec4 ext = texture2D(extra, vec2(vUv.x, 1.0 - vUv.y)) - maskInvert;
 
 			vec4 tex = texture2D(texture, vUv);
-			//  * (shadowDither)
-			//* vec4(light.rgb,1.0)
-			gl_FragColor = (tex) + light;
+			
+			//vec4 mask2 = vec4(1.0, 1.0, 1.0, tex.r
+			vec4 final = max(ext, tex);
+			//ext -= mask2;
+	// +	// + tex
+			gl_FragColor = ((final) + light) * vec4(shadowVal, 1.0);
 
 			#ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT

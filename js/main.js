@@ -45,7 +45,8 @@ var playerBox;
 var SpriteGroupManage;
 
 var characterList = [];
-
+var mapScale = 50.0;
+var SpriteSheetSize = new THREE.Vector2(4, 2); // 4 columns, 2 rows
 //var textureList = [];
 
 var planetSize, planetData, inPlanet, planet,
@@ -91,6 +92,7 @@ var planetUniform =
     palette: { type: "v3v", value: GrayScalePallete },
     paletteSize: { type: "i", value: 8 },
     texture: { type: "t", value: null },
+    extra : { type: "t", value: null },
     lightpos: { type: 'v3', value: new THREE.Vector3(0, 30, 20) },
     noTexture: { type: "i", value: 0 },
     customColorSwitch: { type: "i", value: 1 },
@@ -217,9 +219,15 @@ function init() {
 
     BackgroundScene = new THREE.Scene();
 
-    var sizex = window.innerWidth * 35;
-    var sizey = window.innerHeight * 35;
+    var sizex = window.innerWidth * 26;
+    var sizey = window.innerHeight * 25;
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+
+    mapCamera = new THREE.OrthographicCamera( sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000 );
+    //camera.add(mapCamera);
+    mapCamera.position.set(0, 0, 0);
+    mapCamera.rotation.x = -90 * (Math.PI / 180);
+    mapCamera.position.y = 1000;
 
     MainScene = new THREE.Scene();
 
@@ -273,14 +281,15 @@ function init() {
 
     });
     MainScene.add(controls.getObject());
-    controls.getObject().position.set(((textureSize / 2.0) - 5) * 50, 40, ((textureSize / 2.0) - 5) * 50);
-
+    controls.getObject().position.set((((textureSize/2.0) * mapScale) - 125 * mapScale), 
+    40, ((textureSize/2.0) * mapScale) - 125 * mapScale);
+    
     worldObjects = new THREE.Object3D();
     collisionCheck = new Array();
 
     MainScene.add(worldObjects);
 
-    //MainScene.add(mapCamera);
+    MainScene.add(mapCamera);
     //mapCamera.lookAt(controls.getObject());
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
@@ -396,12 +405,12 @@ function init() {
     mapcontainer = document.getElementById('webGL-container-map_view');
     document.body.appendChild(mapcontainer);
 
-    //MapRenderer = new THREE.WebGLRenderer({ antialias: false });
-    //MapRenderer.setSize(window.innerWidth / 3, window.innerWidth / 4);
-    //MapRenderer.setClearColor(0x000000, 1);
-    //MapRenderer.setPixelRatio(window.devicePixelRatio);
-    //document.body.appendChild(MapRenderer.domElement);
-    //MapRenderer.domElement.id = "Map";
+    MapRenderer = new THREE.WebGLRenderer({ antialias: false });
+    MapRenderer.setSize(window.innerWidth / 3, window.innerWidth / 4);
+    MapRenderer.setClearColor(0x000000, 1);
+    MapRenderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(MapRenderer.domElement);
+    MapRenderer.domElement.id = "Map";
 
     //Composer
     composer = new THREE.EffectComposer(renderer);
@@ -506,14 +515,14 @@ function detectCollisionCubes(object1, object2) {
     return box1.intersectsBox(box2);
 }
 
-function GetCharHeight(raycaster, char) {
+function GetCharHeight(raycaster, vector) {
 
-    var vector = new THREE.Vector3(
-        char.position.x,
+    var NewVector = new THREE.Vector3(
+        vector.x,
         0,
-        char.position.z);
+        vector.z);
 
-    raycaster.ray.origin.copy(vector);
+    raycaster.ray.origin.copy(NewVector);
     raycaster.ray.origin.y -= 1;
 
     var intersections = raycaster.intersectObjects(objects);
@@ -675,7 +684,7 @@ function ManageCharacters() {
 
         var char = characterList[i];
         var charYAngle = (char.rotation.y) * Math.PI / 180;
-        char.position.y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), char);
+        char.position.y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), char.position);
 
         var camObj = controls.getObject();
 
@@ -719,7 +728,7 @@ function animate() {
     timer = timer + delta;
     DayNightCycle(delta);
     //Landmass ChunkManagement
-    ShowHideObjects(landMassObject, 2000, false, false, false);
+    //ShowHideObjects(landMassObject, 2000, false, false, false);
 
     //Scene and Collsion World Managment
     //ShowHideObjects(worldObjects, 3000, true);
@@ -767,8 +776,6 @@ function Movement(delta) {
         var time = performance.now();
         var delta = (time - prevTime) / 1000;
 
-
-
         velocity.x -= velocity.x * 2.0 * delta;
         velocity.z -= velocity.z * 2.0 * delta;
 
@@ -778,8 +785,8 @@ function Movement(delta) {
         direction.x = Number(moveLeft) - Number(moveRight);
         direction.normalize(); // this ensures consistent movements in all directions
 
-        if (moveForward && !colliding || moveBackward && !colliding) velocity.z -= direction.z * 400.0 * delta;
-        if (moveLeft && !colliding || moveRight && !colliding) velocity.x -= direction.x * 400.0 * delta;
+        if (moveForward && !colliding || moveBackward && !colliding) velocity.z -= direction.z * 1200.0 * delta;
+        if (moveLeft && !colliding || moveRight && !colliding) velocity.x -= direction.x * 1200.0 * delta;
 
         //if (onObject === true) {
         //    velocity.y = Math.max(0, velocity.y);
@@ -817,7 +824,7 @@ function Movement(delta) {
 function render() {
     //renderer.render(MainScene, camera);
     composer.render();
-    //renderer.render(MainScene, camera);
+    MapRenderer.render(MainScene, mapCamera);
 
 }
 
@@ -899,7 +906,7 @@ function CreateLand(start, vertex_text, fragment_text) {
     ShaderLoader('js/Shaders/BillBoard/BillBoard.vs.glsl',
         'js/Shaders/BillBoard/BillBoard.fs.glsl', setUpMapFirstPass, {
             octaves: octaves, persistance: persistance, lacunarity: lacunarity,
-            seed: seed, noiseScale: noiseScale, offset: offset, size: textureSize, scale: 50.0, gridsize: 16,
+            seed: seed, noiseScale: noiseScale, offset: offset, size: textureSize, scale: mapScale, gridsize: 16,
         });
 
 
@@ -998,9 +1005,12 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
     //console.log(vertexShader);
     //console.log(information.vertex);
     //console.log(data);
+
+    var ShaderInfo =  { billvertex : information.vertex, billfragment: information.fragment, instavert : vertexShader, instafrag: fragShader };
+
     var planetInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
         information.data.seed, information.data.noiseScale, information.data.offset, information.data.size, information.data.scale, information.data.gridsize, false, worldObjects,
-        collisionCheck, { billvertex : information.vertex, billfragment: information.fragment, instavert : vertexShader, instafrag: fragShader });
+        collisionCheck, ShaderInfo, SpriteSheetSize);
 
     var dataTexture;
 
@@ -1023,6 +1033,11 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
         planetInfo.hasLiquad, planetInfo.colors, planetInfo.url,
         planetInfo.regionsInfo, planetInfo.LandMass);
 
+    extraDetial = new THREE.TextureLoader().load( "img/Game_File/Map_Paint.png");
+    extraDetial.magFilter = THREE.NearestFilter;
+    extraDetial.minFilter = THREE.NearestFilter;
+    extraDetial.wrapS = THREE.RepeatWrapping;
+
 
     if (planetData != undefined) {
         landMassObject = new THREE.Object3D();
@@ -1039,9 +1054,17 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
             //planet.scale.z = -1;
             //planet.scale.x = -1;
             //planet.rotation.x = Math.PI / 2;
+                   
+
+
             PlanetMaterial.uniforms.texture.value = planetData.map;
+            PlanetMaterial.uniforms.extra.value = extraDetial;
+
             planetData.map.wrapS = THREE.RepeatWrapping;
             planetData.map.repeat.x = -1;
+            //PlanetMaterial.uniforms.extra.repeat.x = - 1;
+
+
             PlanetMaterial.side = THREE.DoubleSide;
             dirLight.target = landMassObject;
             landMassObject.add(chunk)
@@ -1054,9 +1077,10 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
 
     var texture, imagedata;
 
-    texture = new THREE.TextureLoader().load( "img/Game_File/MapDecal.jpg", function ( event ) {
+    texture = new THREE.TextureLoader().load( "img/Game_File/Map_Decal.png", function ( event ) {
         imagedata = getImageData( texture.image );
-        GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects, objects);
+        GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects, 
+            objects, collisionCheck, ShaderInfo, SpriteSheetSize);
     } );
 }
 

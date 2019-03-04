@@ -1,4 +1,4 @@
-function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, scale, gridsize, isclouds, world, collision, ShaderInformation) {
+function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, scale, gridsize, isclouds, world, collision, ShaderInformation, SpriteSheetSize) {
     console.log(scale);
     regions = regionRoll(isclouds);
     var colorMap = new Array();
@@ -94,7 +94,8 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, world, collision, ShaderInformation, size * scale, gridsize, scale));
+                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, 
+                world, collision, ShaderInformation, size * scale, gridsize, scale, SpriteSheetSize));
             }
     }
 
