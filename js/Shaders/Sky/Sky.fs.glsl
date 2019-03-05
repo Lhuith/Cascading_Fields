@@ -3,6 +3,7 @@
 uniform vec2 resolution;
 uniform vec3 randomColsMults;
 uniform float time;
+uniform float alpha;
 varying vec2 vUv;
 varying vec3 normalDirection;
 varying vec3 viewDirection;
@@ -111,7 +112,9 @@ void main()
 	//vec3 color = vec3(random(ipos,a/3.0), random(ipos,a/1.5), random(ipos,a/2.0));
 	vec4 tex = texture2D(_MainTex, vUv);
   vec4 final = mix(tex, vec4(0.478, 0.854, 1, 1.0), sin(time/25.0));
-	gl_FragColor = tex + skyCol;//+  vec4(sparkles,sparkles,sparkles, 1.);
+  tex.a = 1.0;
+  //
+	gl_FragColor = (tex* alpha) + vec4(skyCol.rgb, 1.0);//+  vec4(sparkles,sparkles,sparkles, 1.);
 
 }
 

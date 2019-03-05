@@ -1,6 +1,6 @@
 
-var container, mapcontainer, stats, controls, lineUI, gui, stats;
-var camera, mapCamera, MainScene, BackgroundScene, renderer, MapRenderer, clock, composer, Mapcomposer;
+var container, mapcontainer, stats, controls;
+var camera, mapCamera, MainScene, BackgroundScene, renderer, MapRenderer, clock, composer;
 var lightpos, dirLight, angle;
 var skyBox;
 
@@ -22,11 +22,16 @@ var skyMaterial;
 var landMassObject;
 var collisionCheck;
 
-var cycleDuration = 100;
+var cycleDuration = 25;
 var dawnDuration = 5;
 var duskDuration = 5;
 var D_N_Time = 0;
 var rotation = 0;
+var cloudMin, cloudMax = 50000;
+var cloudSpeed = 500;
+var cloudsGoingRight = true;
+var cloudsGoingLeft = false;
+var cloudDirection = 1;
 
 // Custom global variables
 var mouse = { x: 0, y: 0 };
@@ -44,35 +49,39 @@ var skyboxuniforms;
 var playerBox;
 var SpriteGroupManage;
 var Clouds;
+var animatedWorldObjects;
 
 var characterList = [];
 var mapScale = 50.0;
 var SpriteSheetSize = new THREE.Vector2(8, 8);
 var SpriteSize = 32;
 
-//var textureList = [];
+var Sun;
+var Moon;
+var skyObject = new THREE.Object3D();
+var SunMoonObject = new THREE.Object3D();
+var EnviromentalSpriteSheet;
 
-var planetSize, planetData, inPlanet, planet,
-    planetText, planetTextInfo, atmoMaterial, planetTilt, hasRings,
-    PlanetMaterial, moonList, ringsList, outline,
-    atmo, planetRotationPeriod, planetSelected;
+var planetData, planet,
+    planetText, planetTextInfo, planetTilt, hasRings,
+    PlanetMaterial, outline, planetRotationPeriod, planetSelected;
 
-var targetPoint = { object: new THREE.Object3D(), size: 0 };
-
-var sphereGeom;
 var timer = 0;
 var timeLimit = .25;
 var startTime = Date.now();
-var targetBox = { topR: 0, topL: 0, bottomR: 0, bottomL: 0 };
 var transitionWidthInfo;
-var atmoGrad;
-var showMoonOrbits;
 
-var startexture;
-var SkyColors = [];
-
-var cubeTest;
-var skyColor = [];
+var SkyColors = [
+    new THREE.Vector3(0.968, 0.929, 0.611), //Morning
+    new THREE.Vector3(0.658, 0.705, 0.803),
+    new THREE.Vector3(0.541, 0.894, 0.996), // Midday
+    new THREE.Vector3(0.541, 0.894, 0.996), // Midday
+    new THREE.Vector3(0.819, 0.396, 0.388), // dusk
+    new THREE.Vector3(0.333, 0.168, 0.235), // Night
+    new THREE.Vector3(0.113, 0.125, 0.207), // Night
+    new THREE.Vector3(0.113, 0.125, 0.207), // Night
+    new THREE.Vector3(0.168, 0.156, 0.278), // early morning
+];
 
 var skyboxuniforms =
 {
@@ -87,6 +96,7 @@ var skyboxuniforms =
     time: { type: "f", value: 1.0 },
     _MainTex: { type: "t", value: null },
     skyCol: { type: "i", value: new THREE.Vector4(.48, .89, .90, 1) },
+    alpha: { type: "f", value: 1.0 },
 }
 
 var planetUniform =
@@ -156,7 +166,7 @@ function DayNightCycle(delta) {
     }
 
     var nightToDay = 0.25;
-    var dayToNight = 0.75;
+    var dayToNight = 1.00;
     var dawnNormalized = dawnDuration / cycleDuration / 2.0;
     var duskNormalized = duskDuration / cycleDuration / 2.0;
 
@@ -180,16 +190,23 @@ function DayNightCycle(delta) {
             }
         }
     }
-
+     console.log(D_N_Time * cycleDuration);
     //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
+    SunMoonObject.rotation.z = ((D_N_Time * 360) - 90) * Math.PI/180; 
+
+    if(skyBox != undefined)
+    {
+        skyBox.rotation.z = ((D_N_Time * 360) - 90) *  Math.PI/180;
+        //skyMaterial.uniforms.alpha.value = ;
+    }
 }
 
 function SetSkyColor(d_n_time) {
 
-    var index = (skyColor.length * d_n_time);
+    var index = (SkyColors.length * d_n_time);
 
-    var a = skyColor[Math.floor(index)];
-    var b = skyColor[Math.ceil(index) % skyColor.length];
+    var a = SkyColors[Math.floor(index)];
+    var b = SkyColors[Math.ceil(index) % SkyColors.length];
 
     var lerped = new THREE.Vector3();
 
@@ -203,28 +220,21 @@ function SetSkyColor(d_n_time) {
     if (skyMaterial !== undefined) {
         //console.log("poo");
         skyMaterial.uniforms.skyCol.value = new THREE.Vector4(lerped.x, lerped.y, lerped.z, 0.7);
+     
     }
     //console.log(index);
 }
 
 function init() {
-
-    skyColor = [
-        new THREE.Vector3(0.4, 0.588, 0.729),
-        new THREE.Vector3(0.886, 0.890, 0.545),
-        new THREE.Vector3(0.905, 0.647, 0.325),
-        new THREE.Vector3(0.494, 0.294, 0.407),
-        new THREE.Vector3(0.160, 0.160, 0.396),
-    ];
-
     clock = new THREE.Clock();
     resolution = (window.devicePixelRatio == 1) ? 3 : 4;;
 
     BackgroundScene = new THREE.Scene();
+    BackgroundScene.add(skyObject);
 
     var sizex = window.innerWidth * 26;
     var sizey = window.innerHeight * 25;
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
 
     mapCamera = new THREE.OrthographicCamera( sizex / - 2, sizex / 2, sizey / 2, sizey / - 2, 1, 5000 );
     //camera.add(mapCamera);
@@ -289,16 +299,21 @@ function init() {
     
     worldObjects = new THREE.Object3D();
     Clouds = new THREE.Object3D();
+    animatedWorldObjects =   new THREE.Object3D();
 
     collisionCheck = new Array();
 
     MainScene.add(worldObjects);
     MainScene.add(Clouds);
+    MainScene.add(animatedWorldObjects);
+    MainScene.add(SunMoonObject);
+    SunMoonObject.rotation.x = 25;
 
     MainScene.add(mapCamera);
     //mapCamera.lookAt(controls.getObject());
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
+    Clouds.position.x = 100000;
 
     var geometry = new THREE.BoxGeometry(5, 5, 5);
     var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -435,7 +450,6 @@ function init() {
 
     MainRenderPass.renderToScreen = true;
 
-
     //Load Shaders and Setup SkyBox
     ShaderLoader('js/Shaders/Sky/Sky.vs.glsl', 'js/Shaders/Sky/Sky.fs.glsl', setUpSky, true);
     if (devicePixelRatio == 1)
@@ -455,6 +469,12 @@ function init() {
 
     LoadCharacters(0);
     //LoadAssets();
+
+    EnviromentalSpriteSheet = new THREE.TextureLoader().load("img/Game_File/enviromental_SpriteSheet");
+    EnviromentalSpriteSheet.magFilter = THREE.NearestFilter;
+    EnviromentalSpriteSheet.minFilter = THREE.NearestFilter;
+
+    SetUpSunAndMoon();
 }
 
 function LoadCharacters(spriteNumber) {
@@ -474,6 +494,49 @@ function LoadCharacters(spriteNumber) {
     sprite.rotation.y = 180;
     characterList.push(sprite);
     MainScene.add(sprite);
+}
+
+function SetUpSunAndMoon(){
+
+
+    var sheet = new THREE.TextureLoader().load("img/Game_File/enviromental_SpriteSheet");
+    sheet.magFilter = THREE.NearestFilter;
+    sheet.minFilter = THREE.NearestFilter;
+
+    var SkyPosX = ((textureSize * mapScale)/2.0) - (((textureSize * mapScale / 2.0)) / 16) + (2048 * 2);
+    var SkyPosZ = ((textureSize * mapScale)/2.0) - (((textureSize * mapScale / 2.0)) / 16) + (2048 * 2);
+
+    var indexX = (1 / SpriteSheetSize.x);
+    var indexY = (1 / SpriteSheetSize.y);
+    var size = 3000;
+
+    var sunMaterial = new THREE.SpriteMaterial({ map: sheet, color: 0xffffff });
+    Sun = new THREE.Sprite(sunMaterial);
+    Sun.scale.set(size, size, size);
+
+    sunMaterial.map.offset = new THREE.Vector2(indexX * 7, indexY * 7);
+    sunMaterial.map.repeat = new THREE.Vector2(indexX, indexY);
+    Sun.position.set(SkyPosX, 100,0);
+    
+    SunMoonObject.add(Sun);
+   // 
+    //MainScene.add(Sun);
+
+    var sheet = new THREE.TextureLoader().load("img/Game_File/enviromental_SpriteSheet");
+    sheet.magFilter = THREE.NearestFilter;
+    sheet.minFilter = THREE.NearestFilter;
+    
+    var moonMaterial = new THREE.SpriteMaterial({ map: sheet, color: 0xffffff });
+    Moon = new THREE.Sprite(moonMaterial);
+    Moon.scale.set(size/2.0, size/2.0, size/2.0);
+
+    moonMaterial.map.offset = new THREE.Vector2(indexX * 7, indexY * 6);
+    moonMaterial.map.repeat = new THREE.Vector2(indexX, indexY);
+
+    Moon.position.set(-SkyPosX, 100,0);
+    SunMoonObject.add(Moon);
+    //
+   // MainScene.add(Moon);
 }
 
 function SimpleCollision(delta) {
@@ -580,15 +643,19 @@ function setUpSky(start, vertex_text, fragment_text) {
             fragmentShader: fragment_text,
             uniforms: skyboxuniforms,
             side: THREE.BackSide,
-            fog: true
+            fog: true,
+            transparent : true,
         });
 
     skyBox = new THREE.Mesh(new THREE.SphereGeometry(10000,
         32, 32), skyMaterial);
 
-    BackgroundScene.add(skyBox);
+    //BackgroundScene.add(skyBox);
+    skyObject.add(skyBox);
+
     skyBox.castShadow = false;
     skyBox.receiveShadow = false;
+    skyBox.rotation.x = -25;
     skyMaterial.uniforms._MainTex.value = starMap01;
     skyMaterial.uniforms.resolution.value.x = window.innerWidth;
     skyMaterial.uniforms.resolution.value.y = window.innerHeight;
@@ -720,8 +787,29 @@ function UpdateCharacterSprite(angle, char) {
 function AbsoluteAngle(angle) {
     return (angle %= 360) >= 0 ? angle : (angle + 360);
 }
+
+function AnimateClouds(delta){
+
+
+    if(Math.abs(Clouds.position.x) > cloudMax && cloudsGoingLeft){
+        cloudDirection = 1;
+        cloudsGoingLeft = false;
+        cloudsGoingRight = true;
+    }
+    else if(Math.abs(Clouds.position.x) > cloudMax && cloudsGoingRight){
+        cloudDirection = -1;
+        cloudsGoingLeft = true;
+        cloudsGoingRight = false;
+    }
+
+    Clouds.position.x += (delta * cloudSpeed) * cloudDirection;
+
+
+}
+
 function animate() {
 
+  
     //console.log(collisionCheck.length);
 
     stats.begin();
@@ -734,7 +822,7 @@ function animate() {
     DayNightCycle(delta);
     //Landmass ChunkManagement
     //ShowHideObjects(landMassObject, 2000, false, false, false);
-
+    AnimateClouds(delta);
     //Scene and Collsion World Managment
     //ShowHideObjects(worldObjects, 3000, true);
     DistanceCollisionManage(worldObjects, 300);
@@ -745,8 +833,8 @@ function animate() {
 
     angle += 0.1;
     //mapCamera.rotation.x  += delta;
-    if (planet !== undefined) {
-        dirLight.lookAt(planet.position);
+    if (landMassObject !== undefined) {
+        dirLight.lookAt(landMassObject.position);
         var elapsedMilliseconds = Date.now() - startTime;
         var elapsedSeconds = elapsedMilliseconds / 1000.;
     }
@@ -778,8 +866,8 @@ function Movement(delta) {
 
         //var onObject = intersections.length > 0;
 
-        var time = performance.now();
-        var delta = (time - prevTime) / 1000;
+        //var time = performance.now();
+        var delta = delta;//(time - prevTime) / 1000;
 
         velocity.x -= velocity.x * 2.0 * delta;
         velocity.z -= velocity.z * 2.0 * delta;
@@ -814,7 +902,7 @@ function Movement(delta) {
         if (controls.getObject().position.y !== height)
             controls.getObject().position.y = height;
 
-        prevTime = time;
+        //prevTime = time;
 
         if (skyBox !== undefined)
             skyBox.position.copy(controls.getObject().position);
@@ -859,11 +947,6 @@ function CalculateParametres() {
     lacunarity = 0.21;//randomRange(1.9, 2.2);
     octaves = 5;//Math.round(randomRange(4, 6));
     noiseScale = 3;//randomRange(10, 200);
-    moonList = new Array(Math.round(randomRange(1, 4)));
-    planetTilt = randomRange(-55, 55);
-    planetSize = 100;//randomRange(40, 110);
-    planetRotationPeriod = Math.round(randomRange(65, 100));
-    //InitializeMoonData(moonList, vertex_text, fragment_text);
 }
 
 function FrustrumIntersection(object) {
@@ -1085,7 +1168,7 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
     texture = new THREE.TextureLoader().load( "img/Game_File/Map_Decal.png", function ( event ) {
         imagedata = getImageData( texture.image );
         GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects, 
-            objects, collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
+            animatedWorldObjects, objects, collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
     } );
 
     GenerateClouds(Clouds, 256, ShaderInfo, SpriteSheetSize, SpriteSize);

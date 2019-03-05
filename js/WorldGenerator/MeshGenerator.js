@@ -31,25 +31,24 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     var normals = [];
     var uvs = [];
 
-    var EnviOffsets = [];
-    var EnviOrientations = [];
-    var EnviVector = new THREE.Vector4();
-    var EnviScale = [];
-    var EnviColor = [];
-    var EnviUVOffset = [];
-
-    var ForestOffsets = [];
-    var ForestOrientations = [];
-    var ForestVector = new THREE.Vector4();
-    var ForestScale = [];
-    var ForestColor = [];
-    var ForestUVOffset = [];
-
-    var SpriteSheetSizeX = SpriteSheetSize.x;//4.0;
-    var SpriteSheetSizeY = SpriteSheetSize.y;//2.0;
+    var EnviromentBuffer = {
+        offsets: [],
+        orientations: [],
+        vector: new THREE.Vector4(),
+        scales: [],
+        colors: [],
+        uvoffsets: [],
+    }
 
     var treex, treey, treez, treew;
     var detialTexture;
+
+    var indexX = 1 / (SpriteSheetSize.x);
+    var indexY = 1 / (SpriteSheetSize.y);
+
+    var hexIndex = [0xFFDCD5, 0xFFF0D5, 0xEDCDFF, 0xE0FFFD, 0xFF5355, 0x8EC2FE, 0x8FFBFE, 0xFFFF93];
+    var grassHex = [0x61C535, 0x81D15D, 0x9ADA7D, 0xAEE197, 0xBEE7AC];
+    var rockHex = [0x7B7167, 0x958D85, 0xAAA49D, 0xBBB6B1, 0xC9C5C1];
 
     var hPoint = 0;
     //65536
@@ -106,14 +105,17 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             uvs.push((uvX + worldUVX));
             uvs.push((uvY + worldUVY));
 
+            //Grass
             if (hPoint > 0.35 && hPoint < 0.65) {
-                if (randomRange(0, 10) > 9.5) { PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, 
-                    EnviColor, EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, Math.round(randomRange(0, 2))); }
-
+                if (randomRange(0, 10) > 9.5) { 
+                    PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                        new Vector2(indexX * randomRangeRound(0, 5), indexY * 7), grassHex[randomRangeRound(0, grassHex.length - 1)])}
+            
+            //Rocks
             } else if (hPoint > 0.7 && hPoint < 0.85) {
                 if (randomRange(0, 10) > 9) {
-                    PopulateEnviromentBuffers(x, finalP, y, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor, 
-                        EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, 3);
+                    PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize, 
+                        new Vector2(indexX * randomRangeRound(0, 4), indexY * 5), rockHex[randomRangeRound(0, rockHex.length - 1)]);
                 }
 
             }
@@ -148,36 +150,25 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     geo.computeFaceNormals();
     geo.computeVertexNormals();
 
-    //Add All the fucking flowers
-    //god what a pain in the ass
-    CreateEnviromentalInstance(world, EnviOffsets, EnviOrientations, EnviColor, EnviUVOffset, EnviScale, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, ShaderInformation);
-    //CreateForestInstance(world, ForestOffsets, ForestOrientations, ForestColor, ForestUVOffset, ForestScale, SpriteSheetSizeX, SpriteSheetSizeY, ShaderInformation);
-
+    CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
     return geo;
 }
 
-
-
-
-function PushToEnviromentBuffers(x, y, z, EnivormentalBuffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, UVlocation, Scale, color) {
-
-    //console.log(EnivormentalBuffer);
-
+function PushToEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, UVlocation, Scale, color) {
     w = 0;
-    EnivormentalBuffer.EnviScale.push(Scale.x, Scale.y, Scale.z);
+    buffer.scales.push(Scale.x, Scale.y, Scale.z);
 
-    EnivormentalBuffer.EnviVector.set(x, y, z, 0).normalize();
+    buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    EnivormentalBuffer.EnviOffsets.push(x + EnivormentalBuffer.EnviVector.x, y + EnivormentalBuffer.EnviVector.y, z + EnivormentalBuffer.EnviVector.z);
-    EnivormentalBuffer.EnviVector.set(x, y, z, w).normalize();
-    EnivormentalBuffer.EnviOrientations.push(0, 0, 0, 0);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
+    buffer.vector.set(x, y, z, w).normalize();
+    buffer.orientations.push(0, 0, 0, 0);
 
-    EnivormentalBuffer.EnviUVOffset.push(UVlocation.x, UVlocation.y);
-    EnivormentalBuffer.EnviColor.push(color.r, color.g, color.b);
+    buffer.uvoffsets.push(UVlocation.x, UVlocation.y);
+    buffer.colors.push(color.r, color.g, color.b);
 }
 
-function PopulateEnviromentBuffers(x, y, z, EnviVector, EnviOffsets, EnviOrientations, EnviScale, EnviColor,
-    EnviUVOffset, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, uvindex) {
+function PopulateEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, uvindex, hex) {
 
     w = 0;
     var scaleX = randomRange(5, 70);
@@ -186,89 +177,18 @@ function PopulateEnviromentBuffers(x, y, z, EnviVector, EnviOffsets, EnviOrienta
 
     var yOffets = (scaleY) / 2.0;
 
-    EnviScale.push(scaleX, scaleX, scaleZ);
+    buffer.scales.push(scaleX, scaleX, scaleZ);
 
-    EnviVector.set(x, y, z, 0).normalize();
+    buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    EnviOffsets.push(x + EnviVector.x, y + EnviVector.y + yOffets, z + EnviVector.z);
-    EnviVector.set(x, y, z, w).normalize();
-    EnviOrientations.push(0, 0, 0, 0);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + yOffets, z + buffer.vector.z);
+    buffer.vector.set(x, y, z, w).normalize();
+    buffer.orientations.push(0, 0, 0, 0);
 
-
-    var index = uvindex;//Math.round(randomRange(0, SpriteSheetSizeX - 1));
-
-    var col = new THREE.Color(0xffffff);
-
-    if (index == 0) {
-        col.setHex(0xA6CA50);
-    } else if (index == 3) {
-        col.setHex(0xAE875E);
-    } else {
-
-        var hexIndex = [0xFFDCD5, 0xFFF0D5, 0xEDCDFF, 0xE0FFFD, 0xFF5355, 0x8EC2FE, 0x8FFBFE, 0xFFFF93];
-
-        col.setHex(hexIndex[Math.round(randomRange(0, hexIndex.length - 1))]);
-    }
-
-    EnviUVOffset.push(index / SpriteSheetSizeX, 0.5);
-    EnviColor.push(col.r, col.g, col.b);
-}
-
-function CreateEnviromentalInstance(world, offsets, orientations, colors, uvOffset, scale, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, ShaderInformation) {
-
-    var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1); //new THREE.BoxBufferGeometry( 2, 2, 2 );
-    //console.log(instances);
-
-    var geometry = new THREE.InstancedBufferGeometry();
-    geometry.index = bufferGeometry.index;
-    geometry.attributes.position = bufferGeometry.attributes.position;
-    geometry.attributes.uv = bufferGeometry.attributes.uv;
-
-    offsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3);
-    orientationAttribute = new THREE.InstancedBufferAttribute(new Float32Array(orientations), 4);
-    colorAttribute = new THREE.InstancedBufferAttribute(new Float32Array(colors), 3);
-    uvOffsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(uvOffset), 2);
-    scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(scale), 3);
-
-    geometry.addAttribute('offset', offsetAttribute);
-    geometry.addAttribute('orientation', orientationAttribute);
-    geometry.addAttribute('col', colorAttribute);
-    geometry.addAttribute('uvoffset', uvOffsetAttribute);
-    geometry.addAttribute('scaleInstance', scaleAttribute);
-
-    var texture = new THREE.TextureLoader().load('img/Game_File/enviromental_SpriteSheet.png');
-    texture.magFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-
-    var instanceUniforms = {
-        map: { value: texture },
-        spriteSheetX: { type: "f", value: SpriteSheetSizeX },
-        spriteSheetY: { type: "f", value: SpriteSheetSizeY },
-
-    }
-
-    var material = new THREE.RawShaderMaterial({
-        uniforms:
-            THREE.UniformsUtils.merge([
-                THREE.UniformsLib['fog'],
-                instanceUniforms
-            ]),
-
-        vertexShader: ShaderInformation.billvertex,
-        fragmentShader: ShaderInformation.billfragment,
-        fog: true,
-    });
-
-    mesh = new THREE.Mesh(geometry, material);
-
-    material.uniforms.map.value = texture;
-    material.uniforms.map.repeat = new THREE.Vector2(1 / SpriteSheetSizeX, 1 / SpriteSheetSizeY);
-    material.uniforms.spriteSheetX.value = SpriteSheetSizeX;
-    material.uniforms.spriteSheetY.value = SpriteSheetSizeY;
-
-    mesh.frustumCulled = false;
-    mesh.castShadow = true; //default is false
-    world.add(mesh);
+    var col = new THREE.Color(hex);
+    
+    buffer.uvoffsets.push(uvindex.x, uvindex.y);
+    buffer.colors.push(col.r, col.g, col.b);
 }
 
 
