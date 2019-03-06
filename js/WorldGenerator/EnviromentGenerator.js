@@ -66,15 +66,16 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
                 //var cube = new THREE.Mesh( geometry, material );
                 //cube.position.set(z, 0, x);
                 //
-                var y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3(z, 0, x));
+                var facedata = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), new THREE.Vector3(z, 0, x));
+               // console.log(facedata);
                 // cube.position.y = y + 25;
                 //        
                 //world.add( cube );
                 //console.log(y);
                 if(imagedata.data[g] == 1)
-                    PopulateForestBuffers(z, y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world, EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)]);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world, EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)], facedata);
                 else if(imagedata.data[g] == 2)
-                    PopulateForestBuffers(z, y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world, EnviromentBuffer, 1, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)]);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world, EnviromentBuffer, 1, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata);
 
                 //console.log("Tree Planted");
             } else if (imagedata.data[b] == 1) {
@@ -158,7 +159,7 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     world.add(mesh);
 }
 
-function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, collision, world, EnivormentalBuffer, uvindex, hex) {
+function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, collision, world, EnivormentalBuffer, uvindex, hex, rotationinfo) {
 
     w = 0;
 
@@ -166,28 +167,31 @@ function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, col
     var scaleY = 200;
     var scaleZ = 200;
 
-    var Yoffset = (64);
-    var spriteSize = 32 * 2;
-
+    var Yoffset = (scaleY/2.0) - 30; //plane size of 1 times scale of 200,
+    //console.log(normal);
     //0 or 180
+    var mx = new THREE.Matrix4().makeRotationAxis(rotationinfo.axis, rotationinfo.radians);
+
+    var faceQ = new THREE.Quaternion().setFromRotationMatrix(mx);
+
     CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Vector4(0, 0, 0, 0), new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
+        collision, world, new THREE.Quaternion(0,0,0,0), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
 
     //90
     CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Vector4(0, 0.707, 0, 0.707), new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
+        collision, world, new THREE.Quaternion(0, 0.707, 0, 0.707), faceQ , new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
 
     //45
     CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Vector4(0, 0.924, 0, 0.383), new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
+        collision, world, new THREE.Quaternion(0, 0.924, 0, 0.383), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
 
     CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Vector4(0, 0.383, 0, 0.924), new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
+        collision, world, new THREE.Quaternion(0, 0.383, 0, 0.924), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex);
 
     var indexX = 1 / (spriteSheetSize.x);
     var indexY = 1 / (spriteSheetSize.y);
 
-    PushToEnviromentBuffers(x, y + Yoffset + spriteSize + (spriteSize / 2), z, EnivormentalBuffer, spriteSheetSize,
+    PushToEnviromentBuffers(x, y + (Yoffset * 2.0) + 20, z, EnivormentalBuffer, spriteSheetSize,
         SpriteSize, new THREE.Vector2(indexX * uvindex, indexX * 0), new THREE.Vector3(scaleX, scaleY, scaleZ), new THREE.Color(hex));
 
     var geometry = new THREE.BoxGeometry(25, scaleY, 25);
@@ -290,16 +294,19 @@ function CreateStructureFace(x, y, z, buffer, scale, orientation, spriteSheetSiz
         //--------------------------------------------BASE------------------------------------------
 }
 
-function CreateTreeFace(x, y, z, buffer, spriteSheetSize, SpriteSize, collision, world, orientation, scale, uvIndex) {
+function CreateTreeFace(x, y, z, buffer, spriteSheetSize, SpriteSize, collision, world, orientation, faceQuaternion, scale, uvIndex) {
     //console.log(SpriteSize);
+
+    var combined = new THREE.Quaternion().copy(orientation);
+    combined.multiply(faceQuaternion);
 
     w = 0;
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x +  buffer.vector.x, y +  buffer.vector.y, z +  buffer.vector.z);
+    buffer.offsets.push(x +  buffer.vector.x, y + buffer.vector.y, z +  buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
-    buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
+    buffer.orientations.push(combined.x, combined.y, combined.z, combined.w);
 
     var col = new THREE.Color(0xffffff);
     col.setHex(0xAE875E);
@@ -307,16 +314,17 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, SpriteSize, collision,
     var indexX = 1 / (spriteSheetSize.x);
     var indexY = 1 / (spriteSheetSize.y);
 
-    buffer.uvoffsets.push(indexX * uvIndex, indexY * uvIndex); //Select sprite at 0, 0 on grid
+    buffer.uvoffsets.push(indexX * uvIndex * 0, indexY * uvIndex); //Select sprite at 0, 0 on grid
     buffer.colors.push(col.r, col.g, col.b);
 
+    var trunkOffset = 10;
 
     //----------------------------TRUNK0-------------------------------------------
     w = 0;
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + trunkOffset, z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
     buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
 
@@ -326,6 +334,22 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, SpriteSize, collision,
 
     buffer.colors.push(col.r, col.g, col.b);
     //----------------------------TRUNK0-------------------------------------------
+
+    //----------------------------Branches-------------------------------------------
+    w = 0;
+    buffer.scales.push(scale.x, scale.y, scale.z);
+    buffer.vector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + trunkOffset + scale.y/2.0, z + buffer.vector.z);
+    buffer.vector.set(x, y, z, w).normalize();
+    buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
+
+    var col = new THREE.Color(0xffffff);
+    col.setHex(0xAE875E);
+    buffer.uvoffsets.push(indexX * (uvIndex + 2), indexY * uvIndex); //Select sprite at 1, 1 on grid
+
+    buffer.colors.push(col.r, col.g, col.b);
+    //----------------------------Branches-------------------------------------------
 }
 
 function PopulateCloudBuffers(x, y, z, buffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize) {

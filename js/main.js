@@ -166,22 +166,22 @@ function DayNightCycle(delta) {
     }
 
     var nightToDay = 0.25;
-    var dayToNight = 1.00;
+    var dayToNight = 0.25;
     var dawnNormalized = dawnDuration / cycleDuration / 2.0;
     var duskNormalized = duskDuration / cycleDuration / 2.0;
-
-    D_N_Time = (D_N_Time + nightToDay) % 1.0;
+    var day_to_night = (D_N_Time + nightToDay) % 1.0;
+    //D_N_Time = (D_N_Time + nightToDay) % 1.0;
 
     // Set night and day variables depending on what time it is
-    if (D_N_Time > nightToDay + dawnNormalized && D_N_Time < dayToNight - dawnNormalized) {
+    if (day_to_night > nightToDay + dawnNormalized && day_to_night < dayToNight - dawnNormalized) {
         day = true;
         night = dawn = dusk = false;
     } else {
-        if (D_N_Time < nightToDay - duskNormalized || D_N_Time > dayToNight + duskNormalized) {
+        if (day_to_night < nightToDay - duskNormalized || day_to_night > dayToNight + duskNormalized) {
             night = true;
             day = dawn = dusk = false;
         } else {
-            if (D_N_Time < (nightToDay + dayToNight) / 2) {
+            if (day_to_night < (nightToDay + dayToNight) / 2) {
                 dawn = true;
                 day = night = dusk = false;
             } else {
@@ -190,14 +190,14 @@ function DayNightCycle(delta) {
             }
         }
     }
-     console.log(D_N_Time * cycleDuration);
+     //console.log(Math.sin(D_N_Time * 3));
     //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
-    SunMoonObject.rotation.z = ((D_N_Time * 360) - 90) * Math.PI/180; 
+    SunMoonObject.rotation.z = ((day_to_night * 360) - 90) * Math.PI/180; 
 
     if(skyBox != undefined)
     {
-        skyBox.rotation.z = ((D_N_Time * 360) - 90) *  Math.PI/180;
-        //skyMaterial.uniforms.alpha.value = ;
+        skyBox.rotation.z = ((day_to_night * 360) - 90) *  Math.PI/180;
+        //skyBox.material.uniforms.alpha.value = D_N_Time;
     }
 }
 
@@ -596,14 +596,41 @@ function GetCharHeight(raycaster, vector) {
     var intersections = raycaster.intersectObjects(objects);
 
     var onObject = intersections.length > 0;
-    var height = 0;
+    var height = 0; 
+    var axs = new THREE.Vector3(0, 1, 0);
+    var rads = 1.0;
+    
 
-    if (intersections[0] !== undefined)
+
+    if (intersections[0] !== undefined){
         height = intersections[0].point.y + 40;
-    else
-        height = 40;
+        var vec = intersections[2].face.normal.clone();
 
-    return height;
+        var up = new THREE.Vector3(0, 1, 0);
+
+         // we want the cone to point in the direction of the face normal
+        // determine an axis to rotate around
+        // cross will not work if vec == +up or -up, so there is a special case
+        if(vec.y == 1 || vec.y == -1){
+            var axis = new THREE.Vector3(1, 0, 0);
+        } else {
+            var axis = new THREE.Vector3().crossVectors(up, vec);
+        }
+
+        //determine the amount to rotate
+        var radians = Math.acos(vec.dot(up));
+
+        axs = axis;
+        rads = radians;
+
+    }
+    else{
+        height = 40;
+      
+    }
+
+
+    return {y: height, axis: axs, radians: rads};
 }
 
 function GetHeight() {
@@ -1155,8 +1182,10 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
 
             PlanetMaterial.side = THREE.DoubleSide;
             dirLight.target = landMassObject;
+            //var helper = new THREE.FaceNormalsHelper( chunk, 2, 0x00ff00, 1 );
             landMassObject.add(chunk)
             objects.push(chunk);
+            //MainScene.add(helper);
         }
 
         PostImageData(planetData.map);
