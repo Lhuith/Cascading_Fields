@@ -22,6 +22,8 @@ var skyMaterial;
 var landMassObject;
 var collisionCheck;
 
+var outofbounds;
+
 var cycleDuration = 25;
 var dawnDuration = 5;
 var duskDuration = 5;
@@ -323,11 +325,25 @@ function init() {
     var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     playerMarkerBox = new THREE.Mesh(geometry, material);
 
+
+    var geometry = new THREE.BoxGeometry(((textureSize) * mapScale) , 4000, (textureSize) * mapScale);
+    var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    outofbounds = new THREE.Mesh(geometry, material);
+    outofbounds.position.x -= (textureSize/32) * mapScale
+    outofbounds.visible = false;
+
+
+    boxHelper = new THREE.BoxHelper(outofbounds);
+    boxHelper.material.color.set(0xffffff);
+    MainScene.add(boxHelper);
+
+    //MainScene.add(playerBox);
+
     playerBox.add(playerMarkerBox);
     MainScene.add(playerBox);
 
     var gridHelper = new THREE.GridHelper(1000, 20);
-    MainScene.add(gridHelper);
+    //MainScene.add(gridHelper);
 
     var onKeyDown = function (event) {
 
@@ -478,18 +494,16 @@ function init() {
 }
 
 function LoadCharacters(spriteNumber) {
-    var flower = new THREE.TextureLoader().load("img/Game_File/Ally.png");
+    var flower = new THREE.TextureLoader().load("img/Game_File/myguys.png");
     flower.magFilter = THREE.NearestFilter;
     flower.minFilter = THREE.NearestFilter;
 
     var spriteMaterial = new THREE.SpriteMaterial({ map: flower, color: 0xffffff });
     var sprite = new THREE.Sprite(spriteMaterial);
-    sprite.scale.set(60, 60, 60);
+    sprite.scale.set(115, 115, 115);
 
-    spriteMaterial.map.offset = new THREE.Vector2(0.25 * spriteNumber, 0);
-    spriteMaterial.map.repeat = new THREE.Vector2(1 / 4, 1);
-
-    //sprite.position.set(controls.getObject().position);
+    spriteMaterial.map.offset = new THREE.Vector2(0, 0);
+    spriteMaterial.map.repeat = new THREE.Vector2(1 / 8, 1 / 8);
 
     sprite.rotation.y = 180;
     characterList.push(sprite);
@@ -566,6 +580,19 @@ function SimpleCollision(delta) {
             }
         }
     }
+
+    if (!detectCollisionCubes(outofbounds, playerBox)) {
+        colliding = true;
+
+        var reflection = new THREE.Vector3();//velocity.reflect(dir);
+        reflection.copy(velocity)
+        reflection.reflect(velocity.normalize());
+
+
+        velocity.x += reflection.x * 1.15;
+        velocity.z += reflection.z * 1.15;
+    }
+
 }
 
 function detectCollisionCubes(object1, object2) {
@@ -603,7 +630,7 @@ function GetCharHeight(raycaster, vector) {
 
 
     if (intersections[0] !== undefined){
-        height = intersections[0].point.y + 40;
+        height = intersections[0].point.y;
         var vec = intersections[2].face.normal.clone();
 
         var up = new THREE.Vector3(0, 1, 0);
@@ -779,18 +806,18 @@ function onWindowResize() {
 
 function ManageCharacters() {
 
-    for (var i = 0; i < characterList.length; i++) {
+   for (var i = 0; i < characterList.length; i++) {
 
-        var char = characterList[i];
-        var charYAngle = (char.rotation.y) * Math.PI / 180;
-        char.position.y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), char.position);
+       var char = characterList[i];
+       var charYAngle = (char.rotation.y) * Math.PI / 180;
+       char.position.y = GetCharHeight(new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0), char.position).y + char.scale.y/2.0;
 
-        var camObj = controls.getObject();
+       var camObj = controls.getObject();
 
-        var vector = new Vector2(char.position.z - camObj.position.z, char.position.x - camObj.position.x);
-        var angle = Math.atan2(vector.y, vector.x);
-        UpdateCharacterSprite(angle + charYAngle, char);
-    }
+       var vector = new Vector2(char.position.z - camObj.position.z, char.position.x - camObj.position.x);
+       var angle = Math.atan2(vector.y, vector.x);
+       UpdateCharacterSprite(angle + charYAngle, char);
+   }
 }
 
 function UpdateCharacterSprite(angle, char) {
@@ -807,9 +834,9 @@ function UpdateCharacterSprite(angle, char) {
 
     //console.log(index);
 
-    char.material.map.offset = new THREE.Vector2(0.25 * (index), 0);
+    char.material.map.offset = new THREE.Vector2(0.125 * (index), 0);
     // char.material.map.repeat = new THREE.Vector2(1 / 2, 1);
-}
+}//
 
 function AbsoluteAngle(angle) {
     return (angle %= 360) >= 0 ? angle : (angle + 360);
