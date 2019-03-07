@@ -1,7 +1,7 @@
 function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, objects, collision, ShaderInformation, SpriteSheetSize, SpriteSize) {
     //heightMap, heightMultiplier, _heightCurve, 
 
-    console.log(imagedata.data.length);
+    //console.log(imagedata.data.length);
     //raycaster = ;
 
     var SpriteSheetSizeX = SpriteSheetSize.x;//4.0;
@@ -80,34 +80,34 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
                 //console.log(y);
                 //console.log(imagedata.data[r]);
 
-                if (imagedata.data[r] == 0 && imagedata.data[g] == 1 && imagedata.data[g] == 0)
-                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                        EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
-                else if (imagedata.data[g] == 2)
+                //if (imagedata.data[r] == 0 && imagedata.data[g] == 1 && imagedata.data[g] == 0)
+                //    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                //        EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
+                if (imagedata.data[g] == 2)
                     PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
                         EnviromentBuffer, 1, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
-                else if (imagedata.data[g] == 3)
-                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                        EnviromentBuffer, 2, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
+                //else if (imagedata.data[g] == 3)
+                //    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                //        EnviromentBuffer, 2, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
                 else if (imagedata.data[g] == 4)
                     PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
                         EnviromentBuffer, 4, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
-                //Flowers
-                else if (imagedata.data[r] == 243 && imagedata.data[g] == 234 && imagedata.data[b] == 32) {
-                    if (randomRange(0, 10) > 7.5) {
-                        PopulateEnviromentBuffers(z, facedata.y, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                            new Vector2(indexX * randomRangeRound(0, 2), indexY * 6), flowerIndex[randomRangeRound(0, flowerIndex.length - 1)]);
-                    }
-                }
+                ////Flowers
+                //else if (imagedata.data[r] == 243 && imagedata.data[g] == 234 && imagedata.data[b] == 32) {
+                //    if (randomRange(0, 10) > 7.5) {
+                //        PopulateEnviromentBuffers(z, facedata.y, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                //            new Vector2(indexX * randomRangeRound(0, 2), indexY * 6), flowerIndex[randomRangeRound(0, flowerIndex.length - 1)]);
+                //    }
+                //}
                 //Mushies mate
                 else if (imagedata.data[r] == 255 && imagedata.data[g] == 60 && imagedata.data[b] == 255) {
-                    PopulateForestBuffers(z, facedata.y + 100, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                        EnviromentBuffer, 7, MushyHex[randomRangeRound(0, MushyHex.length - 1)], facedata, new THREE.Vector3(300, 300, 300), true, false);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                        EnviromentBuffer, 7, MushyHex[randomRangeRound(0, MushyHex.length - 1)], facedata, new THREE.Vector3(300, 300, 300), true, false, randomRange(0.5, 3.5));
                 }
-                //else if (imagedata.data[r] == 182 && imagedata.data[b] == 156) {
-                //    PopulateEnviromentBuffers(z, facedata.y, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                //        new Vector2(indexX * randomRangeRound(0, 2), indexY * 6), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
-                //}
+                else if (imagedata.data[r] == 182 && imagedata.data[b] == 156) {
+                    PopulateEnviromentBuffers(z, facedata.y, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                        new Vector2(indexX * Math.ceil(randomRange(3, 6)), indexY * 6), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
+                }
 
 
                 //console.log("Tree Planted");
@@ -193,45 +193,57 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
 }
 
 function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, collision,
-    world, EnivormentalBuffer, uvindex, hex, rotationinfo, scale, useHex = false, leaves = true) {
+    world, EnivormentalBuffer, uvindex, hex, rotationinfo, scale,
+    useHex = false, leaves = true, trunkHeightScale = 1.0) {
 
     w = 0;
+    //|     | leaves 
+    //|     | branches scale/2
+    //|     | trunk scale/2 - trunk spritePixelheight
+    //|     | roots scale/2
 
-    var scaleX = scale.x;
-    var scaleY = scale.y;
-    var scaleZ = scale.z;
+    var rootsPos = scale.y / 2.0;
+    var pixelSize = (scale.y / 32);
 
-    var Yoffset = (scaleY / 2.0) - 30; //plane size of 1 times scale of 200,
-    //console.log(normal);
+    var rootSpriteDiffrence = (scale.y - (pixelSize * 3)) / 2.0;//has to be hardcoded for now :(
+    
+    var trunkPos = ((rootsPos + ((scale.y * trunkHeightScale) / 2.0))) - rootSpriteDiffrence;
+    var branchesPos = trunkPos + scale.y / 2.0;
+
+    var offsets = { root: rootsPos, trunk: trunkPos, branches: branchesPos };
+    var hexInfo = { useHex: useHex, hex: hex };
     //0 or 180
     var mx = new THREE.Matrix4().makeRotationAxis(rotationinfo.axis, rotationinfo.radians);
     var faceQ = new THREE.Quaternion().setFromRotationMatrix(mx);
-
-    CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Quaternion(0, 0, 0, 0), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex, hex, useHex);
+    
+    var TrunkOveridePass = {trunkH : trunkHeightScale};
+    CreateTreeFace(x, y, z, buffer, spriteSheetSize,
+        new THREE.Quaternion(0, 0, 0, 0), faceQ,
+        scale, uvindex, hexInfo, offsets, TrunkOveridePass);
 
     //90
-
-    CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Quaternion(0, 0.707, 0, 0.707), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex, hex, useHex);
-
+    CreateTreeFace(x, y, z, buffer, spriteSheetSize,
+        new THREE.Quaternion(0, 0.707, 0, 0.707), faceQ,
+        scale, uvindex, hexInfo, offsets, TrunkOveridePass);
     //45
-    CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Quaternion(0, 0.924, 0, 0.383), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex, hex, useHex);
+    CreateTreeFace(x, y, z, buffer, spriteSheetSize,
+        new THREE.Quaternion(0, 0.924, 0, 0.383), faceQ,
+        scale, uvindex, hexInfo, offsets, TrunkOveridePass);
 
-    CreateTreeFace(x, y + Yoffset, z, buffer, spriteSheetSize, SpriteSize,
-        collision, world, new THREE.Quaternion(0, 0.383, 0, 0.924), faceQ, new THREE.Vector3(scaleX, scaleY, scaleZ), uvindex, hex, useHex);
+    CreateTreeFace(x, y, z, buffer, spriteSheetSize,
+        new THREE.Quaternion(0, 0.383, 0, 0.924), faceQ,
+        scale, uvindex, hexInfo, offsets, TrunkOveridePass);
 
     var indexX = 1 / (spriteSheetSize.x);
     var indexY = 1 / (spriteSheetSize.y);
 
     if (leaves) {
-        PushToEnviromentBuffers(x, y + (Yoffset * 2.0) + scaleY / 2.0, z, EnivormentalBuffer, spriteSheetSize,
-            SpriteSize, new THREE.Vector2(indexX * uvindex, indexY * 0), new THREE.Vector3(scaleX, scaleY, scaleZ), new THREE.Color(hex));
+        PushToEnviromentBuffers(x, y + branchesPos, z, EnivormentalBuffer, spriteSheetSize,
+            SpriteSize, new THREE.Vector2(indexX * uvindex, indexY * 0), scale, new THREE.Color(hex));
     }
 
 
-    var geometry = new THREE.BoxGeometry(25, scaleY, 25);
+    var geometry = new THREE.BoxGeometry(25, scale.y, 25);
     var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     var cube = new THREE.Mesh(geometry, material);
     //scene.add( cube );
@@ -245,69 +257,67 @@ function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, col
     //collision.push()
 }
 
-function CreateTreeFace(x, y, z, buffer, spriteSheetSize, SpriteSize, collision, world, orientation, faceQuaternion, scale, uvIndex, hex, useHex) {
+function CreateTreeFace(x, y, z, buffer, spriteSheetSize, orientation,
+    faceQuaternion, scale, uvIndex, hexInfo, scaleInfo, trunkOveride) {
     //console.log(SpriteSize);
     var indexX = 1 / (spriteSheetSize.x);
     var indexY = 1 / (spriteSheetSize.y);
-
+    //console.log(scaleInfo);
     var combined = new THREE.Quaternion();
     faceQuaternion.normalize();
 
-    //combined.multiplyQuaternions(orientation, faceQuaternion).normalize();
-
-    w = 0;
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + scaleInfo.root, z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
     buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
 
     var col = new THREE.Color(0xffffff);
 
-    if (!useHex)
+    if (!hexInfo.useHex)
         col.setHex(0xAE875E);
     else
-        col.setHex(hex);
+        col.setHex(hexInfo.hex);
     //console.log(indexX * uvIndex);
     buffer.uvoffsets.push(indexX * 0, indexY * uvIndex); //Select sprite at 0, 0 on grid
     buffer.colors.push(col.r, col.g, col.b);
 
-    var trunkOffset = 10;
+    //----------------------------TRUNK-------------------------------------------
 
-    //----------------------------TRUNK0-------------------------------------------
-    w = 0;
-    buffer.scales.push(scale.x, scale.y, scale.z);
+    var yScale = scale.y * trunkOveride.trunkH;
+
+    buffer.scales.push(scale.x, yScale, scale.z);
+
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + trunkOffset, z + buffer.vector.z);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + scaleInfo.trunk, z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
     buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
 
     var col = new THREE.Color(0xffffff);
-    if (!useHex)
+    if (!hexInfo.useHex)
         col.setHex(0xAE875E);
     else
-        col.setHex(hex);
+        col.setHex(hexInfo.hex);
     buffer.uvoffsets.push(indexX * 0 + (indexX), indexY * uvIndex); //Select sprite at 1, 1 on grid
 
     buffer.colors.push(col.r, col.g, col.b);
-    //----------------------------TRUNK0-------------------------------------------
+    //----------------------------TRUNK-------------------------------------------
 
     //----------------------------Branches-------------------------------------------
-    w = 0;
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + trunkOffset + scale.y / 2.0, z + buffer.vector.z);
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + scaleInfo.branches, z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
     buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
 
     var col = new THREE.Color(0xffffff);
-    if (!useHex)
+    if (!hexInfo.useHex)
         col.setHex(0xAE875E);
     else
-        col.setHex(hex);
+        col.setHex(hexInfo.hex);
     buffer.uvoffsets.push(indexX * 0 + (indexX * 2), indexY * uvIndex); //Select sprite at 1, 1 on grid
 
     buffer.colors.push(col.r, col.g, col.b);
