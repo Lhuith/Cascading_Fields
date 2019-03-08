@@ -5,9 +5,6 @@ uniform vec3 randomColsMults;
 uniform float time;
 uniform float alpha;
 varying vec2 vUv;
-varying vec3 normalDirection;
-varying vec3 viewDirection;
-varying vec3 vWorldPosition;
 
 uniform vec4 skyCol;
 
@@ -114,7 +111,7 @@ void main()
   vec4 final = mix(tex, vec4(0.478, 0.854, 1, 1.0), sin(time/25.0));
   tex.a = 1.0;
   //
-	gl_FragColor = (tex* alpha) + vec4(skyCol.rgb, 1.0);//+  vec4(sparkles,sparkles,sparkles, 1.);
+	gl_FragColor = (tex * alpha) + vec4(skyCol.rgb, 1.0);//+  vec4(sparkles,sparkles,sparkles, 1.);
 
 }
 

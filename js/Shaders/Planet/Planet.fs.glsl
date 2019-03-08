@@ -1,13 +1,9 @@
 		 
-
-varying vec3 lightdir;
-varying vec3 eyenorm;
 uniform sampler2D texture;	
 uniform sampler2D extra;		 	
 varying vec2 vUv;
 
 varying vec3 vecNormal;
-varying vec3 vWorldPosition;
 uniform int noTexture;
 uniform vec4 customColor;
 uniform int customColorSwitch;
@@ -76,7 +72,7 @@ uniform float fogFar;
 
 			vec4 final = max(ext, tex);
 
-			gl_FragColor = ((final) + light) * vec4(shadowVal, 1.0);
+			gl_FragColor = ((final * customColor));
 
 		#ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT

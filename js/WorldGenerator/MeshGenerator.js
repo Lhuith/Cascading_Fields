@@ -107,17 +107,19 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
             //Grass
             if (hPoint > 0.35 && hPoint < 0.65) {
-                if (randomRange(0, 10) > 9.8) { 
+                if (randomRange(0, 10) > 9.9) { 
                     PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize,
                         new Vector2(indexX * randomRangeRound(0, 5), indexY * 7), grassHex[randomRangeRound(0, grassHex.length - 1)])}
-            
+                            if (randomRange(0, 10) > 9.9) { 
+                    PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                        new Vector2(indexX * 2, indexY * 6), hexIndex[randomRangeRound(0, hexIndex.length - 1)])};
             //Rocks
             } else if (hPoint > 0.7 && hPoint < 0.85) {
-                if (randomRange(0, 10) > 9.4) {
+                if (randomRange(0, 10) > 9.9) {
                     PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize, 
                         new Vector2(indexX * randomRangeRound(0, 4), indexY * 5), rockHex[randomRangeRound(0, rockHex.length - 1)]);
                 }
-
+//
             }
         }
 
