@@ -8,8 +8,27 @@
 		uniform float fogFar;
 		varying float distToCamera;
 
+		uniform float time;
+		uniform float animationSwith;
+
+		varying vec2 framePass;
+		varying vec2 uvoffsetPass;
+		varying vec2 spritesheetsizePass;
+
 		void main() {
-			vec4 tex = texture2D( map, vUv );
+
+			float uvTime = 1.0;
+			vec2 uvIndex = vec2(1.0);
+
+			if(animationSwith == 1.0){
+				uvTime = time;
+				float timeOffsetX = ceil(mod(time*2.0, (framePass.x))-1.0)/spritesheetsizePass.x;
+				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), vUv.y);
+			} else {
+				uvIndex = vec2(vUv.x, vUv.y);
+			}
+
+			vec4 tex = texture2D( map, uvIndex );
 
 			if (tex.a != 1.0) 
 			discard;

@@ -11,20 +11,21 @@
 		uniform float animationSwith;
 
 		varying vec2 framePass;
-		varying vec3 uvoffsetPass;
+		varying vec2 uvoffsetPass;
 		varying vec2 spritesheetsizePass;
 
 		void main() {
-
-
 			float uvTime = 1.0;
+			vec2 uvIndex = vec2(1.0);
 
 			if(animationSwith == 1.0){
 				uvTime = time;
+				float timeOffsetX = ceil(mod(time*2.0, (framePass.x))-1.0)/spritesheetsizePass.x;
+				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), vUv.y);
+			} else {
+				uvIndex = vec2(vUv.x, vUv.y);
 			}
 
-			float timeOffsetX = mod(time, framePass.x)/spritesheetsizePass.x;
-			vec2 uvIndex = vec2(vUv.x + timeOffsetX, vUv.y);
 
 			vec4 tex = texture2D( map, uvIndex);
 

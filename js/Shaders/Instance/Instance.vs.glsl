@@ -21,6 +21,11 @@
 		varying vec3 colorPass;
 		varying float distToCamera;
 
+
+		varying vec2 framePass;
+		varying vec2 uvoffsetPass;
+		varying vec2 spritesheetsizePass;
+
 		// http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
 		vec3 applyQuaternionToVector( vec4 q, vec3 v ){
 			return v + 2.0 * cross( q.xyz, cross( q.xyz, v ) + q.w * v );
@@ -36,9 +41,10 @@
 			if(animationSwith == 1.0){
 				uvTime = time;
 			}
+			float timeOffsetX = mod(time, animationFrame.x + 1.0);
+			//vec2((uv.x/spriteSheetX) * (uvoffset.x * 1.0), (uv.y/spriteSheetY) + (uvoffset.y));
+			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 
-			vUv = vec2((uv.x/spriteSheetX) + mod((uvoffset.x* uvTime),animationFrame.x), 
-			(uv.y/spriteSheetY) + (mod((uvoffset.y * uvTime), animationFrame.y)));
 
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
 

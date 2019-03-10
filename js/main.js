@@ -953,7 +953,7 @@ function animate() {
 
     //console.log(worldObjects);
     var delta = clock.getDelta();
-    timer = timer + delta;
+    timer += delta;
     DayNightCycle(delta);
     //Landmass ChunkManagement
     //ShowHideObjects(landMassObject, 2000, false, false, false);
@@ -983,6 +983,7 @@ function animate() {
      
         if(animatedWorldObjects.children[0] != undefined){
             animatedWorldObjects.children[0].material.uniforms.time.value = timer;
+            //console.log(timer%3);
             //console.log("poo");
         }
 
