@@ -9,11 +9,21 @@
 		attribute vec3 scaleInstance;
 		
 		attribute vec4 orientation;
+
+
 		varying vec2 vUv;
 		uniform float spriteSheetX;
 		uniform float spriteSheetY;
+		
+		attribute vec2 animationFrame;
+		uniform float time;
+		uniform float animationSwith;
 
+		varying vec2 framePass;
 		varying vec3 colorPass;
+		varying vec3 uvoffsetPass;
+		varying vec2 spritesheetsizePass;
+
 		// http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
 		vec3 applyQuaternionToVector( vec4 q, vec3 v ){
 			return v + 2.0 * cross( q.xyz, cross( q.xyz, v ) + q.w * v );
@@ -24,7 +34,18 @@
 			mvPosition.xyz += (position * scaleInstance);
 			//mvPosition *= vec4(scaleInstance, 1.0);
 
-			vUv = vec2((uv.x/spriteSheetX) + uvoffset.x, (uv.y/spriteSheetY) + uvoffset.y);
+			float uvTime = 1.0;
+
+			if(animationSwith == 1.0){
+				uvTime = time;
+			}
+
+			vUv = vec2((uv.x/spriteSheetX) + uvoffset.x, 
+			(uv.y/spriteSheetY) + (uvoffset.y));
+
 			gl_Position = projectionMatrix * mvPosition;
 			colorPass = col.rgb;
+			framePass = animationFrame;
+			uvoffsetPass = uvoffset;
+			spritesheetsizePass = vec2(spriteSheetX, spriteSheetY);
 		}

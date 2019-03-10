@@ -9,10 +9,15 @@
 		attribute vec3 scaleInstance;
 		
 		attribute vec4 orientation;
+		attribute vec2 animationFrame;
+
 		varying vec2 vUv;
 		uniform float spriteSheetX;
 		uniform float spriteSheetY;
 
+		uniform float time;
+		uniform float animationSwith;
+		
 		varying vec3 colorPass;
 		varying float distToCamera;
 
@@ -25,7 +30,15 @@
 
 			vec3 ScaledPos = position * scaleInstance;
 			vec3 vPosition = applyQuaternionToVector( orientation, ScaledPos );
-			vUv = vec2((uv.x/spriteSheetX) + uvoffset.x, (uv.y/spriteSheetY) + uvoffset.y);
+			
+			float uvTime = 1.0;
+
+			if(animationSwith == 1.0){
+				uvTime = time;
+			}
+
+			vUv = vec2((uv.x/spriteSheetX) + mod((uvoffset.x* uvTime),animationFrame.x), 
+			(uv.y/spriteSheetY) + (mod((uvoffset.y * uvTime), animationFrame.y)));
 
 			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
 

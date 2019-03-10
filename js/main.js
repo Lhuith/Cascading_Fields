@@ -24,7 +24,7 @@ var collisionCheck;
 
 var outofbounds;
 
-var cycleDuration = 25;
+var cycleDuration = 100;
 var dawnDuration = 5;
 var duskDuration = 5;
 var D_N_Time = 0;
@@ -219,7 +219,7 @@ function DayNightCycle(delta) {
     }
     //console.log(Math.sin(D_N_Time * 3));
     //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
-    //SunMoonObject.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
+    SunMoonObject.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
 
     if (skyBox != undefined) {
         skyBox.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
@@ -294,7 +294,7 @@ function init() {
     MainScene = new THREE.Scene();
 
     //MainScene.background = new THREE.Color(0x42c5ff);
-    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 5000);
+    MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 10000);
 
     dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
     var vector = new THREE.Vector3(750, 500, 1000);
@@ -526,10 +526,10 @@ function init() {
 
     stats = new Stats()
 
-    stats.domElement.style.position = 'absolute'
-    stats.domElement.style.left = '0px'
-    stats.domElement.style.bottom = '0px'
-    container.appendChild(stats.domElement)
+    //stats.domElement.style.position = 'absolute'
+    //stats.domElement.style.left = '0px'
+    //stats.domElement.style.bottom = '0px'
+    //container.appendChild(stats.domElement)
 
     LoadCharacters(0);
     //LoadAssets();
@@ -553,7 +553,6 @@ function LoadCharacters(spriteNumber) {
     MainScene.add(sprite);
 }
 
-
 function LoadCharacter(spriteNumber, url, scale, SpriteSheetSize, position) {
     console.log("the fuck?");
     var char = new THREE.TextureLoader().load(url);
@@ -571,7 +570,6 @@ function LoadCharacter(spriteNumber, url, scale, SpriteSheetSize, position) {
     return sprite;
 }
 
-
 function SetUpSunAndMoon() {
 
 
@@ -584,7 +582,7 @@ function SetUpSunAndMoon() {
 
     var indexX = (1 / SpriteSheetSize.x);
     var indexY = (1 / SpriteSheetSize.y);
-    var size = 3000;
+    var size = 2000;
 
     var sunMaterial = new THREE.SpriteMaterial({ map: sheet, color: 0xffffff });
     Sun = new THREE.Sprite(sunMaterial);
@@ -594,7 +592,7 @@ function SetUpSunAndMoon() {
     sunMaterial.map.repeat = new THREE.Vector2(indexX, indexY);
     Sun.position.set(SkyPosX, 100, 0);
 
-    BackgroundScene.add(Sun);
+    SunMoonObject.add(Sun);
     // 
     //MainScene.add(Sun);
 
@@ -612,7 +610,7 @@ function SetUpSunAndMoon() {
     Moon.position.set(-SkyPosX, 100, 0);
     SunMoonObject.add(Moon);
     //
-    BackgroundScene.add(Moon);
+    //BackgroundScene.add(Moon);
 }
 
 function SimpleCollision(delta) {
@@ -788,8 +786,8 @@ function setUpSky(start, vertex_text, fragment_text) {
             transparent: true,
         });
 
-    skyBox = new THREE.Mesh(new THREE.SphereGeometry(10000,
-        32, 32), skyMaterial);
+    skyBox = new THREE.Mesh(new THREE.IcosahedronGeometry(1000,
+        5), skyMaterial);
 
     //BackgroundScene.add(skyBox);
     skyObject.add(skyBox);
@@ -880,9 +878,9 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+   // renderer.setSize( window.innerWidth, window.innerHeight );
 
-    composer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
+    //composer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
     renderer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
     renderer.domElement.style.width = Math.round((renderer.domElement.width) * resolution) + 'px';
     renderer.domElement.style.height = Math.round((renderer.domElement.height) * resolution) + 'px';
@@ -980,6 +978,16 @@ function animate() {
         skyMaterial.uniforms.time.value = timer;
     }
 
+    if(animatedWorldObjects.children.length != 0){
+        //console.log(animatedWorldObjects.children.length);
+     
+        if(animatedWorldObjects.children[0] != undefined){
+            animatedWorldObjects.children[0].material.uniforms.time.value = timer;
+            //console.log("poo");
+        }
+
+    }
+
     Movement(delta);
 
     stats.end();
@@ -1057,7 +1065,6 @@ function render() {
     //MapRenderer.render(MainScene, mapCamera);
 
 }
-
 
 function toScreenPosition(obj, camera) {
     var vector = new THREE.Vector3();
@@ -1298,7 +1305,7 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
             animatedWorldObjects, objects, characterList, collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
     });
 
-    GenerateClouds(Clouds, 256, ShaderInfo, SpriteSheetSize, SpriteSize);
+    //GenerateClouds(Clouds, 256, ShaderInfo, SpriteSheetSize, SpriteSize);
 }
 
 // Credit to THeK3nger - https://gist.github.com/THeK3nger/300b6a62b923c913223fbd29c8b5ac73

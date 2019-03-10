@@ -7,9 +7,26 @@
 		uniform float fogNear;
 		uniform float fogFar;
 
+		uniform float time;
+		uniform float animationSwith;
+
+		varying vec2 framePass;
+		varying vec3 uvoffsetPass;
+		varying vec2 spritesheetsizePass;
 
 		void main() {
-			vec4 tex = texture2D( map, vUv );
+
+
+			float uvTime = 1.0;
+
+			if(animationSwith == 1.0){
+				uvTime = time;
+			}
+
+			float timeOffsetX = mod(time, framePass.x)/spritesheetsizePass.x;
+			vec2 uvIndex = vec2(vUv.x + timeOffsetX, vUv.y);
+
+			vec4 tex = texture2D( map, uvIndex);
 
 			if (tex.a != 1.0) 
 			discard;

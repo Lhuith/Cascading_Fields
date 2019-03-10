@@ -14,6 +14,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
+        animationFrame: []
     }
 
     var EnviromentBuffer = {
@@ -23,6 +24,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
+        animationFrame: []
     }
 
     var StructureBuffer = {
@@ -31,7 +33,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         vector: new THREE.Vector4(),
         scales: [],
         colors: [],
-        uvoffsets: []
+        uvoffsets: [],
+        animationFrame: []
     }
 
     var AnimatedBuffer = {
@@ -40,7 +43,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         vector: new THREE.Vector4(),
         scales: [],
         colors: [],
-        uvoffsets: []
+        uvoffsets: [],
+        animationFrame: []
     }
 
     var CritterBuffer = {
@@ -49,7 +53,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         vector: new THREE.Vector4(),
         scales: [],
         colors: [],
-        uvoffsets: []
+        uvoffsets: [],
+        animationFrame: []
     }
 
     var greenTreeHex = [0xB0C658, 0x4FB64F, 0x9ADA7D, 0x197F54, 0xBEE7AC];
@@ -63,7 +68,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
     var indexX = 1 / (SpriteSheetSize.x);
     var indexY = 1 / (SpriteSheetSize.y);
     var raySampler = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
-    var testing = false;
+    var testing = true;
 
     for (var i = 0; i < size; i++) {
         for (var j = 0; j < size; j++) {
@@ -82,88 +87,94 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
             if (imagedata.data[r] == 255 && imagedata.data[g] == 75 && imagedata.data[b] == 75) {
                 var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
                 var char = LoadCharacter(0, 'img/Game_File/Big_Guy.png', new THREE.Vector3(1000, 1000, 1000), new THREE.Vector2(4, 4), new THREE.Vector3(z, height + 1000 / 2, x));
-                char.rotation.y
+                char.material.fog = true;
+                char.rotation.y = 90;
                 world.add(char);
                 characterList.push(char);
             }
 
+
+            //Mountain Field ----------------------------------------------------
+            if (imagedata.data[r] == 159 && imagedata.data[g] == 159 && imagedata.data[b] == 159) {
+                if (randomRange(0, 1) > 0.4) {
+                    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
+                    //console.log(facedata);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                        EnviromentBuffer, 1, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), false, true, 0.5, 1.0, 2.0);
+                }
+            }
+
+            //Mountain Field ----------------------------------------------------
+            //Crabs ----------------------------------------------------
+            if (imagedata.data[r] == 255 && imagedata.data[g] == 125 && imagedata.data[b] == 255) {
+                if (randomRange(0, 1) > 0.4) {
+                    var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
+                    PopulateCrittersBuffers(z, height, x, CritterBuffer, SpriteSheetSize, SpriteSize, new THREE.Vector2(0,0), 0xff5a5b);
+                }
+            }
+            //Crabs ----------------------------------------------------
             if (!testing) {
                 //Magic Field
-                //if (imagedata.data[r] == 0 && imagedata.data[g] == 150 && imagedata.data[b] == 255 && imagedata.data[a] == 255) {
-                //    if (randomRange(0, 1) > 0.7) {
-                //        var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
-                //        //console.log(facedata);
-                //        PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                //            EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)], facedata, new //THREE.Vector3(200, 200, 200));
-                //    }
-                //}
-//
-                ////Flower Field
-                //if (imagedata.data[r] == 255 && imagedata.data[g] == 255 && imagedata.data[b] == 0) {
-                //  
-                //    if (randomRange(0, 10) > 9.8) {
-                //        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
-                //        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                //            new Vector2(indexX * Math.ceil(randomRange(0, 2)), indexY * 6), MushyHex[randomRangeRound(0, //MushyHex.length - 1)]);
-                //    } else if (randomRange(0, 1) > 0.5) {
-                //        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
-                //        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                //            new Vector2(indexX * Math.ceil(randomRange(6, 7)), indexY * 3), MushyHex[randomRangeRound(0, //MushyHex.length - 1)]);
-                //    }
-                //}
-
-                //Mountain Field ----------------------------------------------------
-                if (imagedata.data[r] == 159 && imagedata.data[g] == 159 && imagedata.data[b] == 159) {
+                if (imagedata.data[r] == 0 && imagedata.data[g] == 150 && imagedata.data[b] == 255 && imagedata.data[a] == 255) {
                     if (randomRange(0, 1) > 0.7) {
                         var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
                         //console.log(facedata);
                         PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                            EnviromentBuffer, 1, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200));
+                            EnviromentBuffer, 0, MagicForestHex[randomRangeRound(0, MagicForestHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), false, true, 1.0, 1.0);
                     }
                 }
-                //Mountain Field ----------------------------------------------------
+                //
+                ////Flower Field
+                if (imagedata.data[r] == 255 && imagedata.data[g] == 255 && imagedata.data[b] == 0) {
+
+                    if (randomRange(0, 10) > 9.5) {
+                        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
+                        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                            new Vector2(indexX * Math.ceil(randomRange(0, 2)), indexY * 6), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
+                    }
+                }
                 //Willow Tree----------------------------------------------------
-                //else if (imagedata.data[r] == 0 && imagedata.data[g] == 217 && imagedata.data[b] == 255) {
-                //    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
-                //    //console.log(facedata);
-                //    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                //        EnviromentBuffer, 2, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3//(400, 400, 400), false, true, 1, 23, 5);
-                //}
+                else if (imagedata.data[r] == 0 && imagedata.data[g] == 217 && imagedata.data[b] == 255) {
+                    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
+                    //console.log(facedata);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                        EnviromentBuffer, 2, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(400, 400, 400), false, true, 1);
+                }
                 ////Willow Tree----------------------------------------------------
                 ////Dead Field----------------------------------------------------
-                //else if (imagedata.data[r] == 75 && imagedata.data[g] == 0 && imagedata.data[b] == 0) {
-                //    if (randomRange(0, 1) > 0.7) {
-                //        var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
-                //        //console.log(facedata);
-                //        PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                //            EnviromentBuffer, 3, burnetTreeHex[randomRangeRound(0, burnetTreeHex.length - 1)], facedata, new //THREE.Vector3(200, 200, 200), true, false, randomRange(1.0, 1.75));
-                //    }
-                //}
-                ////stump    
-                //else if (imagedata.data[r] == 75 && imagedata.data[g] == 0 && imagedata.data[b] == 75) {
-                //    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
-                //    //console.log(facedata);
-                //    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                //        EnviromentBuffer, 5, burnetTreeHex[randomRangeRound(0, burnetTreeHex.length - 1)], facedata, new THREE.Vector3//(150, 150, 150), true, false);
-                //}
+                else if (imagedata.data[r] == 75 && imagedata.data[g] == 0 && imagedata.data[b] == 0) {
+                    if (randomRange(0, 1) > 0.4) {
+                        var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
+                        //console.log(facedata);
+                        PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                            EnviromentBuffer, 3, burnetTreeHex[randomRangeRound(0, burnetTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), true, false, randomRange(1.0, 1.75));
+                    }
+                }
+                //stump    
+                else if (imagedata.data[r] == 75 && imagedata.data[g] == 0 && imagedata.data[b] == 75) {
+                    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
+                    //console.log(facedata);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                        EnviromentBuffer, 5, burnetTreeHex[randomRangeRound(0, burnetTreeHex.length - 1)], facedata, new THREE.Vector3(150, 150, 150), true, false);
+                }
                 //Dead Field----------------------------------------------------
 
                 //Casual Field //tree 04
                 else if (imagedata.data[r] == 0 && imagedata.data[g] == 150 && imagedata.data[b] == 0) {
-                    if (randomRange(0, 1) > 0.7) {
-                        var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
-                        //console.log(facedata);
-                        PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                            EnviromentBuffer, 4, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), false, true, randomRange(1, 3));
-                    }
+                    //if (randomRange(0, 1) > 0.7) {
+                    var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
+                    //console.log(facedata);
+                    PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
+                        EnviromentBuffer, 4, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), false, true, randomRange(1, 3));
+                    //}
                 }
-                ////Casual Field //bush
+                //Casual Field //bush
                 //else if (imagedata.data[r] == 75 && imagedata.data[g] == 150 && imagedata.data[b] == 0) {
                 //    if (randomRange(0, 1) > 0.7) {
                 //        var facedata = GetCharHeightAndOrientation(raySampler, new THREE.Vector3(z, 0, x));
                 //        //console.log(facedata);
                 //        PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
-                //            EnviromentBuffer, 6, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3//(100, 100, 100), false, randomRangeRound(0, 1), 1);
+                //            EnviromentBuffer, 6, greenTreeHex[randomRangeRound(0, greenTreeHex.length - 1)], facedata, new THREE.Vector3(100, 100, 100), false, randomRangeRound(0, 1), 1);
                 //    }
                 //}
 
@@ -174,53 +185,80 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
                     PopulateForestBuffers(z, facedata.y, x, ForestBuffer, SpriteSheetSize, SpriteSize, collision, world,
                         EnviromentBuffer, 7, MushyHex[randomRangeRound(0, MushyHex.length - 1)], facedata, new THREE.Vector3(200, 200, 200), true, false, randomRangeRound(1.0, 2.2));
                 }
-
-
+                //
+                //
                 else if (imagedata.data[r] == 255 && imagedata.data[g] == 0 && imagedata.data[b] == 255) {
-
-                    if (randomRange(0, 10) > 9.9) {
+                    //
+                    if (randomRange(0, 10) > 9.5) {
                         var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
                         PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
                             new Vector2(indexX * Math.ceil(randomRange(3, 6)), indexY * 6), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
                     }
+                    //
 
-                    //Mushies Field ----------------------------------------------------
                 }
-
+                //Mushies Field --------------------------
+                //Magic Field ----------------------------------------------------
                 //else if (imagedata.data[r] == 0 && imagedata.data[g] == 0 && imagedata.data[b] == 255) {
-//
+                //
                 //    if (randomRange(0, 10) > 9.9) {
                 //        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
                 //        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                //            new Vector2(indexX * Math.ceil(randomRange(0, 7)), indexY * 3), MushyHex[randomRangeRound(0, //MushyHex.length - 1)]);
+                //            new Vector2(indexX * Math.ceil(randomRange(0, 7)), indexY * 3), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
                 //    } else if (randomRange(0, 10) > 9.9) {
                 //        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
                 //        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-                //            new Vector2(indexX * Math.ceil(randomRange(4, 6)), indexY * 7), MushyHex[randomRangeRound(0, //MushyHex.length - 1)]);
+                //            new Vector2(indexX * Math.ceil(randomRange(4, 6)), indexY * 7), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
                 //    }
-//
-//
-                //    //Mushies Field ----------------------------------------------------
                 //}
+                //
+                ////Magic Field ----------------------------------------------------
 
-              // else if (imagedata.data[r] == 255 && imagedata.data[g] == 125 && imagedata.data[b] == 0) {
+                //    //Autumn Field ----------------------------------------------------
 
-              //     if (randomRange(0, 10) > 9.9) {
-              //         var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
-              //         PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
-              //             new Vector2(indexX * Math.ceil(randomRange(0, 4)), indexY * 2), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
-              //     }
-              //     //Mushies Field ----------------------------------------------------
-              // }
+                //else if (imagedata.data[r] == 255 && imagedata.data[g] == 125 && imagedata.data[b] == 0) {
+                //
+                //    if (randomRange(0, 10) > 9.9) {
+                //        var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
+                //        PopulateEnviromentBuffers(z, height, x, EnviromentBuffer, SpriteSheetSize, SpriteSize,
+                //            new Vector2(indexX * Math.ceil(randomRange(0, 4)), indexY * 2), MushyHex[randomRangeRound(0, MushyHex.length - 1)]);
+                //    }
+                //    //Autumn Field ----------------------------------------------------
+                //}
             }
         }
     }
 
     CreateInstance(world, ForestBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Forest_SpriteSheet.png', false);
-    //CreateInstance(world, StructureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Structures_SpriteSheet.png', false);
+    CreateInstance(animatedWorld, CritterBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/critters.png', true, true);
     CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
     //CreateInstance(animatedWorld, AnimatedBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Animated_SpriteSheet.png', true);
 }
+
+function PopulateCrittersBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, uvindex, hex) {
+
+    w = 0;
+    var scaleX = randomRange(5, 70);
+    var scaleY = scaleX;//randomRange(5, 70);
+    var scaleZ = randomRange(5, 70);
+
+    var yOffets = (scaleY) / 2.0;
+
+    buffer.scales.push(scaleX, scaleX, scaleZ);
+
+    buffer.vector.set(x, y, z, 0).normalize();
+    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
+    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + yOffets, z + buffer.vector.z);
+    buffer.vector.set(x, y, z, w).normalize();
+    buffer.orientations.push(0, 0, 0, 0);
+
+    var col = new THREE.Color(hex);
+    
+    buffer.uvoffsets.push(uvindex.x, uvindex.y);
+    buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(2, 1);
+}
+
 
 function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate) {
     //console.log(buffer);
@@ -247,12 +285,14 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     colorAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.colors), 3);
     uvOffsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.uvoffsets), 2);
     scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.scales), 3);
+    animationFrameAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.animationFrame), 2);
 
     geometry.addAttribute('offset', offsetAttribute);
     geometry.addAttribute('orientation', orientationAttribute);
     geometry.addAttribute('col', colorAttribute);
     geometry.addAttribute('uvoffset', uvOffsetAttribute);
     geometry.addAttribute('scaleInstance', scaleAttribute);
+    geometry.addAttribute('animationFrame', animationFrameAttribute);
 
     var texture = new THREE.TextureLoader().load(url);
     texture.magFilter = THREE.NearestFilter;
@@ -261,15 +301,14 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     var animationSwitch = 0;
 
     if (Animate)
-        animationSwitch = 1;
-
+        animationSwitch = 1.0;
 
     var instanceUniforms = {
         map: { value: texture },
         spriteSheetX: { type: "f", value: SpriteSheetSize.x },
         spriteSheetY: { type: "f", value: SpriteSheetSize.y },
         animationSwith: { type: "f", value: animationSwitch },
-        time: { type: "f", value: 0 }
+        time: { type: "f", value: 1.0 }
     }
 
     var material = new THREE.RawShaderMaterial({
@@ -299,7 +338,7 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
 
 function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, collision,
     world, EnivormentalBuffer, uvindex, hex, rotationinfo, scale,
-    useHex = false, leaves = true, trunkHeightScale = 1.0, branchHightAdjust = 0.0, numLeaves = 1.0) {
+    useHex = false, leaves = true, trunkHeightScale = 1.0, branchHightAdjust = 0.0, leavesMult = 1.0) {
 
     w = 0;
     //|     | leaves 
@@ -316,7 +355,7 @@ function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, col
 
     var rootSpriteDiffrence = ((scale.y) - (pixelSize * 3)) / 2.0;//has to be hardcoded for now :(
 
-    var trunkPos = (rootsPos + objhalfh) - rootSpriteDiffrence;
+    var trunkPos = ((rootsPos + objhalfh) - rootSpriteDiffrence) - (objhalfh * trunkHeightScale);
 
     var branchesPos = trunkPos + (objhalfh) + ((scale.y * trunkHeightScale) / 2.0);
 
@@ -348,15 +387,11 @@ function PopulateForestBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, col
     var indexY = 1 / (spriteSheetSize.y);
 
     if (leaves) {
-        if (numLeaves == 1)
-            PushToEnviromentBuffers(x, y + branchesPos, z, EnivormentalBuffer, spriteSheetSize,
-                SpriteSize, new THREE.Vector2(indexX * uvindex, indexY * 0), scale, new THREE.Color(hex));
-        else {
-            for (var i = 0; i < numLeaves; i++) {
-                PushToEnviromentBuffers(((x * i) - 1) % numLeaves, y + branchesPos, z, EnivormentalBuffer, spriteSheetSize,
-                    SpriteSize, new THREE.Vector2(indexX * uvindex, indexY * 0), scale, new THREE.Color(hex));
-            }
-        }
+        var yPos = (y + branchesPos);
+        var newPos = ((scale.y) * (leavesMult - 1)) / 2.0;
+        //var extrapos = newPixelsize
+        PushToEnviromentBuffers(x, yPos + (objhalfh * (leavesMult - 1)), z, EnivormentalBuffer, spriteSheetSize,
+            SpriteSize, new THREE.Vector2(indexX * uvindex, indexY * 0), new THREE.Vector3(scale.x * leavesMult, scale.y * leavesMult, scale.z * leavesMult), new THREE.Color(hex));
     }
 
 
@@ -380,8 +415,7 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, orientation,
     var indexX = 1 / (spriteSheetSize.x);
     var indexY = 1 / (spriteSheetSize.y);
     //console.log(scaleInfo);
-    var combined = new THREE.Quaternion();
-    faceQuaternion.normalize();
+    var combined = new THREE.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w).multiply(faceQuaternion);
 
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
@@ -399,7 +433,7 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, orientation,
     //console.log(indexX * uvIndex);
     buffer.uvoffsets.push(indexX * 0, indexY * uvIndex); //Select sprite at 0, 0 on grid
     buffer.colors.push(col.r, col.g, col.b);
-
+    buffer.animationFrame.push(0, 0);
     //----------------------------TRUNK-------------------------------------------
 
     var yScale = scale.y * trunkOveride.trunkH;
@@ -420,6 +454,7 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, orientation,
     buffer.uvoffsets.push(indexX * 0 + (indexX), indexY * uvIndex); //Select sprite at 1, 1 on grid
 
     buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(0, 0);
     //----------------------------TRUNK-------------------------------------------
 
     //----------------------------Branches-------------------------------------------
@@ -438,9 +473,9 @@ function CreateTreeFace(x, y, z, buffer, spriteSheetSize, orientation,
     buffer.uvoffsets.push(indexX * 0 + (indexX * 2), indexY * uvIndex); //Select sprite at 1, 1 on grid
 
     buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(0, 0);
     //----------------------------Branches-------------------------------------------
 }
-
 
 function PopulateStructureBuffers(x, y, z, buffer, AnimatedBuffer, spriteSheetSize, SpriteSize, collision, world, uvIndex) {
 
@@ -506,6 +541,7 @@ function CreateStructureFaceHead(x, y, z, buffer, scale, orientation, spriteShee
 
     buffer.uvoffsets.push(indexX * (uvIndex + 1), indexY * uvIndex); //Select sprite at 0, 0 on grid
     buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(0, 0);
     //--------------------------------------------BASE------------------------------------------
 }
 
@@ -534,9 +570,9 @@ function CreateStructureFace(x, y, z, buffer, scale, orientation, spriteSheetSiz
 function PopulateCloudBuffers(x, y, z, buffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, hex, multiplyScalar) {
 
     w = 0;
-    var scaleX = 150 * multiplyScalar;//randomRange(5, 70);
-    var scaleY = 150 * multiplyScalar;//scaleX;//randomRange(5, 70);
-    var scaleZ = 150 * multiplyScalar;//randomRange(5, 70);
+    var scaleX = 100 * multiplyScalar;//randomRange(5, 70);
+    var scaleY = 100 * multiplyScalar;//scaleX;//randomRange(5, 70);
+    var scaleZ = 100 * multiplyScalar;//randomRange(5, 70);
 
     var yOffets = 1;//(scaleY) / 2.0;
 
@@ -555,6 +591,7 @@ function PopulateCloudBuffers(x, y, z, buffer, SpriteSheetSizeX, SpriteSheetSize
 
     buffer.uvoffsets.push(indexX * 0, indexY * 4);
     buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(0, 0);
 }
 
 function GenerateClouds(CloudsHolder, size, ShaderInformation, SpriteSheetSize, SpriteSize) {

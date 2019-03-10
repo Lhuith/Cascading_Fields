@@ -38,6 +38,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
         scales: [],
         colors: [],
         uvoffsets: [],
+        animationFrame: []
     }
 
     var treex, treey, treez, treew;
@@ -107,10 +108,10 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
             //Grass
             if (hPoint > 0.35 && hPoint < 0.65) {
-                if (randomRange(0, 10) > 9.9) { 
+                if (randomRange(0, 10) > 9.5) { 
                     PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize,
                         new Vector2(indexX * randomRangeRound(0, 5), indexY * 7), grassHex[randomRangeRound(0, grassHex.length - 1)])}
-                            if (randomRange(0, 10) > 9.9) { 
+                            if (randomRange(0, 10) > 9.2) { 
                     PopulateEnviromentBuffers(x, finalP, y, EnviromentBuffer, SpriteSheetSize, SpriteSize,
                         new Vector2(indexX * 2, indexY * 6), hexIndex[randomRangeRound(0, hexIndex.length - 1)])};
             //Rocks
@@ -162,12 +163,13 @@ function PushToEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, U
 
     buffer.vector.set(x, y, z, 0).normalize();
     //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
+    buffer.offsets.push(x + buffer.vector.x, (y + buffer.vector.y), z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
     buffer.orientations.push(0, 0, 0, 0);
 
     buffer.uvoffsets.push(UVlocation.x, UVlocation.y);
     buffer.colors.push(color.r, color.g, color.b);
+    buffer.animationFrame.push(0, 0);
 }
 
 function PopulateEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, uvindex, hex) {
@@ -191,9 +193,8 @@ function PopulateEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize,
     
     buffer.uvoffsets.push(uvindex.x, uvindex.y);
     buffer.colors.push(col.r, col.g, col.b);
+    buffer.animationFrame.push(0, 0);
 }
-
-
 /*
  * Easing Functions - inspired from http://gizma.com/easing/
  * only considering the t value for the range [0, 1] => [0, 1]
@@ -203,34 +204,4 @@ function PopulateEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize,
 function CalculateNormals() {
 
 }
-
-EasingFunctions = {
-    // no easing, no acceleration
-    linear: function (t) { return t },
-    // accelerating from zero velocity
-    easeInQuad: function (t) { return t * t },
-    // decelerating to zero velocity
-    easeOutQuad: function (t) { return t * (2 - t) },
-    // acceleration until halfway, then deceleration
-    easeInOutQuad: function (t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t },
-    // accelerating from zero velocity 
-    easeInCubic: function (t) { return t * t * t },
-    // decelerating to zero velocity 
-    easeOutCubic: function (t) { return (--t) * t * t + 1 },
-    // acceleration until halfway, then deceleration 
-    easeInOutCubic: function (t) { return t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1 },
-    // accelerating from zero velocity 
-    easeInQuart: function (t) { return t * t * t * t },
-    // decelerating to zero velocity 
-    easeOutQuart: function (t) { return 1 - (--t) * t * t * t },
-    // acceleration until halfway, then deceleration
-    easeInOutQuart: function (t) { return t < .5 ? 8 * t * t * t * t : 1 - 8 * (--t) * t * t * t },
-    // accelerating from zero velocity
-    easeInQuint: function (t) { return t * t * t * t * t },
-    // decelerating to zero velocity
-    easeOutQuint: function (t) { return 1 + (--t) * t * t * t * t },
-    // acceleration until halfway, then deceleration 
-    easeInOutQuint: function (t) { return t < .5 ? 16 * t * t * t * t * t : 1 + 16 * (--t) * t * t * t * t }
-}
-
 
