@@ -20,7 +20,7 @@
 
 			if(animationSwith == 1.0){
 				uvTime = time;
-				float timeOffsetX = ceil(mod(time*2.0, (framePass.x))-1.0)/spritesheetsizePass.x;
+				float timeOffsetX = ceil(mod(time*15.0, (framePass.x))-1.0)/spritesheetsizePass.x;
 				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), vUv.y);
 			} else {
 				uvIndex = vec2(vUv.x, vUv.y);

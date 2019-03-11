@@ -33,13 +33,7 @@
 			vec4 mvPosition = modelViewMatrix * vec4( offset * 1.0, 1.0 );
 			mvPosition.xyz += (position * scaleInstance);
 			//mvPosition *= vec4(scaleInstance, 1.0);
-
-			float uvTime = 1.0;
-
-			if(animationSwith == 1.0){
-				uvTime = time;
-			}
-			float timeOffsetX = mod(time, animationFrame.x + 1.0);
+			
 			//vec2((uv.x/spriteSheetX) * (uvoffset.x * 1.0), (uv.y/spriteSheetY) + (uvoffset.y));
 			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 

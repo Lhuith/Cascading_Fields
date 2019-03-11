@@ -157,8 +157,8 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     return geo;
 }
 
-function PushToEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, UVlocation, Scale, color) {
-    w = 0;
+function PushToEnviromentBuffers(x, y, z, buffer, UVlocation, Scale, color) {
+
     buffer.scales.push(Scale.x, Scale.y, Scale.z);
 
     buffer.vector.set(x, y, z, 0).normalize();
@@ -172,7 +172,7 @@ function PushToEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, U
     buffer.animationFrame.push(0, 0);
 }
 
-function PopulateEnviromentBuffers(x, y, z, buffer, spriteSheetSize, SpriteSize, uvindex, hex) {
+function PopulateEnviromentBuffers(x, y, z, buffer, uvindex, hex) {
 
     w = 0;
     var scaleX = randomRange(5, 70);

@@ -67,7 +67,9 @@
 	<script type="text/javascript" src="js/WorldGenerator/NoiseFromTexture.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Regions.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/EnviromentGenerator.js"></script>
-
+	<script type="text/javascript" src="js/WorldGenerator/Critters.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/Trees.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/Enviroment.js"></script>
 </head>
 
 
