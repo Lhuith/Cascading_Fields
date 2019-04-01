@@ -125,9 +125,12 @@ function PopulateBuffer(x, y, z, buffer, basic_object){
     buffer.orientations.push(0, 0, 0, 0);
 
     var col = basic_object.colors[randomRangeRound(0, basic_object.colors.length - 1)];
-
-    buffer.uvoffsets.push(basic_object.ssIndex.x, basic_object.ssIndex.y);
     buffer.colors.push(col.r, col.g, col.b);
+
+    var uvs = basic_object.ssIndex[randomRangeRound(0, basic_object.ssIndex.length - 1)];
+
+    buffer.uvoffsets.push(uvs.x, uvs.y);
+
     buffer.animationFrame.push(basic_object.animationFrames.x, basic_object.animationFrames.y);
 }
 

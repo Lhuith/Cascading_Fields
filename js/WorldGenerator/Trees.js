@@ -16,18 +16,27 @@ var Trees = [
         new Basic_Object(
         "PineWood",
         0x9f9f9f,
-        MapToSS(0, 1), //index of 1
+        [
+            MapToSS(0, 1), //index of 1
+        ],
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
-            new THREE.Color(0xAE875E),
+            new THREE.Color(0x3C2E27),
+            new THREE.Color(0x6D1F09),
+            new THREE.Color(0xA05D31),
+            new THREE.Color(0xCFA67C),
+            new THREE.Color(0xEEE4D0),
         ]
         ),
         new Tree_Extra(
             true,
             0.5,
             2.0,
-            MapToSS(1, 0),
+            [
+                MapToSS(1, 0),
+            ],
+
             [
                 new THREE.Color(0xB0C658),
                 new THREE.Color(0x4FB64F),
@@ -43,7 +52,9 @@ var Trees = [
         new Basic_Object(
         "Mushroom",
         0x9600ff,
-        MapToSS(0, 7), //index of 1
+        [
+            MapToSS(0, 7), //index of 1
+        ],
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
@@ -58,7 +69,9 @@ var Trees = [
             false,
             2.0,
             0.0,
-            new Vector2(0, 0),
+            [
+                MapToSS(0,0)
+            ],
             [
             ],
             3
@@ -69,7 +82,9 @@ var Trees = [
         new Basic_Object(
         "Basic",
         0x009600,
-        MapToSS(0, 4), //index of 1
+        [
+            MapToSS(0, 4),
+        ],
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
@@ -80,7 +95,9 @@ var Trees = [
             true,
             0.5,
             1.5,
-            MapToSS(4, 0),
+            [
+                MapToSS(4, 0),
+            ],
             [
                 new THREE.Color(0xB0C658),
                 new THREE.Color(0x4FB64F),
@@ -96,7 +113,10 @@ var Trees = [
         new Basic_Object(
         "Burnt",
         0x4b0000,
-        MapToSS(0, 3), //index of 1
+        [
+            MapToSS(0, 3), //index of 1
+        ],
+
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
@@ -111,7 +131,9 @@ var Trees = [
             false,
             1.0,
             1.5,
-            MapToSS(0, 3),
+            [
+                MapToSS(0, 3),
+            ],
             [
             ],
             1.5
@@ -122,7 +144,9 @@ var Trees = [
         new Basic_Object(
         "Stump",
         0x4b004b,
-        MapToSS(0, 5), //index of 1
+        [
+            MapToSS(0, 5), //index of 1
+        ],
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
@@ -138,7 +162,9 @@ var Trees = [
             false,
             1.5,
             1.5,
-            MapToSS(0, 5),
+            [
+                MapToSS(0, 5),
+            ],
             [
             ],
             1
@@ -149,7 +175,9 @@ var Trees = [
         new Basic_Object(
         "Willow",
         0x00d9ff,
-        MapToSS(0, 2), //index of 1
+        [
+            MapToSS(0, 2), //index of 1
+        ],
         new THREE.Vector3(400, 400, 400),
         new THREE.Vector2(0, 0),
         [
@@ -160,7 +188,9 @@ var Trees = [
             true,
             1.5,
             1.5,
-            new Vector2((1/8) * 2, 0),
+            [
+                MapToSS(2, 0),
+            ],
             [
                 new THREE.Color(0xB0C658),
                 new THREE.Color(0x4FB64F),
@@ -205,7 +235,9 @@ var Trees = [
         new Basic_Object(
         "Magic",
         0x0096ff,
-        MapToSS(0, 0), //index of 1
+        [
+            MapToSS(0, 0), //index of 1
+        ],
         new THREE.Vector3(200, 200, 200),
         new THREE.Vector2(0, 0),
         [
@@ -223,7 +255,9 @@ var Trees = [
             true,
             1.1,
             1.4,
-            new Vector2((1/8) * 0, 0),
+            [
+                MapToSS(0, 0),
+            ],
             [
                 new THREE.Color(0x13918F),
                 new THREE.Color(0x7BB16B),
@@ -294,13 +328,16 @@ function PopulateGenericForestBuffers(x, y, z, buffer, EnivormentalBuffer, rotIn
         new THREE.Quaternion(0, 0.383, 0, 0.924)
     ]
 
+    var uvs = tree_object.obj.ssIndex[randomRangeRound(0, tree_object.obj.ssIndex.length - 1)];
+
     for(var i = 0; i < FaceOrientations.length; i++){
     CreateGenericTreeFace(x, y, z, buffer,
         FaceOrientations[i], faceQ,
-        tree_object.obj.size, tree_object.obj.ssIndex, hexInfo, offsets, trunkHeight);
+        tree_object.obj.size, uvs, hexInfo, offsets, trunkHeight);
     }
 
     if (tree_object.extra.hasLeaves) {
+        var uvs = tree_object.extra.leaveUvIndex[randomRangeRound(0, tree_object.extra.leaveUvIndex.length - 1)];
         var yPos = (y + branchesPos);
         var leavesMult = tree_object.extra.leavesMultiplier;
 
@@ -309,7 +346,7 @@ function PopulateGenericForestBuffers(x, y, z, buffer, EnivormentalBuffer, rotIn
         var leafcol = tree_object.extra.leafColors[randomRangeRound(0, tree_object.extra.leafColors.length - 1)];
         //console.log(leafcol);
         PushToEnviromentBuffers(x, yPos + (rootsPos * (tree_object.extra.leavesMultiplier - 1)), z, EnivormentalBuffer, 
-        tree_object.extra.leaveUvIndex, newSize, leafcol);
+        uvs, newSize, leafcol);
     }
 
 
@@ -331,13 +368,14 @@ function CreateGenericTreeFace(x, y, z, buffer, orientation,
     faceQuaternion, scale, uvIndex, col, offsetInfo, trunkH) {
         //console.log(offsetInfo);
     var combined = new THREE.Quaternion(orientation.x, orientation.y, orientation.z, orientation.w).multiply(faceQuaternion);
-
+    combined.normalize();
+    
     buffer.scales.push(scale.x, scale.y, scale.z);
     buffer.vector.set(x, y, z, 0).normalize();
 
     buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + offsetInfo.root, z + buffer.vector.z);
     buffer.vector.set(x, y, z, w).normalize();
-    buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
+    buffer.orientations.push(combined.x, combined.y, combined.z, combined.w);
 
 
     buffer.uvoffsets.push(uvIndex.x, uvIndex.y); //Select sprite at 0, 0 on grid

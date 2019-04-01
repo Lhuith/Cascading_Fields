@@ -14,11 +14,30 @@ var Critters = [
     (
         "Crab",
         0xff7dff,
-        MapToSS(0, 0),
+        [
+            MapToSS(0, 0),
+        ],
         new THREE.Vector3(25, 25, 25),
         new THREE.Vector2(3, 1),
         [
             new THREE.Color(0xff5a5b)
+        ]
+    ),
+    new Basic_Object 
+    (
+        "Turtle",
+        0x4b00ff,
+        [
+            MapToSS(0, 1),
+        ],
+        new THREE.Vector3(50, 50, 50),
+        new THREE.Vector2(3, 1),
+        [
+            new THREE.Color(0x065122),
+            new THREE.Color(0x0D7845),
+            new THREE.Color(0x129858),
+            new THREE.Color(0x16B460),
+            new THREE.Color(0x0BD27D),
         ]
     )
 ];

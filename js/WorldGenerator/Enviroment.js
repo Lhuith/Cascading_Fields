@@ -4,7 +4,7 @@ function FetchEnviroment(hex, x, y, z, buffer, ray) {
     for (var i = 0; i < Enviroment.length; i++) {
         if (hex == Enviroment[i].mapHexCode) {
 
-            if (randomRange(0, 100) > 99.1) {
+            if (randomRange(0, 100) > 91.1) {
                 y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
                 PopulateBuffer(x, y, z, buffer, Enviroment[i]);
             }
@@ -15,10 +15,14 @@ function FetchEnviroment(hex, x, y, z, buffer, ray) {
 var Enviroment = [
     new Basic_Object
         (
-            "flower_meduim",
+            "flower",
             0x00ff00,
-            MapToSS(0, 6),
-            new THREE.Vector3(25, 25, 25),
+            [
+                MapToSS(0, 6),
+                MapToSS(1, 6),
+                MapToSS(2, 6),
+            ],
+            new THREE.Vector3(50, 50, 50),
             new THREE.Vector2(1, 1),
             [
                 new THREE.Color(0xFFDCD5),
@@ -33,10 +37,15 @@ var Enviroment = [
         ),
     new Basic_Object
         (
-            "mushy_meduim",
+            "mushy",
             0xff00ff,
-            MapToSS(3, 6),
-            new THREE.Vector3(25, 25, 25),
+            [
+                MapToSS(3, 6),
+                MapToSS(4, 6),
+                MapToSS(5, 6),
+                MapToSS(6, 6),
+            ],
+            new THREE.Vector3(50, 50, 50),
             new THREE.Vector2(1, 1),
             [
                 new THREE.Color(0xF6F3EC),
