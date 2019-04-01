@@ -1,6 +1,4 @@
 
-		
-
 		varying vec4 color;
 		varying vec4 posWorld;
 		varying vec3 normalDirection;
