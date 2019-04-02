@@ -17,7 +17,7 @@
 		
 		attribute vec2 animationFrame;
 		uniform float time;
-		uniform float animationSwith;
+		uniform float animationSwitch;
 
 		varying vec2 framePass;
 		varying vec3 colorPass;

@@ -57,6 +57,16 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         animationFrame: []
     }
 
+    var CreatureBuffer = {
+        offsets: [],
+        orientations: [],
+        vector: new THREE.Vector4(),
+        scales: [],
+        colors: [],
+        uvoffsets: [],
+        animationFrame: []
+    }
+
     var greenTreeHex = [0xB0C658, 0x4FB64F, 0x9ADA7D, 0x197F54, 0xBEE7AC];
     var flowerIndex = [0xFFDCD5, 0xFFF0D5, 0xEDCDFF, 0xE0FFFD, 0xFF5355, 0x8EC2FE, 0x8FFBFE, 0xFFFF93];
 
@@ -102,13 +112,14 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
             FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
             FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world);
             FetchEnviroment(SampledColor.getHex(), z, 1.0, x, EnviromentBuffer, raySampler);
+            FetchCreature(SampledColor.getHex(), z, 1.0, x, CreatureBuffer, raySampler);
         }
     }
 
     CreateInstance(world, ForestBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Forest_SpriteSheet.png', false);
     CreateInstance(animatedWorld, CritterBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/critters.png', true, true);
     CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true, false);
-    //CreateInstance(animatedWorld, AnimatedBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Animated_SpriteSheet.png', true);
+    CreateInstance(world, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
 }
 
 
@@ -134,12 +145,11 @@ function PopulateBuffer(x, y, z, buffer, basic_object){
     buffer.animationFrame.push(basic_object.animationFrames.x, basic_object.animationFrames.y);
 }
 
-
 function MapToSS(x, y){
     return new THREE.Vector2((1/8) * x, (1/8) * y);
 }
 
-function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate) {
+function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate, is3D = false) {
     //console.log(buffer);
     var vertex;
     var fragment;
@@ -178,15 +188,20 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     texture.minFilter = THREE.NearestFilter;
 
     var animationSwitch = 0;
+    var is3DSwitch = 0;
 
     if (Animate)
         animationSwitch = 1.0;
+
+    if(is3D)
+        is3DSwitch = 1.0;
 
     var instanceUniforms = {
         map: { value: texture },
         spriteSheetX: { type: "f", value: SpriteSheetSize.x },
         spriteSheetY: { type: "f", value: SpriteSheetSize.y },
-        animationSwith: { type: "f", value: animationSwitch },
+        animationSwitch: { type: "f", value: animationSwitch },
+        is3D: { type: "f", value: is3DSwitch },
         time: { type: "f", value: 1.0 }
     }
 

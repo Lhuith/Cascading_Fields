@@ -8,7 +8,8 @@
 		uniform float fogFar;
 
 		uniform float time;
-		uniform float animationSwith;
+		uniform float animationSwitch;
+		uniform float is3D;
 
 		varying vec2 framePass;
 		varying vec2 uvoffsetPass;
@@ -27,7 +28,7 @@
 			float uvTime = 1.0;
 			vec2 uvIndex = vec2(1.0);
 
-			if(animationSwith == 1.0){
+			if(animationSwitch == 1.0){
 				
 				vec2 diff = vec2(posWorld.x - viewDirection.x, posWorld.y - viewDirection.y);
 				//Regions mapped from -1 to 1;
@@ -39,11 +40,16 @@
 				//normaledAngle = (normaledAngle * 2) - 1;
 				float normalizedAngle = dagrees / 360.0;
 
-				float index = ceil(mod(normalizedAngle * 4.0, 4.0)) - 1.0;
+				float index = ceil(mod(normalizedAngle * 2.0, 2.0)) - 1.0;
 
 				uvTime = time;
 				float timeOffsetX = ceil(mod(time*15.0, (framePass.x))-1.0)/spritesheetsizePass.x;
-				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), vUv.y + index);
+				
+				float yUvOffset = vUv.y;
+				if(is3D == 1.0)
+					yUvOffset += (index - uvoffsetPass.y);
+
+				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), yUvOffset);
 
 				
 			} else {
