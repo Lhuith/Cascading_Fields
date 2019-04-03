@@ -119,7 +119,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
     CreateInstance(world, ForestBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Forest_SpriteSheet.png', false);
     CreateInstance(animatedWorld, CritterBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/critters.png', true, true);
     CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true, false);
-    CreateInstance(world, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
+    CreateInstance(animatedWorld, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
 }
 
 

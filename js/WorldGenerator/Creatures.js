@@ -15,7 +15,7 @@ var Creatures = [
         "Turtle",
         0x4b00ff,
         [
-            MapToSS(0, 1),
+            MapToSS(0, 0),
         ],
         new THREE.Vector3(50, 50, 50),
         new THREE.Vector2(3, 1),
@@ -28,12 +28,3 @@ var Creatures = [
         ]
     ),
 ];
-
-function Basic_Object(name, maphex, ssIndex, size, animationFrames, colors){
-    this.name = name;
-    this.mapHexCode = maphex;
-    this.size = size;
-    this.ssIndex = ssIndex;
-    this.animationFrames = animationFrames;
-    this.colors = colors;
-}

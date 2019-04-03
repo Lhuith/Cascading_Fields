@@ -15,6 +15,7 @@
 		varying vec2 uvoffsetPass;
 		varying vec2 spritesheetsizePass;
 
+		uniform vec3 cameraPosition;
 		varying vec3 viewDirection;
 		varying vec4 posWorld;
 
@@ -30,7 +31,7 @@
 
 			if(animationSwitch == 1.0){
 				
-				vec2 diff = vec2(posWorld.x - viewDirection.x, posWorld.y - viewDirection.y);
+				vec2 diff = vec2(posWorld.x - cameraPosition.x, posWorld.z - cameraPosition.z);
 				//Regions mapped from -1 to 1;
 				float angle = atan(diff.y, diff.x);
 				float offset = PI / 4.0;
@@ -40,14 +41,18 @@
 				//normaledAngle = (normaledAngle * 2) - 1;
 				float normalizedAngle = dagrees / 360.0;
 
-				float index = ceil(mod(normalizedAngle * 2.0, 2.0)) - 1.0;
+				float index = ceil(mod(normalizedAngle * 4.0, 4.0)) - 1.0;
 
 				uvTime = time;
-				float timeOffsetX = ceil(mod(time*15.0, (framePass.x))-1.0)/spritesheetsizePass.x;
+				float timeOffsetX = ceil(mod(time*2.0, (framePass.x))-1.0)/spritesheetsizePass.x;
 				
 				float yUvOffset = vUv.y;
-				if(is3D == 1.0)
-					yUvOffset += (index - uvoffsetPass.y);
+
+				if(is3D == 1.0){
+				//
+					yUvOffset += (index - uvoffsetPass.y)/spritesheetsizePass.y;
+				}
+
 
 				uvIndex = vec2(vUv.x + (timeOffsetX - uvoffsetPass.x), yUvOffset);
 
@@ -62,7 +67,7 @@
 			if (tex.a != 1.0) 
 			discard;
 
-			gl_FragColor = tex * vec4(colorPass, 1.0) * vec4(fogColor,1.0);
+			gl_FragColor = tex * vec4(colorPass, 1.0) * vec4(fogColor,1.0) ;
 
 			float depth = (gl_FragCoord.z / gl_FragCoord.w)/2.0;
 

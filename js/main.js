@@ -987,6 +987,12 @@ function animate() {
             //console.log("poo");
         }
 
+        if(animatedWorldObjects.children[1] != undefined){
+            animatedWorldObjects.children[1].material.uniforms.time.value = timer;
+            //console.log(timer%3);
+            //console.log("poo");
+        }
+
     }
 
     Movement(delta);

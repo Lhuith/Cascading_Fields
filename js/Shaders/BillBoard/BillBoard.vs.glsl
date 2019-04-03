@@ -43,8 +43,8 @@
 			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 			
 			//viewdirection
-			posWorld = (modelMatrix * (vec4(mvPosition.xyz, 1.0)));
-			viewDirection = normalize(cameraPosition.xyz -	posWorld.xyz);	
+			posWorld = (modelMatrix * (vec4(position.xyz * scaleInstance, 1.0)));
+			viewDirection = normalize(abs(posWorld.xyz - cameraPosition.xyz));	
 			//---------------------------------------------------------
 
 			gl_Position = projectionMatrix * mvPosition;
