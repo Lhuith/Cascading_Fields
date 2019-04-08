@@ -21,16 +21,11 @@ var Critters = [
         new THREE.Vector2(3, 1),
         [
             new THREE.Color(0xff5a5b)
-        ]
+        ],
+        new THREE.Vector3(0,0,0),
+        FACEORIENTATIONS[0],
     ),
 ];
 
-function Basic_Object(name, maphex, ssIndex, size, animationFrames, colors){
-    this.name = name;
-    this.mapHexCode = maphex;
-    this.size = size;
-    this.ssIndex = ssIndex;
-    this.animationFrames = animationFrames;
-    this.colors = colors;
-}
+
 

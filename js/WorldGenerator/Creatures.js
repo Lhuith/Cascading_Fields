@@ -25,6 +25,8 @@ var Creatures = [
             new THREE.Color(0x129858),
             new THREE.Color(0x16B460),
             new THREE.Color(0x0BD27D),
-        ]
+        ],
+        new THREE.Vector3(0,0,0),
+        FACEORIENTATIONS[0],
     ),
 ];

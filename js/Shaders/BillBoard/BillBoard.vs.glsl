@@ -26,7 +26,7 @@
 
 		uniform mat4 modelMatrix;
 		uniform vec3 cameraPosition;
-		varying vec3 viewDirection;
+		varying vec2 viewDirection;
 		varying vec4 posWorld;
 
 		// http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
@@ -43,8 +43,8 @@
 			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 			
 			//viewdirection
-			posWorld = (modelMatrix * (vec4(position.xyz * scaleInstance, 1.0)));
-			viewDirection = normalize(abs(posWorld.xyz - cameraPosition.xyz));	
+			posWorld = modelMatrix * vec4((offset),1.0);
+			viewDirection = normalize((posWorld.xz - cameraPosition.xz));	
 			//---------------------------------------------------------
 
 			gl_Position = projectionMatrix * mvPosition;

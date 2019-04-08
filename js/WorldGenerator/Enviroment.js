@@ -1,13 +1,11 @@
-function FetchEnviroment(hex, x, y, z, buffer, ray) {
+function FetchEnviroment(hex, x, y, z, buffer, ray, chance) {
     var y;
 
     for (var i = 0; i < Enviroment.length; i++) {
-        if (hex == Enviroment[i].mapHexCode) {
+        if (hex == Enviroment[i].mapHexCode && (randomRange(0, 10) < chance)) {
 
-            if (randomRange(0, 100) > 91.1) {
                 y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
                 PopulateBuffer(x, y, z, buffer, Enviroment[i]);
-            }
         }
     }
 }
@@ -33,7 +31,9 @@ var Enviroment = [
                 new THREE.Color(0x8EC2FE),
                 new THREE.Color(0x8FFBFE),
                 new THREE.Color(0xFFFF93),
-            ]
+            ],
+            new THREE.Vector3(0,0,0),
+            FACEORIENTATIONS[0],
         ),
     new Basic_Object
         (
@@ -53,15 +53,8 @@ var Enviroment = [
                 new THREE.Color(0xDB4C2C),
                 new THREE.Color(0xAA7B47),
                 new THREE.Color(0xECDAC2),
-            ]
+            ],
+            new THREE.Vector3(0,0,0),
+            FACEORIENTATIONS[0],
         )
 ];
-
-function Basic_Object(name, maphex, ssIndex, size, animationFrames, colors) {
-    this.name = name;
-    this.mapHexCode = maphex;
-    this.size = size;
-    this.ssIndex = ssIndex;
-    this.animationFrames = animationFrames;
-    this.colors = colors;
-}

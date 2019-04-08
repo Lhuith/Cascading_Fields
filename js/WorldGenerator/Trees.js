@@ -320,19 +320,11 @@ function PopulateGenericForestBuffers(x, y, z, buffer, EnivormentalBuffer, rotIn
         trunk: trunkPos,
         branch: branchesPos,
     }
-
-    var FaceOrientations = [
-        new THREE.Quaternion(0, 0, 0, 0),
-        new THREE.Quaternion(0, 0.707, 0, 0.707),
-        new THREE.Quaternion(0, 0.924, 0, 0.383),
-        new THREE.Quaternion(0, 0.383, 0, 0.924)
-    ]
-
     var uvs = tree_object.obj.ssIndex[randomRangeRound(0, tree_object.obj.ssIndex.length - 1)];
 
-    for(var i = 0; i < FaceOrientations.length; i++){
+    for(var i = 0; i < FACEORIENTATIONS.length; i++){
     CreateGenericTreeFace(x, y, z, buffer,
-        FaceOrientations[i], faceQ,
+        FACEORIENTATIONS[i], faceQ,
         tree_object.obj.size, uvs, hexInfo, offsets, trunkHeight);
     }
 

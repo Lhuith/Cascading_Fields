@@ -59,6 +59,7 @@
 	<script type="text/javascript" src="js/GibbirishGenerator.js"></script>
 
 	<!-- World Generator -->
+	<script type="text/javascript" src="js/WorldGenerator/WorldGeneratorHelpers.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/FallOffGenerator.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerator.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MeshGenerator.js"></script>
@@ -71,6 +72,9 @@
 	<script type="text/javascript" src="js/WorldGenerator/Trees.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Enviroment.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Creatures.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/Elements.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/Structures.js"></script>
+
 </head>
 
 

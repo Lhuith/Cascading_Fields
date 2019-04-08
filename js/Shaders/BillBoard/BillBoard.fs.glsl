@@ -16,7 +16,7 @@
 		varying vec2 spritesheetsizePass;
 
 		uniform vec3 cameraPosition;
-		varying vec3 viewDirection;
+		varying vec2 viewDirection;
 		varying vec4 posWorld;
 
 		const float PI = 3.1415926535897932384626433832795;
@@ -30,18 +30,16 @@
 			vec2 uvIndex = vec2(1.0);
 
 			if(animationSwitch == 1.0){
-				
-				vec2 diff = vec2(posWorld.x - cameraPosition.x, posWorld.z - cameraPosition.z);
-				//Regions mapped from -1 to 1;
-				float angle = atan(diff.y, diff.x);
-				float offset = PI / 4.0;
+			
+				float angle = atan(viewDirection.y, viewDirection.x) * (180.0 / PI);
+				float offset = (PI / 4.0) * (180.0 / PI);
 
-				float dagrees = AbsoluteAngle((angle + offset) * 180.0 / PI);
+				float dagrees = AbsoluteAngle(angle + offset);
 
 				//normaledAngle = (normaledAngle * 2) - 1;
 				float normalizedAngle = dagrees / 360.0;
 
-				float index = ceil(mod(normalizedAngle * 4.0, 4.0)) - 1.0;
+				float index = ceil(mod(normalizedAngle * 4.0, 4.0) - 1.0);
 
 				uvTime = time;
 				float timeOffsetX = ceil(mod(time*2.0, (framePass.x))-1.0)/spritesheetsizePass.x;
@@ -60,14 +58,12 @@
 			} else {
 				uvIndex = vec2(vUv.x, vUv.y);
 			}
-
-
 			vec4 tex = texture2D( map, uvIndex);
 
 			if (tex.a != 1.0) 
 			discard;
 
-			gl_FragColor = tex * vec4(colorPass, 1.0) * vec4(fogColor,1.0) ;
+			gl_FragColor = (tex * vec4(colorPass, 1.0) * vec4(fogColor,1.0));
 
 			float depth = (gl_FragCoord.z / gl_FragCoord.w)/2.0;
 

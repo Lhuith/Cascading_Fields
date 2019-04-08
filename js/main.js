@@ -99,14 +99,14 @@ var SunColors = [
 
 var starAlpha = [
     new THREE.Vector4(0.0, 0.0, 0.0, 0.0), //Morning
-    new THREE.Vector4(1, 0.0, 0.0,0.0),
-    new THREE.Vector4(1, 0.941,0.0, 0.0), // Midday
-    new THREE.Vector4(1, 0.941, 0.0,0.0), // Midday
-    new THREE.Vector4(1, 0.352, 0.0,0.5), // dusk
-    new THREE.Vector4(0.878, 0.447,0.0, 0.7), // Night
-    new THREE.Vector4(0.113, 0.125, 0.0,1.0), // Night
-    new THREE.Vector4(0.113, 0.125, 0.0,1.0), // Night
-    new THREE.Vector4(0.968, 0.737, 0.0,0.0), // early morning
+    new THREE.Vector4(1, 0.0, 0.0, 0.0),
+    new THREE.Vector4(1, 0.941, 0.0, 0.0), // Midday
+    new THREE.Vector4(1, 0.941, 0.0, 0.0), // Midday
+    new THREE.Vector4(1, 0.352, 0.0, 0.5), // dusk
+    new THREE.Vector4(0.878, 0.447, 0.0, 0.7), // Night
+    new THREE.Vector4(0.113, 0.125, 0.0, 1.0), // Night
+    new THREE.Vector4(0.113, 0.125, 0.0, 1.0), // Night
+    new THREE.Vector4(0.968, 0.737, 0.0, 0.0), // early morning
 ];
 
 
@@ -241,7 +241,7 @@ function SetSkyColor(d_n_time) {
     lerped.lerpVectors(a, b, index - Math.floor(index));
 
     var as = SunColors[Math.floor(index)];
-    var bs = SunColors[Math.ceil(index) % SunColors .length];
+    var bs = SunColors[Math.ceil(index) % SunColors.length];
 
     var lerpeds = new THREE.Vector3();
 
@@ -251,7 +251,7 @@ function SetSkyColor(d_n_time) {
 
 
     var aAlpha = starAlpha[Math.floor(index)];
-    var bAlpha = starAlpha[Math.ceil(index) % starAlpha .length];
+    var bAlpha = starAlpha[Math.ceil(index) % starAlpha.length];
 
     var lerpedAlpha = new THREE.Vector4();
 
@@ -268,7 +268,7 @@ function SetSkyColor(d_n_time) {
         skyMaterial.uniforms.alpha.value = lerpedAlpha.w;
     }
 
-    if(PlanetMaterial != undefined){
+    if (PlanetMaterial != undefined) {
         PlanetMaterial.uniforms.customColor.value = new THREE.Vector4(lerped.x, lerped.y, lerped.z, 1.0);
     }
     //console.log(index);
@@ -489,7 +489,7 @@ function init() {
 
     //mapcontainer = document.getElementById('webGL-container-map_view');
     //document.body.appendChild(mapcontainer);
-//
+    //
     //MapRenderer = new THREE.WebGLRenderer({ antialias: false });
     //MapRenderer.setSize(window.innerWidth / 3, window.innerWidth / 4);
     //MapRenderer.setClearColor(0x000000, 1);
@@ -564,8 +564,8 @@ function LoadCharacter(spriteNumber, url, scale, SpriteSheetSize, position) {
     sprite.scale.set(scale.x, scale.y, scale.z);
     sprite.position.set(position.x, position.y, position.z);
 
-    spriteMaterial.map.offset = new THREE.Vector2((1/SpriteSheetSize.x) * 0, (1/SpriteSheetSize.y) * 0);
-    spriteMaterial.map.repeat = new THREE.Vector2((1/SpriteSheetSize.x), (1/SpriteSheetSize.y));
+    spriteMaterial.map.offset = new THREE.Vector2((1 / SpriteSheetSize.x) * 0, (1 / SpriteSheetSize.y) * 0);
+    spriteMaterial.map.repeat = new THREE.Vector2((1 / SpriteSheetSize.x), (1 / SpriteSheetSize.y));
 
     return sprite;
 }
@@ -878,7 +878,7 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-   // renderer.setSize( window.innerWidth, window.innerHeight );
+    // renderer.setSize( window.innerWidth, window.innerHeight );
 
     //composer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
     renderer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
@@ -978,21 +978,14 @@ function animate() {
         skyMaterial.uniforms.time.value = timer;
     }
 
-    if(animatedWorldObjects.children.length != 0){
+    if (animatedWorldObjects.children.length != 0) {
         //console.log(animatedWorldObjects.children.length);
-     
-        if(animatedWorldObjects.children[0] != undefined){
-            animatedWorldObjects.children[0].material.uniforms.time.value = timer;
-            //console.log(timer%3);
-            //console.log("poo");
-        }
 
-        if(animatedWorldObjects.children[1] != undefined){
-            animatedWorldObjects.children[1].material.uniforms.time.value = timer;
-            //console.log(timer%3);
-            //console.log("poo");
+        for (var i = 0; i < animatedWorldObjects.children.length; i++) {
+            if (animatedWorldObjects.children[i] != undefined) {
+                animatedWorldObjects.children[i].material.uniforms.time.value = timer;
+            }
         }
-
     }
 
     Movement(delta);
@@ -1216,12 +1209,12 @@ function createDataMap(map, size) {
 
     dataTexture = new THREE.DataTexture
         (
-        Uint8Array.from(map),
-        size,
-        size,
-        THREE.RGBFormat,
-        THREE.UnsignedByteType,
-    );
+            Uint8Array.from(map),
+            size,
+            size,
+            THREE.RGBFormat,
+            THREE.UnsignedByteType,
+        );
 
     dataTexture.needsUpdate = true;
 
@@ -1244,12 +1237,12 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
 
     dataTexture = new THREE.DataTexture
         (
-        Uint8Array.from(planetInfo.map),
-        information.data.size,
-        information.data.size,
-        THREE.RGBFormat,
-        THREE.UnsignedByteType,
-    );
+            Uint8Array.from(planetInfo.map),
+            information.data.size,
+            information.data.size,
+            THREE.RGBFormat,
+            THREE.UnsignedByteType,
+        );
 
     dataTexture.needsUpdate = true;
     planetData = new PlanetInformation(dataTexture, planetInfo.hasAtmo,
