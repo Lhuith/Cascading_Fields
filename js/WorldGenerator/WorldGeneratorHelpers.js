@@ -8,19 +8,30 @@ const FACEORIENTATIONS = [
 const FACEORIENTATIONSIDENTITY = new THREE.Quaternion(0, 0, 0, 1);
 
 
-function Basic_Object(name, maphex, ssIndex, size, animationFrames, colors, positionOffsets, orientation, solid = false, children){
+function Basic_Object(name, maphex, solid = false){
     this.name = name;
     this.mapHexCode = maphex;
+    this.components = [];
+    this.solid = solid;
+    this.children = []
+}
+
+Basic_Object.prototype.addComponent = function(c){
+    this.components.push(c);
+}
+
+Basic_Object.prototype.addChild = function(c){
+    this.children.push(c);
+}
+
+
+function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orientation){
     this.size = size;
     this.ssIndex = ssIndex;
     this.animationFrames = animationFrames;
     this.colors = colors;
     this.posOffsets = positionOffsets;
     this.orientation = orientation;
-    this.solid = solid;
-
-    if(children != undefined)
-        this.children = children;
 }
 
 function Create3DObjectArray(name, maphex, ssIndex, size, animationFrames, colors, positionOffsets, orientationOffset, solid = false, children){
@@ -44,16 +55,6 @@ function Create3DObjectArray(name, maphex, ssIndex, size, animationFrames, color
     return array;
 }
 
-Basic_Object.prototype.DecomposeObject = function(x, y, z, buffer) {
-
-    //Pass 1 for primary
+Renderer.prototype.DecomposeObject = function(x, y, z, buffer) {
     PopulateBuffer(x, y, z, buffer, this);
-   
-    //Pass 2 for primary's children
-    if (this.children != undefined ) {
-        for (var i = 0; i < this.children.length; i++) {
-            //PopulateBuffer(x, y, z, buffer, Structure[i].children[j]);
-            this.children[i].DecomposeObject(x, y, z, buffer);
-        }
-    }
 }

@@ -146,6 +146,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
 
 
 function PopulateBuffer(x, y, z, buffer, basic_object){
+    //console.log(basic_object);
     var yOffets = (basic_object.size.y) / 2.0;
 
     buffer.scales.push(basic_object.size.x, basic_object.size.y, basic_object.size.z);
