@@ -145,30 +145,30 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
 }
 
 
-function PopulateBuffer(x, y, z, buffer, basic_object){
-    //console.log(basic_object);
-    var yOffets = (basic_object.size.y) / 2.0;
+function PopulateBuffer(x, y, z, buffer, renderer){
+    //console.log(renderer);
+    var yOffets = (renderer.size.y) / 2.0;
 
-    buffer.scales.push(basic_object.size.x, basic_object.size.y, basic_object.size.z);
+    buffer.scales.push(renderer.size.x, renderer.size.y, renderer.size.z);
 
     buffer.vector.set(x, y, z, 0).normalize();
 
-    buffer.offsets.push(x + buffer.vector.x + basic_object.posOffsets.x, y + buffer.vector.y + yOffets + basic_object.posOffsets.y, z + buffer.vector.z + basic_object.posOffsets.z);
+    buffer.offsets.push(x + buffer.vector.x + renderer.posOffsets.x, y + buffer.vector.y + yOffets + renderer.posOffsets.y, z + buffer.vector.z + renderer.posOffsets.z);
     buffer.vector.set(x, y, z, w).normalize();
 
-    buffer.orientations.push(basic_object.orientation.x, basic_object.orientation.y, basic_object.orientation.z, basic_object.orientation.w);
+    buffer.orientations.push(renderer.orientation.x, renderer.orientation.y, renderer.orientation.z, renderer.orientation.w);
 
-    var col = basic_object.colors[randomRangeRound(0, basic_object.colors.length - 1)];
+    var col = renderer.colors[randomRangeRound(0, renderer.colors.length - 1)];
     buffer.colors.push(col.r, col.g, col.b);
 
-    var uvs = basic_object.ssIndex[randomRangeRound(0, basic_object.ssIndex.length - 1)];
+    var uvs = renderer.ssIndex[randomRangeRound(0, renderer.ssIndex.length - 1)];
 
     buffer.uvoffsets.push(uvs.x, uvs.y);
 
-    buffer.animationFrame.push(basic_object.animationFrames.x, basic_object.animationFrames.y);
+    buffer.animationFrame.push(renderer.animationFrames.x, renderer.animationFrames.y);
 
-    if(basic_object.solid){
-        var geometry = new THREE.BoxGeometry(25, basic_object.size.y, 25);
+    if(renderer.solid){
+        var geometry = new THREE.BoxGeometry(25, renderer.size.y, 25);
         var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         var cube = new THREE.Mesh(geometry, material);
         //scene.add( cube );
