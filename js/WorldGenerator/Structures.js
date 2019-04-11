@@ -15,12 +15,13 @@ function FetchStructure(hex, x, y, z, buffer, ray) {
 var silver0 = 0xD3D3D3;
 var silver1 = 0x808080; 
 
+//LampPost
+{
 var lampPost = 
 new Basic_Object
     (
     "LampPost",
     0xff9c00,
-    true,
 );
 
 var lampPostBase =
@@ -28,7 +29,6 @@ new Basic_Object
 (
 "LampPostBase",
 0xff9c00,
-true,
 );
 
 lampPostBase.Create3D
@@ -46,7 +46,6 @@ new Basic_Object
 (
 "LampPostBase",
 0xff9c00,
-true,
 );
 
 lampPostHead.CreateBox3D(
@@ -59,6 +58,7 @@ lampPostHead.CreateBox3D(
 
 lampPost.addChild(lampPostHead);
 //Strucutres are multiple instances of basic_object
+}
 
 var Structure = [
     lampPost,

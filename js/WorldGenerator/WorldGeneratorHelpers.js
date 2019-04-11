@@ -8,11 +8,10 @@ const FACEORIENTATIONS = [
 const FACEORIENTATIONSIDENTITY = new THREE.Quaternion(0, 0, 0, 1);
 
 
-function Basic_Object(name, maphex, solid = false) {
+function Basic_Object(name, maphex) {
     this.name = name;
     this.mapHexCode = maphex;
     this.components = [];
-    this.solid = solid;
     this.children = []
     this.parent;
 }
@@ -104,4 +103,8 @@ Basic_Object.prototype.Update = function (x, y, z, buffer) {
 
 Renderer.prototype.DecomposeObject = function (x, y, z, buffer) {
     PopulateBuffer(x, y, z, buffer, this);
+}
+
+function MapToSS(x, y){
+    return new THREE.Vector2((1/8) * x, (1/8) * y);
 }

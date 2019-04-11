@@ -152,7 +152,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     geo.computeFaceNormals();
     geo.computeVertexNormals();
 
-    CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
+    //CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
     return geo;
 }
 

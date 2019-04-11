@@ -127,8 +127,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
                 characterList.push(char);
             }
 
-            //FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
-            //FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
+            FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
+            FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
             //FetchEnviroment(SampledColor.getHex(), z, 1.0, x, EnviromentBuffer, raySampler);
             //FetchCreature(SampledColor.getHex(), z, 1.0, x, CreatureBuffer, raySampler);
             //FetchElement(SampledColor.getHex(), z, 1.0, x, ElementBuffer, raySampler, 0.4);
@@ -181,10 +181,6 @@ function PopulateBuffer(x, y, z, buffer, renderer){
         //worldObject.add(cube);
         //collision.push()
     }
-}
-
-function MapToSS(x, y){
-    return new THREE.Vector2((1/8) * x, (1/8) * y);
 }
 
 function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate, is3D = false) {
