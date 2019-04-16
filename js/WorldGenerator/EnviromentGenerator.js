@@ -14,7 +14,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
 
     var EnviromentBuffer = {
@@ -24,7 +25,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
 
     var StructureBuffer = {
@@ -34,17 +36,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
-    }
-
-    var AnimatedBuffer = {
-        offsets: [],
-        orientations: [],
-        vector: new THREE.Vector4(),
-        scales: [],
-        colors: [],
-        uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
 
     var CritterBuffer = {
@@ -54,7 +47,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
 
     var CreatureBuffer = {
@@ -64,7 +58,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
     var ElementBuffer = {
         offsets: [],
@@ -73,7 +68,8 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
     var StructureBuffer = {
         offsets: [],
@@ -82,14 +78,10 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         scales: [],
         colors: [],
         uvoffsets: [],
-        animationFrame: []
+        animationFrame: [],
+        typeSwitch: []
     }
 
-    var greenTreeHex = [0xB0C658, 0x4FB64F, 0x9ADA7D, 0x197F54, 0xBEE7AC];
-    var flowerIndex = [0xFFDCD5, 0xFFF0D5, 0xEDCDFF, 0xE0FFFD, 0xFF5355, 0x8EC2FE, 0x8FFBFE, 0xFFFF93];
-
-    var indexX = 1 / (SpriteSheetSize.x);
-    var indexY = 1 / (SpriteSheetSize.y);
     var raySampler = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
     var testing = true;
 
@@ -167,34 +159,13 @@ function PopulateBuffer(x, y, z, buffer, renderer){
 
     buffer.animationFrame.push(renderer.animationFrames.x, renderer.animationFrames.y);
 
-    if(renderer.solid){
-        var geometry = new THREE.BoxGeometry(25, renderer.size.y, 25);
-        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        var cube = new THREE.Mesh(geometry, material);
-        //scene.add( cube );
-        cube.visible = false;
-        cube.position.set(x, y, z);
-    
-        //boxHelper = new THREE.BoxHelper(cube);
-        //boxHelper.material.color.set(0xffffff);
-        //world.add(boxHelper);
-        //worldObject.add(cube);
-        //collision.push()
-    }
+    buffer.typeSwitch.push(renderer.typeSwitch);
 }
 
 function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate, is3D = false) {
-    //console.log(buffer);
-    var vertex;
-    var fragment;
 
-    if (isBill) {
-        vertex = ShaderInformation.billvertex;
-        fragment = ShaderInformation.billfragment;
-    } else {
-        vertex = ShaderInformation.instavert;
-        fragment = ShaderInformation.instafrag;``
-    }
+    var vertex = ShaderInformation.billvertex;
+    var fragment = ShaderInformation.billfragment;
 
     var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1); //new THREE.BoxBufferGeometry( 2, 2, 2 );
     bufferGeometry.castShadow = true;
@@ -209,6 +180,10 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     uvOffsetAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.uvoffsets), 2);
     scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.scales), 3);
     animationFrameAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.animationFrame), 2);
+    typeSwitchAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.typeSwitch), 1);
+    
+    //Quad tree insertion for collsion
+    ObjectScene.push(offsetAttribute);
 
     geometry.addAttribute('offset', offsetAttribute);
     geometry.addAttribute('orientation', orientationAttribute);
@@ -216,6 +191,7 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     geometry.addAttribute('uvoffset', uvOffsetAttribute);
     geometry.addAttribute('scaleInstance', scaleAttribute);
     geometry.addAttribute('animationFrame', animationFrameAttribute);
+    geometry.addAttribute('typeSwitch', typeSwitchAttribute);
 
     var texture = new THREE.TextureLoader().load(url);
     texture.magFilter = THREE.NearestFilter;
@@ -262,96 +238,6 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     mesh.frustumCulled = false;
     mesh.castShadow = true;
     world.add(mesh);
-}
-
-function PopulateStructureBuffers(x, y, z, buffer, AnimatedBuffer, spriteSheetSize, SpriteSize, collision, world, uvIndex) {
-
-    w = 0;
-
-    var scale = new THREE.Vector3(100, 100, 100);
-
-    var Yoffset = (16);
-    var spriteSize = 32 * 2;
-
-    var indexX = 1 / (spriteSheetSize.x);
-    var indexY = 1 / (spriteSheetSize.y);
-
-    // + Yoffset
-    CreateStructureFace(x, y + Yoffset, z, buffer, scale, new THREE.Vector4(0, 0, 0, 0), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-    CreateStructureFace(x, y + Yoffset, z, buffer, scale, new THREE.Vector4(0, 0.707, 0, 0.707), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-    CreateStructureFace(x, y + Yoffset, z, buffer, scale, new THREE.Vector4(0, 0.924, 0, 0.383), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-    CreateStructureFace(x, y + Yoffset, z, buffer, scale, new THREE.Vector4(0, 0.383, 0, 0.924), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-
-    var baseH = spriteSize + Yoffset + 6;///y + Yoffset;
-
-    var xOffset = 12;
-    var zOffset = 12;
-
-    CreateStructureFaceHead(x, y + baseH, z + zOffset, buffer, scale, new THREE.Vector4(0, 0.0, 0, 0.0), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-    CreateStructureFaceHead(x, y + baseH, z - zOffset, buffer, scale, new THREE.Vector4(0, 0.0, 0, 0.0), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-
-    CreateStructureFaceHead(x + xOffset, y + baseH, z, buffer, scale, new THREE.Vector4(0, 0.707, 0, 0.707), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-    CreateStructureFaceHead(x - xOffset, y + baseH, z, buffer, scale, new THREE.Vector4(0, 0.707, 0, 0.707), spriteSheetSize, SpriteSize, collision, world, uvIndex);
-
-    PushToEnviromentBuffers(x, y + Yoffset + baseH - 32, z, AnimatedBuffer, spriteSheetSize,
-        SpriteSize, new THREE.Vector2(indexX * uvIndex, indexX * 0), new THREE.Vector3(scale.x / 2.0, scale.y / 2.0, scale.z / 2.0), new THREE.Color(0xFF6F4B));
-
-    var geometry = new THREE.BoxGeometry(25, scale.y, 25);
-    var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    var cube = new THREE.Mesh(geometry, material);
-    //scene.add( cube );
-    cube.visible = false;
-    cube.position.set(x, y, z);
-
-    //boxHelper = new THREE.BoxHelper(cube);
-    //boxHelper.material.color.set(0xffffff);
-    //world.add(boxHelper);
-    world.add(cube);
-    //collision.push()
-}
-
-function CreateStructureFaceHead(x, y, z, buffer, scale, orientation, spriteSheetSize, SpriteSize, collision, world, uvIndex) {
-    //--------------------------------------------BASE------------------------------------------
-    w = 0;
-    buffer.scales.push(scale.x, scale.y, scale.z);
-    buffer.vector.set(x, y, z, 0).normalize();
-    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
-    buffer.vector.set(x, y, z, w).normalize();
-    buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.y);
-
-    var index = Math.round(randomRange(0, spriteSheetSize.x - 1));
-    var col = new THREE.Color(0xFFA54F);
-
-    var indexX = 1 / (spriteSheetSize.x);
-    var indexY = 1 / (spriteSheetSize.y);
-
-    buffer.uvoffsets.push(indexX * (uvIndex + 1), indexY * uvIndex); //Select sprite at 0, 0 on grid
-    buffer.colors.push(col.r, col.g, col.b);
-    buffer.animationFrame.push(0, 0);
-    //--------------------------------------------BASE------------------------------------------
-}
-
-function CreateStructureFace(x, y, z, buffer, scale, orientation, spriteSheetSize, SpriteSize, collision, world, uvIndex) {
-
-    //--------------------------------------------BASE------------------------------------------
-    w = 0;
-    buffer.scales.push(scale.x, scale.y, scale.z);
-    buffer.vector.set(x, y, z, 0).normalize();
-    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y, z + buffer.vector.z);
-    buffer.vector.set(x, y, z, w).normalize();
-    buffer.orientations.push(orientation.x, orientation.y, orientation.z, orientation.w);
-
-    var index = Math.round(randomRange(0, spriteSheetSize.x - 1));
-    var col = new THREE.Color(0xFFA54F);
-
-    var indexX = 1 / (spriteSheetSize.x);
-    var indexY = 1 / (spriteSheetSize.y);
-
-    buffer.uvoffsets.push(indexX * uvIndex, indexY * uvIndex); //Select sprite at 0, 0 on grid
-    buffer.colors.push(col.r, col.g, col.b);
-    //--------------------------------------------BASE------------------------------------------
 }
 
 function PopulateCloudBuffers(x, y, z, buffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, hex, multiplyScalar) {

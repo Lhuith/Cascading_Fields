@@ -15,6 +15,9 @@
 		varying vec2 uvoffsetPass;
 		varying vec2 spritesheetsizePass;
 
+		addShadow
+		addDither
+		
 		void main() {
 
 			float uvTime = 1.0;

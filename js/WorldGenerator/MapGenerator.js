@@ -101,7 +101,7 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
 
     //console.log(LandMass);
 
-    return new PlanetInformation(finalmap, false, false, colors,
+    return new landInformation(finalmap, false, false, colors,
         (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);
 };
 
@@ -128,7 +128,7 @@ function getOtherImageData( image ) {
 
 }
 
-function PlanetInformation(map, hasAtmo, hasLiquad, colors, url, regionsInfo, landmass) {
+function landInformation(map, hasAtmo, hasLiquad, colors, url, regionsInfo, landmass) {
     this.map = map;
     this.hasAtmo = hasAtmo;
     this.hasLiquad = hasLiquad;

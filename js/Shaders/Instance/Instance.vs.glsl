@@ -35,6 +35,7 @@
 
 			vec3 ScaledPos = position * scaleInstance;
 			vec3 vPosition = applyQuaternionToVector( orientation, ScaledPos );
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
 			
 			float uvTime = 1.0;
 
@@ -46,7 +47,7 @@
 			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 
 
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
+			
 
 			colorPass = col.rgb;
 		}

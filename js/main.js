@@ -64,9 +64,9 @@ var skyObject = new THREE.Object3D();
 var SunMoonObject = new THREE.Object3D();
 var EnviromentalSpriteSheet;
 
-var planetData, planet,
-    planetText, planetTextInfo, planetTilt, hasRings,
-    PlanetMaterial, outline, planetRotationPeriod, planetSelected;
+var landData, land,
+    landText, landTextInfo, landTilt, hasRings,
+    landMaterial, outline, landRotationPeriod, landSelected;
 
 var timer = 0;
 var timeLimit = .25;
@@ -126,7 +126,7 @@ var skyboxuniforms =
     alpha: { type: "f", value: 1.0 },
 }
 
-var planetUniform =
+var landUniform =
 {
     indexMatrix16x16: { type: "fv1", value: DitherPattern4x4 },
     palette: { type: "v3v", value: GrayScalePallete },
@@ -151,7 +151,7 @@ var sundata =
 
 var ShaderLoadList =
 {
-    planet: new Shader
+    land: new Shader
         (
         ),
 }
@@ -268,8 +268,8 @@ function SetSkyColor(d_n_time) {
         skyMaterial.uniforms.alpha.value = lerpedAlpha.w;
     }
 
-    if (PlanetMaterial != undefined) {
-        PlanetMaterial.uniforms.customColor.value = new THREE.Vector4(lerped.x, lerped.y, lerped.z, 1.0);
+    if (landMaterial != undefined) {
+        landMaterial.uniforms.customColor.value = new THREE.Vector4(lerped.x, lerped.y, lerped.z, 1.0);
     }
     //console.log(index);
 }
@@ -461,9 +461,9 @@ function init() {
     raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1000);
     raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
     //LoadAssets();
-    //Load Shaders and Setup Planet
-    ShaderLoader('js/Shaders/Planet/Planet.vs.glsl',
-        'js/Shaders/Planet/Planet.fs.glsl', setUpPlanet, true);
+    //Load Shaders and Setup Land
+    ShaderLoader('js/Shaders/Land/Land.vs.glsl',
+        'js/Shaders/Land/Land.fs.glsl', setUpLand, true);
 
     //camera.position.y = -40;
     container = document.getElementById('webGL-container');
@@ -960,11 +960,61 @@ function animate() {
     AnimateClouds(delta);
     //Scene and Collsion World Managment
     //ShowHideObjects(worldObjects, 3000, true);
-    DistanceCollisionManage(worldObjects, 300);
+    //DistanceCollisionManage(worldObjects, 300);
+    //SimpleCollision(delta);
 
-    SimpleCollision(delta);
+    //worldObjects.position.y += 0.02;
+
+    if (ObjectScene != undefined) {
+        //for(var i = 0; i < ObjectScene.length; i++){
+        //    var obj = ObjectScene[i];
+        //    console.log(obj);
+        //   // obj.position.z += 22;
+        //}
+        var forestPosArray = ObjectScene[0];
 
 
+        var currentC = new THREE.Vector3();
+
+        if (forestPosArray != undefined) {
+            //for(var i = 0; i < forestOffsetArray.count; i++){
+            // 
+            // //console.log(currentT);
+            //
+            // //currentT.multiply(3);
+            // 
+            // if(i % 3 == 0)
+            //     forestOffsetArray.setXYZ(i, currentT.x, currentT.y + Math.sin(timer), currentT.z);
+            //}
+            //  var r =  randomRangeRound(0, forestOffsetArray.count - 1) ;
+            //  
+            //  currentT.fromArray( forestOffsetArray.array, ( r * 3 ) );
+            //  forestOffsetArray.setXYZ(r, currentT.x, 0, currentT.z);
+            //  forestOffsetArray.needsUpdate = true;
+            //console.log(forestPosArray[0]);
+            for (var i = 0; i < forestPosArray.count; i+=3) {
+
+                currentC.fromArray(forestPosArray.array, i);//new THREE.Vector3(forestPosArray[i], forestPosArray[i + 1], forestPosArray[i + 2]);
+                //treepos.setFromMatrixPosition(worldObjects.matrixWorld);
+
+                var distance =  controls.getObject().position.distanceTo(currentC);
+                //console.log(distance);
+
+                if(distance < 300){
+                    console.log("Cant belieave this worked");
+                } 
+                //if ((i * 3) < forestColortArray.count) {
+                //var index = i * 3;
+                //currentC.fromArray(forestColortArray.array, index);
+                //forestColortArray.setXYZ(index, 1.0, 1.0, 1.0);
+                //} else {
+                //    //console.log("gadda do guard check");
+                //}
+            }
+
+            //forestColortArray.needsUpdate = true;
+        }
+    }
 
     angle += 0.1;
     //mapCamera.rotation.x  += delta;
@@ -1118,13 +1168,13 @@ function CreateLand(start, vertex_text, fragment_text) {
 
     var vertex = vertex_text;
     var fragment = fragment_text;
-    //var ico = new THREE.PlaneGeometry(1000, 1000, 32);//new THREE.IcosahedronGeometry(planetSize, 4);
+    //var ico = new THREE.PlaneGeometry(1000, 1000, 32);//new THREE.IcosahedronGeometry(landSize, 4);
 
-    PlanetMaterial = new THREE.ShaderMaterial({
+    landMaterial = new THREE.ShaderMaterial({
         uniforms: THREE.UniformsUtils.merge([
             THREE.UniformsLib['lights'],
             THREE.UniformsLib['fog'],
-            planetUniform]),
+            landUniform]),
         vertexShader: (vertex),
         fragmentShader: (fragment),
         lights: true,
@@ -1173,7 +1223,7 @@ function PostImageData(map) {
 
     $.ajax({
         type: 'POST',
-        url: 'planet_information_post.php',
+        url: 'land_information_post.php',
         data: {
             image: dataUri,
         },
@@ -1221,15 +1271,15 @@ function createDataMap(map, size) {
     return dataTexture;
 }
 
-function createPlantiodDataFirst(data, vertexShader, fragShader) {
+function createLandDataFirst(data, vertexShader, fragShader) {
     ShaderLoader('js/Shaders/Instance/Instance.vs.glsl',
         'js/Shaders/Instance/Instance.fs.glsl', setUpMapFinal, { data: data, vertex: vertexShader, fragment: fragShader });
 }
 
-function createPlantiodDataFinal(information, vertexShader, fragShader) {
+function createLandDataFinal(information, vertexShader, fragShader) {
     var ShaderInfo = { billvertex: information.vertex, billfragment: information.fragment, instavert: vertexShader, instafrag: fragShader };
 
-    var planetInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
+    var landInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
         information.data.seed, information.data.noiseScale, information.data.offset, information.data.size, information.data.scale, information.data.gridsize, false, worldObjects,
         collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
 
@@ -1237,7 +1287,7 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
 
     dataTexture = new THREE.DataTexture
         (
-            Uint8Array.from(planetInfo.map),
+            Uint8Array.from(landInfo.map),
             information.data.size,
             information.data.size,
             THREE.RGBFormat,
@@ -1245,9 +1295,9 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
         );
 
     dataTexture.needsUpdate = true;
-    planetData = new PlanetInformation(dataTexture, planetInfo.hasAtmo,
-        planetInfo.hasLiquad, planetInfo.colors, planetInfo.url,
-        planetInfo.regionsInfo, planetInfo.LandMass);
+    landData = new landInformation(dataTexture, landInfo.hasAtmo,
+        landInfo.hasLiquad, landInfo.colors, landInfo.url,
+        landInfo.regionsInfo, landInfo.LandMass);
 
     extraDetial = new THREE.TextureLoader().load("img/Game_File/Map_Paint.png");
     extraDetial.magFilter = THREE.NearestFilter;
@@ -1255,25 +1305,25 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
     extraDetial.wrapS = THREE.RepeatWrapping;
 
 
-    if (planetData != undefined) {
+    if (landData != undefined) {
         landMassObject = new THREE.Object3D();
 
-        for (var i = 0; i < planetData.LandMass.length; i++) {
-            var chunk = new THREE.Mesh(planetData.LandMass[i],
-                PlanetMaterial);
+        for (var i = 0; i < landData.LandMass.length; i++) {
+            var chunk = new THREE.Mesh(landData.LandMass[i],
+                landMaterial);
 
 
             chunk.castShadow = true; //default is false
             chunk.receiveShadow = true; //default
             chunk.scale.set(1, 1, 1);
 
-            PlanetMaterial.uniforms.texture.value = planetData.map;
-            PlanetMaterial.uniforms.extra.value = extraDetial;
+            landMaterial.uniforms.texture.value = landData.map;
+            landMaterial.uniforms.extra.value = extraDetial;
 
-            planetData.map.wrapS = THREE.RepeatWrapping;
-            planetData.map.repeat.x = -1;
+            landData.map.wrapS = THREE.RepeatWrapping;
+            landData.map.repeat.x = -1;
 
-            PlanetMaterial.side = THREE.DoubleSide;
+            landMaterial.side = THREE.DoubleSide;
             dirLight.target = landMassObject;
             //var helper = new THREE.FaceNormalsHelper( chunk, 2, 0x00ff00, 1 );
             landMassObject.add(chunk)
@@ -1281,7 +1331,7 @@ function createPlantiodDataFinal(information, vertexShader, fragShader) {
             //MainScene.add(helper);
         }
 
-        //PostImageData(planetData.map);
+        //PostImageData(landData.map);
         MainScene.add(landMassObject);
     }
 
@@ -1335,20 +1385,20 @@ function ShaderLoader(vertex_url, fragment_url, onLoad, Custom, onProgress, onEr
 //Aswell as pass in extra paramaratres if needed
 
 function setUpMapFirstPass(init, vertex_text, fragment_text) {
-    ShaderLoadList.planet.vertex = vertex_text;
-    ShaderLoadList.planet.fragment = fragment_text;
-    createPlantiodDataFirst(init, vertex_text, fragment_text);
+    ShaderLoadList.land.vertex = vertex_text;
+    ShaderLoadList.land.fragment = fragment_text;
+    createLandDataFirst(init, vertex_text, fragment_text);
 }
 
 function setUpMapFinal(init, vertex_text, fragment_text) {
-    ShaderLoadList.planet.vertex = vertex_text;
-    ShaderLoadList.planet.fragment = fragment_text;
-    createPlantiodDataFinal(init, vertex_text, fragment_text);
+    ShaderLoadList.land.vertex = vertex_text;
+    ShaderLoadList.land.fragment = fragment_text;
+    createLandDataFinal(init, vertex_text, fragment_text);
 }
 
-function setUpPlanet(init, vertex_text, fragment_text) {
-    ShaderLoadList.planet.vertex = vertex_text;
-    ShaderLoadList.planet.fragment = fragment_text;
+function setUpLand(init, vertex_text, fragment_text) {
+    ShaderLoadList.land.vertex = vertex_text;
+    ShaderLoadList.land.fragment = fragment_text;
     CreateLand(init, vertex_text, fragment_text);
 }
 

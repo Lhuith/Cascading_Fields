@@ -45,7 +45,7 @@
 	<script type="text/javascript" src="js/THREE/ShaderPass.js"></script>
 	<script type="text/javascript" src="js/THREE/stats.min.js"></script>
 	<script type="text/javascript" src="js/THREE/RemoveInvis.js"></script>
-	<script type="text/javascript" src="js/Shaders/Planet/DitherParameters.js"></script>
+	<script type="text/javascript" src="js/Shaders/Land/DitherParameters.js"></script>
 	<script type="text/javascript" src="js/Helpers/ColorPalletes.js"></script>
 
 	<!--Helpers -->

@@ -2,11 +2,11 @@ function FetchStructure(hex, x, y, z, buffer, ray) {
     var y;
 
     for (var i = 0; i < Structure.length; i++) {
-        if (hex == Structure[i].mapHexCode) {
+        if (hex == Structure[i].hex) {
             y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
 
             //console.log(Structure[i].components[0]);
-            Structure[i].Update(x,y,z, buffer);
+            Structure[i].array.push(lampPost.Render(x,y,z, buffer));
         }
     }
 }
@@ -21,7 +21,7 @@ var lampPost =
 new Basic_Object
     (
     "LampPost",
-    0xff9c00,
+
 );
 
 var lampPostBase =
@@ -61,5 +61,5 @@ lampPost.addChild(lampPostHead);
 }
 
 var Structure = [
-    lampPost,
+    {hex:0xff9c00, base: lampPost, array: []}
 ];

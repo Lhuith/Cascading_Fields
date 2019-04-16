@@ -1,13 +1,15 @@
 		precision highp float;
 		uniform mat4 modelViewMatrix;
 		uniform mat4 projectionMatrix;
+
 		attribute vec3 position;
 		attribute vec3 offset;
 		attribute vec3 col;
 		attribute vec2 uv;
 		attribute vec2 uvoffset;
 		attribute vec3 scaleInstance;
-		
+		attribute float typeSwitch;
+
 		attribute vec4 orientation;
 
 
@@ -35,11 +37,26 @@
 		}
 
 		void main() {
-			vec4 mvPosition = modelViewMatrix * vec4( offset * 1.0, 1.0 );
-			mvPosition.xyz += (position * scaleInstance);
-			//mvPosition *= vec4(scaleInstance, 1.0);
-			
-			//vec2((uv.x/spriteSheetX) * (uvoffset.x * 1.0), (uv.y/spriteSheetY) + (uvoffset.y));
+
+			vec4 finalPosition = vec4(0);
+
+
+			if(typeSwitch == 0.0){
+				//Normal Sprite State ---------------------------------------------------
+				vec4 mvPosition = modelViewMatrix * vec4( offset * 1.0, 1.0 );
+				mvPosition.xyz += (position * scaleInstance);
+				finalPosition = projectionMatrix * mvPosition;
+				//Normal Sprite State ---------------------------------------------------
+			} else if (typeSwitch == 1.0){
+				//Solid Sprite State ---------------------------------------------------
+				vec3 ScaledPos = position * scaleInstance;
+				vec3 vPosition = applyQuaternionToVector( orientation, ScaledPos );
+				finalPosition = projectionMatrix * modelViewMatrix * vec4( offset + vPosition, 1.0 );
+				//Solid Sprite State ---------------------------------------------------
+			}
+
+
+
 			vUv = vec2((uv.x/spriteSheetX) + (uvoffset.x), (uv.y/spriteSheetY) + (uvoffset.y));
 			
 			//viewdirection
@@ -47,9 +64,15 @@
 			viewDirection = normalize((posWorld.xz - cameraPosition.xz));	
 			//---------------------------------------------------------
 
-			gl_Position = projectionMatrix * mvPosition;
+			
+
+
+
 			colorPass = col.rgb;
 			framePass = animationFrame;
 			uvoffsetPass = uvoffset;
 			spritesheetsizePass = vec2(spriteSheetX, spriteSheetY);	
+
+
+			gl_Position = finalPosition;
 		}

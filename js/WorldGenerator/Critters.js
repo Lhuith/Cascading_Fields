@@ -2,18 +2,17 @@ function FetchCritter(hex, x, y, z, buffer, ray) {
     var y;
 
     for (var i = 0; i < Critters.length; i++) {
-        if (hex == Critters[i].mapHexCode) {
+        if (hex == Critters[i].hex) {
             y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
-            Critters[i].Update(x,y,z, buffer);
+            Critters[i].array.push(Crab.Render(x,y,z, buffer));
+
         }
     }
 }
 
-
 var Crab = new Basic_Object
     (
         "Crab",
-        0xff7dff,
     );
 
 Crab.addComponent(
@@ -26,10 +25,12 @@ Crab.addComponent(
             new THREE.Color(0xff5a5b)
         ],
         new THREE.Vector3(0, 0, 0),
-        FACEORIENTATIONS[0], Crab));
+        FACEORIENTATIONS[0], 
+        0, 
+        Crab));
 
 var Critters = [
-    Crab,
+    {hex: 0xff7dff, base: Crab, array: []},
 ];
 
 
