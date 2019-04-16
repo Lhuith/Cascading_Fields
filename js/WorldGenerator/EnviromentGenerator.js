@@ -1,3 +1,8 @@
+const MapFileIndex =[
+    'img/Game_File/trees.png',
+    'img/Game_File/structures.png',
+];
+
 function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, ShaderInformation, SpriteSheetSize, SpriteSize) {
     //heightMap, heightMultiplier, _heightCurve, 
 
@@ -82,6 +87,18 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
         typeSwitch: []
     }
 
+    var ObjectBuffer = {
+        offsets: [],
+        orientations: [],
+        vector: new THREE.Vector4(),
+        scales: [],
+        colors: [],
+        uvoffsets: [],
+        animationFrame: [],
+        typeSwitch: [],
+        ssfileindex: [],
+    }
+
     var raySampler = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
     var testing = true;
 
@@ -108,32 +125,25 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
             var x = ((i * scale) - (size * scale) / 2.0) - (((size * scale / 2.0)) / 16);
             var z = ((j * scale) - (size * scale) / 2.0) - (((size * scale / 2.0)) / 16);
 
-
-           // //BigDude
-           // if (SampledColor.getHex() == 0xff4b4b) {
-           //     var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
-           //     var char = LoadCharacter(0, 'img/Game_File/Big_Guy.png', new THREE.Vector3(1000, 1000, 1000), new THREE.Vector2(4, 4), new THREE.Vector3(z, height + 1000 / 2, x));
-           //     char.material.fog = true;
-           //     char.rotation.y = 90;
-           //     world.add(char);
-           //     characterList.push(char);
-           // }
-
-            FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
-            FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
+            //FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
+            //FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
             //FetchEnviroment(SampledColor.getHex(), z, 1.0, x, EnviromentBuffer, raySampler);
             //FetchCreature(SampledColor.getHex(), z, 1.0, x, CreatureBuffer, raySampler);
             //FetchElement(SampledColor.getHex(), z, 1.0, x, ElementBuffer, raySampler, 0.4);
-            FetchStructure(SampledColor.getHex(), z, 1.0, x, StructureBuffer, raySampler);
+            //FetchStructure(SampledColor.getHex(), z, 1.0, x, StructureBuffer, raySampler);
+
+            FetchTrees(SampledColor.getHex(), z, 1.0, x, ObjectBuffer, EnviromentBuffer, raySampler, world, 0.2);
+            FetchStructure(SampledColor.getHex(), z, 1.0, x, ObjectBuffer, raySampler);
         }
     }
 
+    
     //Will change world objects to chunks, to switch them off and save memory
-    CreateInstance(world, ForestBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/Forest_SpriteSheet.png', false);
-    CreateInstance(animatedWorld, CritterBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/critters.png', true, true);
-    CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true, false);
-    CreateInstance(animatedWorld, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
-    CreateInstance(world, StructureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/structures.png', false);
+    CreateInstance(world, ObjectBuffer, SpriteSheetSize, ShaderInformation, false, true);
+    //CreateInstance(animatedWorld, CritterBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/critters.png', true, true);
+    //CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true, false);
+    //CreateInstance(animatedWorld, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
+    //CreateInstance(world, StructureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/structures.png', false);
 }
 
 
@@ -160,9 +170,12 @@ function PopulateBuffer(x, y, z, buffer, renderer){
     buffer.animationFrame.push(renderer.animationFrames.x, renderer.animationFrames.y);
 
     buffer.typeSwitch.push(renderer.typeSwitch);
+
+    buffer.ssfileindex.push(renderer.ssfileindex);
+  
 }
 
-function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInformation, url, isBill, Animate, is3D = false) {
+function CreateInstance(world, buffer, SpriteSheetSize, ShaderInformation, Animate, is3D = false) {
 
     var vertex = ShaderInformation.billvertex;
     var fragment = ShaderInformation.billfragment;
@@ -193,7 +206,8 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     geometry.addAttribute('animationFrame', animationFrameAttribute);
     geometry.addAttribute('typeSwitch', typeSwitchAttribute);
 
-    var texture = new THREE.TextureLoader().load(url);
+    var texture = new THREE.TextureLoader().load(MapFileIndex[Math.round(buffer.ssfileindex)]);
+    console.log(Math.round(buffer.ssfileindex));
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
 

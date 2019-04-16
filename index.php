@@ -59,13 +59,13 @@
 	<script type="text/javascript" src="js/Helpers/phpFunctions.js"></script>
 
 	<!-- Cascading Fields -->
-	<script type="text/javascript" src="js/Cascading_Fields/World_QuadTree.js"></script>
-	<script type="text/javascript" src="js/Cascading_Fields/Cascading_Fields.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Collision.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Land.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Sky.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Movement.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Clouds.js"></script>
+	<script type="text/javascript" src="js/Cascading_Fields/World_QuadTree.js"></script>
+	<script type="text/javascript" src="js/Cascading_Fields/Cascading_Fields.js"></script>
 
 	<!-- World Generator Map Creators-->
 

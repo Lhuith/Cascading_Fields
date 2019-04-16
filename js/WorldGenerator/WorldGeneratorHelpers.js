@@ -30,7 +30,7 @@ Basic_Object.prototype.addChild = function (c) {
     this.children.push(c);
 }
 
-function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orientation, type, parent) {
+function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orientation, type, ssfileindex, parent) {
     this.size = size;
     this.ssIndex = ssIndex;
     this.animationFrames = animationFrames;
@@ -39,33 +39,34 @@ function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orien
     this.orientation = orientation;
     this.typeSwitch = type;
     this.parent = parent;
+    this.ssfileindex = ssfileindex;
 }
 
-Basic_Object.prototype.Create3D = function (ssIndex, size, animationFrames, colors, positionOffsets) {
+Basic_Object.prototype.Create3D = function (ssIndex, size, animationFrames, colors, positionOffsets, ssfileindex) {
 
     //creates a 4 sided sphereical reprenstation of a 3d object?
     for (var i = 0; i < 4; i++) {
         var obj = new Basic_Object(this.name + i.toString());
         obj.setParent(this);
-        obj.addComponent(new Renderer(ssIndex, size, animationFrames, colors, positionOffsets, FACEORIENTATIONS[i], 1, obj));
+        obj.addComponent(new Renderer(ssIndex, size, animationFrames, colors, positionOffsets, FACEORIENTATIONS[i], 1, ssfileindex, obj));
         this.children.push(obj);
     }
 }
 
-Basic_Object.prototype.CreateBox3D = function (ssIndex, size, animationFrames, colors, positionOffsets, W, H) {
+Basic_Object.prototype.CreateBox3D = function (ssIndex, size, animationFrames, colors, positionOffsets, ssfileindex, W, H) {
 
     var obj = new Basic_Object(this.name + "Front");
     obj.setParent(this);
     obj.addComponent(
         new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z - H / 2),
-            FACEORIENTATIONSIDENTITY, 1, obj));
+            FACEORIENTATIONSIDENTITY, 1, ssfileindex, obj));
     this.children.push(obj);
 
     var obj = new Basic_Object(this.name + "Back");
     obj.setParent(this);
     obj.addComponent(
         new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z + H / 2),
-            FACEORIENTATIONSIDENTITY, 1, obj));
+            FACEORIENTATIONSIDENTITY, 1, ssfileindex, obj));
     this.children.push(obj);
 
 
@@ -73,14 +74,14 @@ Basic_Object.prototype.CreateBox3D = function (ssIndex, size, animationFrames, c
     obj.setParent(this);
     obj.addComponent(
         new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x + W / 2, positionOffsets.y, positionOffsets.z),
-            FACEORIENTATIONS[1], 1, obj));
+            FACEORIENTATIONS[1], 1, ssfileindex, obj));
     this.children.push(obj);
 
     var obj = new Basic_Object(this.name + "Back");
     obj.setParent(this);
     obj.addComponent(
         new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x - W / 2, positionOffsets.y, positionOffsets.z),
-            FACEORIENTATIONS[1], 1, obj));
+            FACEORIENTATIONS[1], 1, ssfileindex, obj));
     this.children.push(obj);
 
 }

@@ -163,6 +163,8 @@ function init() {
     ShaderLoader('js/Shaders/Land/Land.vs.glsl','js/Shaders/Land/Land.fs.glsl', setUpLand, true);
     ShaderLoader('js/Shaders/Sky/Sky.vs.glsl', 'js/Shaders/Sky/Sky.fs.glsl', setUpSky, true);
     SetUpSunAndMoon();
+    init_cascding_fields();
+    
 }
 
 function FogController() {

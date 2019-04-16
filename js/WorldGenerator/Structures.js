@@ -37,7 +37,7 @@ lampPostBase.Create3D
     new THREE.Vector3(100,100,100), 
     new THREE.Vector2(1,1), 
     [new THREE.Color(silver0)], 
-    new THREE.Vector3(0,0,0));
+    new THREE.Vector3(0,0,0), 1);
 
 lampPost.addChild(lampPostBase);
 
@@ -53,7 +53,7 @@ lampPostHead.CreateBox3D(
     new THREE.Vector3(100, 100, 100), 
     new THREE.Vector2(1,1), 
     [new THREE.Color(silver1)], 
-    new THREE.Vector3(0, 70, 0),
+    new THREE.Vector3(0, 70, 0), 1,
      16, 16)
 
 lampPost.addChild(lampPostHead);

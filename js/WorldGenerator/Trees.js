@@ -60,7 +60,7 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
         [
             trunkcolor
         ],
-        new THREE.Vector3(0, 0, 0)
+        new THREE.Vector3(0, 0, 0), 0
     );
     //Roots ------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
         [
             trunkcolor
         ],
-        new THREE.Vector3(0, trunkPos, 0)
+        new THREE.Vector3(0, trunkPos, 0), 0
     );
     //Trunk ------------------------------------------------------------------------------
 
@@ -88,7 +88,8 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
         [
             trunkcolor 
         ],
-        new THREE.Vector3(0, branchesPos, 0)
+        new THREE.Vector3(0, branchesPos, 0),
+        0
     );
     //Branches ---------------------------------------------------------------------------
 
@@ -109,7 +110,7 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
             leavescolor
         ],
         new THREE.Vector3(0, leavespos, 0),
-        FACEORIENTATIONSIDENTITY, 0, new_tree_leaves
+        FACEORIENTATIONSIDENTITY, 0, 1, new_tree_leaves
     ));
     //Leaves ---------------------------------------------------------------------------
 
