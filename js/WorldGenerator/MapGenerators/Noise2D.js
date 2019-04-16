@@ -42,7 +42,7 @@
         {
             var offsetX = prng.next(-100000, 100000) + offset.x;
             var offsetY = prng.next(-100000, 100000) - offset.y;
-            octaveOffsets[i] = new Vector2 (offsetX, offsetY);
+            octaveOffsets[i] = new THREE.Vector2 (offsetX, offsetY);
             
             maxPossibleHeight += amplitude;
             amplitude *= persistance;

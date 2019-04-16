@@ -1,4 +1,4 @@
-function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, objects, characterlist, collision, ShaderInformation, SpriteSheetSize, SpriteSize) {
+function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, ShaderInformation, SpriteSheetSize, SpriteSize) {
     //heightMap, heightMultiplier, _heightCurve, 
 
     //console.log(imagedata.data.length);
@@ -109,15 +109,15 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
             var z = ((j * scale) - (size * scale) / 2.0) - (((size * scale / 2.0)) / 16);
 
 
-            //BigDude
-            if (SampledColor.getHex() == 0xff4b4b) {
-                var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
-                var char = LoadCharacter(0, 'img/Game_File/Big_Guy.png', new THREE.Vector3(1000, 1000, 1000), new THREE.Vector2(4, 4), new THREE.Vector3(z, height + 1000 / 2, x));
-                char.material.fog = true;
-                char.rotation.y = 90;
-                world.add(char);
-                characterList.push(char);
-            }
+           // //BigDude
+           // if (SampledColor.getHex() == 0xff4b4b) {
+           //     var height = GetCharHeight(raySampler, new THREE.Vector3(z, 0, x));
+           //     var char = LoadCharacter(0, 'img/Game_File/Big_Guy.png', new THREE.Vector3(1000, 1000, 1000), new THREE.Vector2(4, 4), new THREE.Vector3(z, height + 1000 / 2, x));
+           //     char.material.fog = true;
+           //     char.rotation.y = 90;
+           //     world.add(char);
+           //     characterList.push(char);
+           // }
 
             FetchCritter(SampledColor.getHex(), z, 1.0, x, CritterBuffer, raySampler);
             FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
@@ -183,7 +183,7 @@ function CreateInstance(world, buffer, SpriteSheetSize, SpriteSize, ShaderInform
     typeSwitchAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.typeSwitch), 1);
     
     //Quad tree insertion for collsion
-    ObjectScene.push(offsetAttribute);
+    //ObjectScene.push(offsetAttribute);
 
     geometry.addAttribute('offset', offsetAttribute);
     geometry.addAttribute('orientation', orientationAttribute);
