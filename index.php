@@ -77,13 +77,13 @@
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/FallOffGenerator.js"></script>
 
 	<!-- World Generator-->
+	<script type="text/javascript" src="js/WorldGenerator/ObjectData.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/WorldGeneratorHelpers.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MeshGenerator.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/EnviromentGenerator.js"></script>
-	<script type="text/javascript" src="js/WorldGenerator/Critters.js"></script>
+	<script type="text/javascript" src="js/WorldGenerator/Critter.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Trees.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Enviroment.js"></script>
-	<script type="text/javascript" src="js/WorldGenerator/Creatures.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Elements.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/Structures.js"></script>
 

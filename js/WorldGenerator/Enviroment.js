@@ -11,7 +11,7 @@ function FetchEnviroment(hex, x, y, z, buffer, ray, chance) {
 }
 
 var Enviroment = [
-    new Basic_Object
+    new Object_Frame
         (
             "flower",
             0x00ff00,
@@ -35,7 +35,7 @@ var Enviroment = [
             new THREE.Vector3(0,0,0),
             FACEORIENTATIONS[0],
         ),
-    new Basic_Object
+    new Object_Frame
         (
             "mushy",
             0xff00ff,

@@ -6,7 +6,7 @@ function FetchStructure(hex, x, y, z, buffer, ray) {
             y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
 
             //console.log(Structure[i].components[0]);
-            Structure[i].array.push(lampPost.Render(x,y,z, buffer));
+            Structure[i].array.push(lampPost.Decompose(x,y,z, buffer));
         }
     }
 }
@@ -18,14 +18,14 @@ var silver1 = 0x808080;
 //LampPost
 {
 var lampPost = 
-new Basic_Object
+new Object_Frame
     (
     "LampPost",
 
 );
 
 var lampPostBase =
-new Basic_Object
+new Object_Frame
 (
 "LampPostBase",
 0xff9c00,
@@ -37,12 +37,12 @@ lampPostBase.Create3D
     new THREE.Vector3(100,100,100), 
     new THREE.Vector2(1,1), 
     [new THREE.Color(silver0)], 
-    new THREE.Vector3(0,0,0), 1);
+    new THREE.Vector3(0,0,0));
 
 lampPost.addChild(lampPostBase);
 
 var lampPostHead =
-new Basic_Object
+new Object_Frame
 (
 "LampPostBase",
 0xff9c00,
@@ -53,7 +53,7 @@ lampPostHead.CreateBox3D(
     new THREE.Vector3(100, 100, 100), 
     new THREE.Vector2(1,1), 
     [new THREE.Color(silver1)], 
-    new THREE.Vector3(0, 70, 0), 1,
+    new THREE.Vector3(0, 70, 0),
      16, 16)
 
 lampPost.addChild(lampPostHead);

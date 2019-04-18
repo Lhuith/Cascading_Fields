@@ -10,7 +10,7 @@ function FetchElement(hex, x, y, z, buffer, ray, chance){
 }
 
 var Element = [
-    new Basic_Object 
+    new Object_Frame 
     (
         "Fire",
         0x838383,

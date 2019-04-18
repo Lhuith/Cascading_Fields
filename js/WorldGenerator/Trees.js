@@ -11,7 +11,7 @@ function FetchTrees(hex, x, y, z, buffer, enviBuffer, ray, world) {
                 TreesMeta[i].meta.name, TreesMeta[i].meta.ss, TreesMeta[i].meta.size, randomRange(TreesMeta[i].meta.t_range.x, TreesMeta[i].meta.t_range.y), TreesMeta[i].meta.color, TreesMeta[i].meta.leaves_color);
 
             TreesMeta[i].array.push(
-                tree.Render(x, facedata.y, z, buffer));
+                tree.Decompose(x, facedata.y, z, buffer));
         }
     }
 }
@@ -23,12 +23,12 @@ BushMeta = {name:"Bush", ss: new THREE.Vector2(0, 6), size: new THREE.Vector3(75
 function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolor) {
 
     var new_tree =
-        new Basic_Object(
+        new Object_Frame(
             name,
         );
 
     var new_tree_base =
-        new Basic_Object(
+        new Object_Frame(
             name + "Base",
         );
     
@@ -60,7 +60,7 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
         [
             trunkcolor
         ],
-        new THREE.Vector3(0, 0, 0), 0
+        new THREE.Vector3(0, 0, 0),
     );
     //Roots ------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
         [
             trunkcolor
         ],
-        new THREE.Vector3(0, trunkPos, 0), 0
+        new THREE.Vector3(0, trunkPos, 0),
     );
     //Trunk ------------------------------------------------------------------------------
 
@@ -89,13 +89,12 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
             trunkcolor 
         ],
         new THREE.Vector3(0, branchesPos, 0),
-        0
     );
     //Branches ---------------------------------------------------------------------------
 
     //Leaves ---------------------------------------------------------------------------
     var new_tree_leaves =
-    new Basic_Object(
+    new Object_Frame(
         name + "_leaves",
     );
 
@@ -110,26 +109,13 @@ function CreateTree(name, ssindex, size, trunkMultiplier, trunkcolor, leavescolo
             leavescolor
         ],
         new THREE.Vector3(0, leavespos, 0),
-        FACEORIENTATIONSIDENTITY, 0, 1, new_tree_leaves
+        FACEORIENTATIONSIDENTITY, 0, new_tree_leaves
     ));
     //Leaves ---------------------------------------------------------------------------
 
 
     new_tree.addChild(new_tree_base);
     new_tree.addChild(new_tree_leaves);
-
-    //var geometry = new THREE.BoxGeometry(25, tree_object.obj.size.y, 25);
-    //var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    //var cube = new THREE.Mesh(geometry, material);
-    ////scene.add( cube );
-    //cube.visible = false;
-    //cube.position.set(x, y, z);
-//
-    ////boxHelper = new THREE.BoxHelper(cube);
-    ////boxHelper.material.color.set(0xffffff);
-    ////world.add(boxHelper);
-    //worldObject.add(cube);
-    ////collision.push()
 
     return new_tree;
 }

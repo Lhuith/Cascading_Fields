@@ -279,7 +279,42 @@ function ShowHideObjects(ObjectList, Threshold, doChildren = false, doDistance =
     }
 }
 
-function HandleCollisions(){
+function HandleCollisions(scene, camera, world){
+
+    var raySampler = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
+    
+    if(Soups != undefined){
+        //console.log(Soups);
+        var currentP = new THREE.Vector3();
+        var currentS = new THREE.Vector3();
+        var currentC = new THREE.Vector3();
+
+        if(Soups[0] != undefined){
+            //console.log(critters.offsets);
+            for(var i = 0; i < Soups[0].offsets.count; i++){
+
+                //scene.updateMatrixWorld();
+
+                currentP.fromArray(Soups[0].offsets.array, i * 3);
+                currentC.fromArray(Soups[0].color.array, i * 3);
+                currentS.fromArray(Soups[0].scales.array, i * 3);
+                
+                var distance =  controls.getObject().position.distanceTo(currentP);
+
+                scene.add(outofbounds);
+
+                if(distance < 200){
+                    Soups[0].color.setXYZ(i, 0.0, 1.0, 0.0);
+                    var y = GetCharHeight(raySampler, currentC)
+                    Soups[0].offsets.setXYZ(i, controls.getObject().position.x - 5,,controls.getObject().position.z - 5);
+                    //console.log("Cant belieave this worked");
+                } 
+            }
+            Soups[0].color.needsUpdate = true;
+            Soups[0].offsets.needsUpdate = true;
+        }
+    }
+
     if (ObjectScene != undefined) {
         //for(var i = 0; i < ObjectScene.length; i++){
         //    var obj = ObjectScene[i];

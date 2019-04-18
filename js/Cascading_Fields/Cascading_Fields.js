@@ -2,6 +2,7 @@
 
 const World_QuadTree = new Quad_Tree(new Rectangle(0,0, textureSize, textureSize), 25);
 
+
 function init_cascding_fields(){
     //Init All Game Stuff here
     //World_QuadTree = ;
@@ -11,6 +12,7 @@ function init_cascding_fields(){
     console.log(World_QuadTree);
     World_QuadTree.Insert(obj);
     console.log(World_QuadTree);
+    LoadResources();
 }
 
 function Update(){
@@ -20,3 +22,4 @@ function Update(){
 function LateUpdate(){
 
 }
+

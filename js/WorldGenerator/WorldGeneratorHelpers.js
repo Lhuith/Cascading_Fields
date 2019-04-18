@@ -10,27 +10,31 @@ const FACEORIENTATIONS = [
 const FACEORIENTATIONSIDENTITY = new THREE.Quaternion(0, 0, 0, 1);
 
 
-function Basic_Object(name) {
+function Object_Frame(name) {
     this.name = name;
     this.components = [];
     this.children = []
     this.parent;
-    this.Object3D = new THREE.Object3D({name:name});
 }
 
-Basic_Object.prototype.setParent = function (p) {
+
+//Object_Frame.prototype.setPosition = function(v){
+//    this.Physical.position.copy(v); 
+//}
+
+Object_Frame.prototype.setParent = function (p) {
     this.parent = p;
 }
 
-Basic_Object.prototype.addComponent = function (c) {
+Object_Frame.prototype.addComponent = function (c) {
     this.components.push(c);
 }
 
-Basic_Object.prototype.addChild = function (c) {
+Object_Frame.prototype.addChild = function (c) {
     this.children.push(c);
 }
 
-function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orientation, type, ssfileindex, parent) {
+function Decomposer(ssIndex, size, animationFrames, colors, positionOffsets, orientation, type, parent) {
     this.size = size;
     this.ssIndex = ssIndex;
     this.animationFrames = animationFrames;
@@ -39,77 +43,73 @@ function Renderer(ssIndex, size, animationFrames, colors, positionOffsets, orien
     this.orientation = orientation;
     this.typeSwitch = type;
     this.parent = parent;
-    this.ssfileindex = ssfileindex;
 }
 
-Basic_Object.prototype.Create3D = function (ssIndex, size, animationFrames, colors, positionOffsets, ssfileindex) {
+Object_Frame.prototype.Create3D = function (ssIndex, size, animationFrames, colors, positionOffsets) {
 
     //creates a 4 sided sphereical reprenstation of a 3d object?
     for (var i = 0; i < 4; i++) {
-        var obj = new Basic_Object(this.name + i.toString());
+        var obj = new Object_Frame(this.name + i.toString());
         obj.setParent(this);
-        obj.addComponent(new Renderer(ssIndex, size, animationFrames, colors, positionOffsets, FACEORIENTATIONS[i], 1, ssfileindex, obj));
+        obj.addComponent(new Decomposer(ssIndex, size, animationFrames, colors, positionOffsets, FACEORIENTATIONS[i],1, obj));
         this.children.push(obj);
     }
 }
 
-Basic_Object.prototype.CreateBox3D = function (ssIndex, size, animationFrames, colors, positionOffsets, ssfileindex, W, H) {
+Object_Frame.prototype.CreateBox3D = function (ssIndex, size, animationFrames, colors, positionOffsets, W, H) {
 
-    var obj = new Basic_Object(this.name + "Front");
+    var obj = new Object_Frame(this.name + "Front");
     obj.setParent(this);
     obj.addComponent(
-        new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z - H / 2),
-            FACEORIENTATIONSIDENTITY, 1, ssfileindex, obj));
+        new Decomposer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z - H / 2),
+            FACEORIENTATIONSIDENTITY, 1, obj));
     this.children.push(obj);
 
-    var obj = new Basic_Object(this.name + "Back");
+    var obj = new Object_Frame(this.name + "Back");
     obj.setParent(this);
     obj.addComponent(
-        new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z + H / 2),
-            FACEORIENTATIONSIDENTITY, 1, ssfileindex, obj));
+        new Decomposer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x, positionOffsets.y, positionOffsets.z + H / 2),
+            FACEORIENTATIONSIDENTITY, 1, obj));
     this.children.push(obj);
 
 
-    var obj = new Basic_Object(this.name + "Front");
+    var obj = new Object_Frame(this.name + "Front");
     obj.setParent(this);
     obj.addComponent(
-        new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x + W / 2, positionOffsets.y, positionOffsets.z),
-            FACEORIENTATIONS[1], 1, ssfileindex, obj));
+        new Decomposer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x + W / 2, positionOffsets.y, positionOffsets.z),
+            FACEORIENTATIONS[1], 1, obj));
     this.children.push(obj);
 
-    var obj = new Basic_Object(this.name + "Back");
+    var obj = new Object_Frame(this.name + "Back");
     obj.setParent(this);
     obj.addComponent(
-        new Renderer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x - W / 2, positionOffsets.y, positionOffsets.z),
-            FACEORIENTATIONS[1], 1, ssfileindex, obj));
+        new Decomposer(ssIndex, size, animationFrames, colors, new THREE.Vector3(positionOffsets.x - W / 2, positionOffsets.y, positionOffsets.z),
+            FACEORIENTATIONS[1], 1, obj));
     this.children.push(obj);
 
 }
 
-Basic_Object.prototype.Render = function (x, y, z, buffer) {
-
-    this.Object3D.position.set(x,y,z);
+Object_Frame.prototype.Decompose = function (x, y, z, buffer) {
 
     if (this.components != undefined) {
         for (var i = 0; i < this.components.length; i++) {
-            if (this.components[i] instanceof Renderer) {
+            if (this.components[i] instanceof Decomposer) {
                 //PopulateBuffer(x, y, z, buffer);
-                this.components[i].DecomposeAndRenderObject(this.Object3D.position.x, this.Object3D.position.y, this.Object3D.position.z, buffer);
+                this.components[i].DecomposeAndRenderObject(x, y, z, buffer);
             }
         }
-
     }
     if (this.children != undefined) {
         for (var j = 0; j < this.children.length; j++) {
-            this.children[j].Render(this.Object3D.position.x, this.Object3D.position.y, this.Object3D.position.z, buffer);
+            this.children[j].Decompose(x, y, z);
         }
     }
 }
 
-Renderer.prototype.DecomposeAndRenderObject = function (x, y, z, buffer) {
+Decomposer.prototype.DecomposeAndRenderObject = function (x, y, z, buffer) {
     PopulateBuffer(x, y, z, buffer, this);
 }
-Renderer.prototype.setSize = function (s) {
+Decomposer.prototype.setSize = function (s) {
     console.log(s);
     this.size = s;
 }

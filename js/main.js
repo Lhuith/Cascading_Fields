@@ -204,7 +204,7 @@ function animate() {
 
     //worldObjects.position.y += 0.02;
 
-    HandleCollisions();
+    HandleCollisions(MainScene, camera, animatedWorldObjects);
 
     angle += 0.1;
     //mapCamera.rotation.x  += delta;
