@@ -37,14 +37,14 @@ uniform float fogFar;
 		void main()
 		{
 			vec3 sumDirLights = ((dot(normalize(directionalLights[0].direction), 
-			vecNormal)) * directionalLights[0].color) * 1.0;
+			vecNormal)) * directionalLights[0].color) * 1.10;
 
 			float shadowValue = getShadow(directionalShadowMap[ 0 ], directionalLights[0].shadowMapSize, 
 			directionalLights[0].shadowBias, directionalLights[0].shadowRadius, vDirectionalShadowCoord[0] );
 
 			vec3 shadowVal = vec3(shadowValue,shadowValue,shadowValue);
 			vec4 shadowDither = vec4(dither(shadowVal), 1.0);
-			vec4 light = vec4(dither(sumDirLights), 1.0) * 0.1;
+			vec4 light = vec4(dither(sumDirLights), 1.0);
 			vec4 color;
 			//dither
 			if(customColorSwitch == 1)
@@ -72,7 +72,7 @@ uniform float fogFar;
 
 			vec4 final = max(ext, tex);
 
-			gl_FragColor = ((final * customColor)) + light;
+			gl_FragColor = ((final * customColor)) * light;
 
 		#ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT

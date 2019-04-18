@@ -1,0 +1,27 @@
+crab = {
+    "name": "Crab",
+    "hex": "0xff7dff",
+    "ssIndex": [
+        0,
+        0
+    ],
+    "size": [
+        25,
+        25,
+        25
+    ],
+    "colors": [
+        "0xff5a5b"
+    ],
+    "position": [
+        0,
+        0,
+        0
+    ],
+    "orientation": [
+        0
+    ],
+    "type": [
+        0
+    ]
+}

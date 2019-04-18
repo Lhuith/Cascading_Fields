@@ -305,64 +305,28 @@ function HandleCollisions(scene, camera, world){
 
                 if(distance < 200){
                     Soups[0].color.setXYZ(i, 0.0, 1.0, 0.0);
-                    var y = GetCharHeight(raySampler, currentC)
-                    Soups[0].offsets.setXYZ(i, controls.getObject().position.x - 5,,controls.getObject().position.z - 5);
+                    
+
+                    var diffX = currentP.x - controls.getObject().position.x;
+                    var diffZ = currentP.z - controls.getObject().position.z;
+                    
+                    var d = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+                    var pushed_vec = new THREE.Vector3(currentP.x + diffX, currentP.y, currentP.z + diffZ)
+
+                    var y = GetCharHeight(raySampler, pushed_vec);
+
+                  
+                    Soups[0].offsets.setXYZ(
+                        i, 
+                        (pushed_vec.x), 
+                        y + currentS.y/2, 
+                        (pushed_vec.z));
                     //console.log("Cant belieave this worked");
                 } 
             }
             Soups[0].color.needsUpdate = true;
             Soups[0].offsets.needsUpdate = true;
-        }
-    }
-
-    if (ObjectScene != undefined) {
-        //for(var i = 0; i < ObjectScene.length; i++){
-        //    var obj = ObjectScene[i];
-        //    console.log(obj);
-        //   // obj.position.z += 22;
-        //}
-        var forestPosArray = ObjectScene[0];
-
-
-        var currentC = new THREE.Vector3();
-
-        if (forestPosArray != undefined) {
-            //for(var i = 0; i < forestOffsetArray.count; i++){
-            // 
-            // //console.log(currentT);
-            //
-            // //currentT.multiply(3);
-            // 
-            // if(i % 3 == 0)
-            //     forestOffsetArray.setXYZ(i, currentT.x, currentT.y + Math.sin(timer), currentT.z);
-            //}
-            //  var r =  randomRangeRound(0, forestOffsetArray.count - 1) ;
-            //  
-            //  currentT.fromArray( forestOffsetArray.array, ( r * 3 ) );
-            //  forestOffsetArray.setXYZ(r, currentT.x, 0, currentT.z);
-            //  forestOffsetArray.needsUpdate = true;
-            //console.log(forestPosArray[0]);
-            for (var i = 0; i < forestPosArray.count; i+=3) {
-
-                currentC.fromArray(forestPosArray.array, i);//new THREE.Vector3(forestPosArray[i], forestPosArray[i + 1], forestPosArray[i + 2]);
-                //treepos.setFromMatrixPosition(worldObjects.matrixWorld);
-
-                var distance =  controls.getObject().position.distanceTo(currentC);
-                //console.log(distance);
-
-                if(distance < 300){
-                    console.log("Cant belieave this worked");
-                } 
-                //if ((i * 3) < forestColortArray.count) {
-                //var index = i * 3;
-                //currentC.fromArray(forestColortArray.array, index);
-                //forestColortArray.setXYZ(index, 1.0, 1.0, 1.0);
-                //} else {
-                //    //console.log("gadda do guard check");
-                //}
-            }
-
-            //forestColortArray.needsUpdate = true;
         }
     }
 }

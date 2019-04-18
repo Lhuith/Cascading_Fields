@@ -76,6 +76,9 @@
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/Regions.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/FallOffGenerator.js"></script>
 
+
+	<script type="text/javascript" src="data/critters.json"></script>
+
 	<!-- World Generator-->
 	<script type="text/javascript" src="js/WorldGenerator/ObjectData.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/WorldGeneratorHelpers.js"></script>
