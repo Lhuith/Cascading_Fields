@@ -29,33 +29,12 @@ var landUniform =
 };
 
 
-function createDataMap(map, size) {
-    var dataTexture;
-
-    dataTexture = new THREE.DataTexture
-        (
-            Uint8Array.from(map),
-            size,
-            size,
-            THREE.RGBFormat,
-            THREE.UnsignedByteType,
-        );
-
-    dataTexture.needsUpdate = true;
-
-    return dataTexture;
-}
-
-function createLandDataFirst(data, vertexShader, fragShader) {
-    ShaderLoader('js/Shaders/Instance/Instance.vs.glsl',
-        'js/Shaders/Instance/Instance.fs.glsl', setUpMapFinal, { data: data, vertex: vertexShader, fragment: fragShader });
-}
-
 function createLandDataFinal(information, vertexShader, fragShader) {
-    var ShaderInfo = { billvertex: information.vertex, billfragment: information.fragment, instavert: vertexShader, instafrag: fragShader };
+    console.log(information);
+    var ShaderInfo = { billvertex: vertexShader, billfragment: fragShader};
 
-    var landInfo = new MapGenerator(information.data.octaves, information.data.persistance, information.data.lacunarity,
-        information.data.seed, information.data.noiseScale, information.data.offset, information.data.size, information.data.scale, information.data.gridsize, false, worldObjects,
+    var landInfo = new MapGenerator(information.octaves, information.persistance, information.lacunarity,
+        information.seed, information.noiseScale, information.offset, information.size, information.scale, information.gridsize, false, worldObjects,
         collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
 
     var dataTexture;
@@ -63,13 +42,15 @@ function createLandDataFinal(information, vertexShader, fragShader) {
     dataTexture = new THREE.DataTexture
         (
             Uint8Array.from(landInfo.map),
-            information.data.size,
-            information.data.size,
+            information.size,
+            information.size,
             THREE.RGBFormat,
             THREE.UnsignedByteType,
         );
 
     dataTexture.needsUpdate = true;
+
+    //Creating Land Information
     landData = new landInformation(dataTexture, landInfo.hasAtmo,
         landInfo.hasLiquad, landInfo.colors, landInfo.url,
         landInfo.regionsInfo, landInfo.LandMass);
@@ -79,7 +60,7 @@ function createLandDataFinal(information, vertexShader, fragShader) {
     extraDetial.minFilter = THREE.NearestFilter;
     extraDetial.wrapS = THREE.RepeatWrapping;
 
-
+    //Adding Land Masses to Scene
     if (landData != undefined) {
         landMassObject = new THREE.Object3D();
 
@@ -106,7 +87,6 @@ function createLandDataFinal(information, vertexShader, fragShader) {
             //MainScene.add(helper);
         }
 
-        //PostImageData(landData.map);
         MainScene.add(landMassObject);
     }
 
@@ -119,6 +99,8 @@ function createLandDataFinal(information, vertexShader, fragShader) {
 
     document.body.appendChild(progress);
 
+
+    //Big HeadAche
     var manager = new THREE.LoadingManager();
     manager.onProgress = function (item, loaded, total) {
         progressBar.style.width = (loaded / total * 100) + '%';
@@ -126,9 +108,10 @@ function createLandDataFinal(information, vertexShader, fragShader) {
 
     texture = new THREE.TextureLoader(manager).load("img/Game_File/Map_Decal.png", function (event) {
         imagedata = getImageData(texture.image);
-        GenerateEnviromentalDecal(information.data.scale, information.data.size, imagedata, worldObjects,
+        GenerateEnviromentalDecal(information.scale, information.size, imagedata, landMassObject,
             animatedWorldObjects, ShaderInfo, SpriteSheetSize, SpriteSize);
     });
+    //Big HeadAche
 
     //GenerateClouds(Clouds, 256, ShaderInfo, SpriteSheetSize, SpriteSize);
 }
@@ -155,7 +138,7 @@ function CreateLand(start, vertex_text, fragment_text) {
     CalculateParametres();
 
     ShaderLoader('js/Shaders/BillBoard/BillBoard.vs.glsl',
-        'js/Shaders/BillBoard/BillBoard.fs.glsl', setUpMapFirstPass, {
+        'js/Shaders/BillBoard/BillBoard.fs.glsl', setUpMapFinal, {
             octaves: octaves, persistance: persistance, lacunarity: lacunarity,
             seed: seed, noiseScale: noiseScale, offset: offset, size: textureSize, scale: mapScale, gridsize: 16,
         });
@@ -166,13 +149,6 @@ function CalculateParametres() {
     lacunarity = 0.21;//randomRange(1.9, 2.2);
     octaves = 5;//Math.round(randomRange(4, 6));
     noiseScale = 3;//randomRange(10, 200);
-}
-
-
-function setUpMapFirstPass(init, vertex_text, fragment_text) {
-    ShaderLoadList.land.vertex = vertex_text;
-    ShaderLoadList.land.fragment = fragment_text;
-    createLandDataFirst(init, vertex_text, fragment_text);
 }
 
 function setUpMapFinal(init, vertex_text, fragment_text) {

@@ -22,6 +22,24 @@ function Object_Frame(name) {
 //    this.Physical.position.copy(v); 
 //}
 
+function LoadResources(){
+    for(var i = 0; i < MapFileurl.length; i++){
+        var texture = new THREE.TextureLoader().load(MapFileurl[i]);
+        MapFileIndex.push(texture);
+    }
+}
+
+function ObjectSoup(name, offsets, scales, orientation, color, length){
+    this.name = name;
+    this.offsets = offsets;
+    this.scales = scales;
+    this.orientation = orientation;
+    this.color = color;
+    this.length = length;
+}
+
+const Soups = [];
+
 Object_Frame.prototype.setParent = function (p) {
     this.parent = p;
 }

@@ -9,7 +9,8 @@ var playerBox;
 var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
 
-function MovementInit(camera, textureSize, mapScale){
+function MovementInit(camera, textureSize, mapScale) {
+    
     controls = new THREE.PointerLockControls(camera);
 
     var blocker = document.getElementById('blocker');
@@ -34,78 +35,19 @@ function MovementInit(camera, textureSize, mapScale){
         instructions.style.display = '';
 
     });
+
+
     MainScene.add(controls.getObject());
     controls.getObject().position.set((((textureSize / 2.0) * mapScale) - 125 * mapScale),
         40, ((textureSize / 2.0) * mapScale) - 125 * mapScale);
-    
-        var onKeyDown = function (event) {
 
-            switch (event.keyCode) {
-    
-                case 38: // up
-                case 87: // w
-                    moveForward = true;
-                    break;
-    
-                case 37: // left
-                case 65: // a
-                    moveLeft = true;
-                    break;
-    
-                case 40: // down
-                case 83: // s
-                    moveBackward = true;
-                    break;
-    
-                case 39: // right
-                case 68: // d
-                    moveRight = true;
-                    break;
-    
-                case 32: // space
-                    if (canJump === true) velocity.y += 350;
-                    canJump = false;
-                    break;
-            }
-    
-        };
-    
-        var onKeyUp = function (event) {
-    
-            switch (event.keyCode) {
-    
-                case 38: // up
-                case 87: // w
-                    moveForward = false;
-                    break;
-    
-                case 37: // left
-                case 65: // a
-                    moveLeft = false;
-                    break;
-    
-                case 40: // down
-                case 83: // s
-                    moveBackward = false;
-                    break;
-    
-                case 39: // right
-                case 68: // d
-                    moveRight = false;
-                    break;
-    
-            }
-    
-        };
-    
-        document.addEventListener('keydown', onKeyDown, false);
-        document.addEventListener('keyup', onKeyUp, false);
-    
-        raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
-        raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1000);
-        raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
+
+    raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
+    raycaster_F = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 0, -1), 0, 1000);
+    raycaster_U = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
 
 }
+
 
 function Movement(delta) {
 

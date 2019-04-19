@@ -59,7 +59,9 @@
 	<script type="text/javascript" src="js/Helpers/phpFunctions.js"></script>
 
 	<!-- Cascading Fields -->
+	<script type="text/javascript" src="js/Cascading_Fields/Console.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Collision.js"></script>
+	<script type="text/javascript" src="js/Cascading_Fields/Input.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Land.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Sky.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Movement.js"></script>
@@ -75,9 +77,6 @@
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/NoiseFromTexture.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/Regions.js"></script>
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/FallOffGenerator.js"></script>
-
-
-	<script type="text/javascript" src="data/critters.json"></script>
 
 	<!-- World Generator-->
 	<script type="text/javascript" src="js/WorldGenerator/ObjectData.js"></script>
@@ -107,7 +106,7 @@
 	<script type="text/javascript" src="js/main.js"></script>
 
 	<footer class="page-footer gold footer-body padding-10 ">
-		<h6 class="t-align-c">Created using THREE.js</h6>
+		<!-- <h6 class="t-align-c">Created using THREE.js</h6> -->
 	</footer>
 </body>
 

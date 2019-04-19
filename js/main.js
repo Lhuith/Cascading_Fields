@@ -229,10 +229,9 @@ function animate() {
     }
 
     Movement(delta);
-
+    update_cascading_fields();
     stats.end();
     requestAnimationFrame(animate);
-
     render();
 
 }
@@ -285,6 +284,4 @@ function doDispose(obj) {
     obj = undefined;
 };
 
-//Methods to Setup and Save the Loaded Texts
-//Aswell as pass in extra paramaratres if needed
 

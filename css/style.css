@@ -28,7 +28,7 @@
         text-align: center;
         overflow-x: hidden;
         overflow: hidden;
-        padding: 0px 0px 0px 10px;
+        padding: 0px 0px 0px 0px;
         /*fills the little gap*/
     }
 
@@ -71,6 +71,34 @@
 
     }
     
+    #Console{
+        position: absolute;
+        bottom: 0;
+        left:0;
+        height: 30px;
+        width: 600px;
+        background-color: rgba(50, 50, 50, .5);
+        font-size: 20px;
+        text-align: left;
+        padding: 0px 0px 0px 10px;
+        border: 0;
+        resize: none;
+    }
+
+    #Console_Output{
+        position: absolute;
+        bottom: 34px;
+        left:0;
+        height: 200px;
+        width: 600px;
+        background-color: rgba(50, 50, 50, .5);
+        font-size: 20px;
+        text-align: left;
+        padding: 0px 0px 0px 10px;
+        border: 0;
+        resize: none;
+    }
+
     #Map{
         position: absolute;
         top: 0;
@@ -82,7 +110,7 @@
 
     .h-adjust2
     {
-            height: 125px!important;
+        height: 125px!important;
     }
 
     .h-adjust3

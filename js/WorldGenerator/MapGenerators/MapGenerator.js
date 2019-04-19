@@ -6,14 +6,8 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
     var regions;
     var colors = regions.ColorPallette;
     var noiseMap2D, noiseMap1D;
-    var noiseMapTexture = new Array();
-    var texture;
-    var imagedata;
-    var index = 0;
     var finalmap = new Array();
-    //var meshData;
-    var geo;
-    //console.log(size);
+
     if (regions.customUrl == '') {
         for (var x = 0; x < size + 1; x++) {
             clampedMap[x] = new Array();
@@ -81,9 +75,6 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
             finalmap[i + 2] = colorMap[i / 3].b;
         }
 
-        var finalGeo = new THREE.Object3D();
-
-  
         var LandMass = new Array();
 
         var chunkSize = (size * scale);
@@ -94,12 +85,9 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
         for (var y = 0; y < gridsize; y++)
             for (var x = 0; x < gridsize; x++) {
                 //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, 
-                world, collision, ShaderInformation, size * scale, gridsize, scale, SpriteSheetSize, SpriteSize));
+                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, size * scale, gridsize, scale));
             }
     }
-
-    //console.log(LandMass);
 
     return new landInformation(finalmap, false, false, colors,
         (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);

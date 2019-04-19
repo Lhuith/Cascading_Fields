@@ -7,32 +7,9 @@ const MapFileurl =[
 ];
 const MapFileIndex =[];
 
-function LoadResources(){
-    for(var i = 0; i < MapFileurl.length; i++){
-        var texture = new THREE.TextureLoader().load(MapFileurl[i]);
-        MapFileIndex.push(texture);
-    }
-}
 
-function ObjectSoup(name, offsets, scales, orientation, color, length){
-    this.name = name;
-    this.offsets = offsets;
-    this.scales = scales;
-    this.orientation = orientation;
-    this.color = color;
-    this.length = length;
-}
-
-const Soups = [];
 
 function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, ShaderInformation, SpriteSheetSize, SpriteSize) {
-    //heightMap, heightMultiplier, _heightCurve, 
-
-    //console.log(imagedata.data.length);
-    //raycaster = ;
-
-    var SpriteSheetSizeX = SpriteSheetSize.x;//4.0;
-    var SpriteSheetSizeY = SpriteSheetSize.y;//2.0;
 
     var ForestBuffer = {
         offsets: [],
@@ -137,7 +114,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
     //CreateInstance(animatedWorld, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
     //Soups.push(new ObjectSoup("Creatures", createtureSoupRaw.offsets, createtureSoupRaw.scales, createtureSoupRaw.orientation, createtureSoupRaw.color, createtureSoupRaw.length));
 
-    console.log(Soups);
+    //console.log(Soups);
 }
 
 
@@ -151,7 +128,7 @@ function PopulateBuffer(x, y, z, buffer, renderer){
     buffer.vector.set(x, y, z, 0).normalize();
 
     buffer.offsets.push(x + buffer.vector.x + renderer.posOffsets.x, y + buffer.vector.y + yOffets + renderer.posOffsets.y, z + buffer.vector.z + renderer.posOffsets.z);
-    buffer.vector.set(x, y, z, w).normalize();
+    buffer.vector.set(x, y, z).normalize();
 
     buffer.orientations.push(renderer.orientation.x, renderer.orientation.y, renderer.orientation.z, renderer.orientation.w);
 

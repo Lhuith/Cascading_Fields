@@ -4,10 +4,12 @@ function FetchCritter(hex, x, y, z, buffer, ray) {
     for (var i = 0; i < CrittersMeta.length; i++) {
         if (hex == CrittersMeta[i].hex) {
             y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
-            console.log("Zah?")
-            CrittersMeta[i].base.Decompose(x,y,z,buffer);//PopulateBuffer(x, y, z, buffer, CrittersMeta[i]);
+            //console.log("Zah?")
+            CrittersMeta[i].base.Decompose(x, y, z, buffer);//PopulateBuffer(x, y, z, buffer, CrittersMeta[i]);
+
         }
     }
+
 }
 
 var Turtle =
