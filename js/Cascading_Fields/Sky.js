@@ -102,7 +102,9 @@ function DayNightCycle(delta) {
     //console.log(Math.sin(D_N_Time * 3));
     //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
     SunMoonObject.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
-
+    var rot =  ((day_to_night * 360) - 90)
+    dirLight.rotation.set(rot,rot, rot);
+    //console.log(dirLight.rotation.x);
     if (skyBox != undefined) {
         skyBox.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
         //skyBox.material.uniforms.alpha.value = D_N_Time;

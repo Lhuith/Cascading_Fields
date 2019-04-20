@@ -1,9 +1,8 @@
-function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size, scale, gridsize, isclouds, world, collision, ShaderInformation, SpriteSheetSize, SpriteSize) {
+function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset, size) {
 
-    regions = regionRoll(isclouds);
+    var regions = regionRoll(false);
     var colorMap = new Array();
     var clampedMap = new Array();
-    var regions;
     var colors = regions.ColorPallette;
     var noiseMap2D, noiseMap1D;
     var finalmap = new Array();
@@ -50,10 +49,10 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
                         var g = regions.ColorPallette[i % regions.ColorPallette.length].RGB.g;
                         var b = regions.ColorPallette[i % regions.ColorPallette.length].RGB.b;
 
-                        if(currentHeight <= 0.25){
-                         r = r * currentHeight * 1.4;
-                         g = g * currentHeight * 1.4;
-                         b = b * currentHeight * 1.4;
+                        if (currentHeight <= 0.25) {
+                            r = r * currentHeight * 1.4;
+                            g = g * currentHeight * 1.4;
+                            b = b * currentHeight * 1.4;
                         }
                         var color = new THREE.Color(r, g, b, 1.0);
 
@@ -75,58 +74,63 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
             finalmap[i + 2] = colorMap[i / 3].b;
         }
 
-        var LandMass = new Array();
+        return heightmap;
+        //CreateLand(heightmap, scale, gridsize)
+    }
+}
 
-        var chunkSize = (size * scale);
-        //var size = chunkSize;
-        var detial = (chunkSize/gridsize)/scale; 
-        //console.log(world);
+    function CreateLand(h_map, f_map, colors, size, scale, gridsize, regions) {
+       //var LandMass = new Array();
 
-        for (var y = 0; y < gridsize; y++)
-            for (var x = 0; x < gridsize; x++) {
-                //var meshData = ;
-                LandMass.push(GenerateTerrainMesh(heightmap, (50.0 * scale), 1.0, detial, chunkSize/gridsize, x, y, size * scale, gridsize, scale));
-            }
+       //var chunkSize = (size * scale);
+       ////var size = chunkSize;
+       //var detial = (chunkSize / gridsize) / scale;
+       ////console.log(world);
+
+       //for (var y = 0; y < gridsize; y++)
+       //    for (var x = 0; x < gridsize; x++) {
+       //        //var meshData = ;
+       //        LandMass.push(GenerateTerrainMesh(h_map, (50.0 * scale), 1.0, detial, chunkSize / gridsize, x, y, size * scale, gridsize, scale));
+       //    }
+
+       //return new landInformation(f_map, false, false, colors,
+       //    (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);
     }
 
-    return new landInformation(finalmap, false, false, colors,
-        (regions.customUrl == '') ? false : regions.customUrl, regions, LandMass);
-};
+    function loadTexture(url) {
+        return new Promise(resolve => {
+            new THREE.TextureLoader().load(url, resolve);
+        });
+    }
 
-function loadTexture(url) {
-    return new Promise(resolve => {
-      new THREE.TextureLoader().load(url, resolve);
-    });
-  }
+    function getOtherImageData(image) {
 
-function getOtherImageData( image ) {
+        var canvas = document.createElement('canvas');
 
-    var canvas = document.createElement( 'canvas' );
+        var width = image.width || image.naturalWidth;
+        var hieght = image.height || image.naturalHeight;
 
-    var width = image.width || image.naturalWidth;
-    var hieght = image.height || image.naturalHeight;
+        canvas.width = width;
+        canvas.height = hieght;
 
-    canvas.width = width;
-    canvas.height = hieght;
+        var context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
 
-    var context = canvas.getContext( '2d' );
-    context.drawImage( image, 0, 0 );
+        return context.getImageData(0, 0, width, hieght);
 
-    return context.getImageData( 0, 0, width, hieght );
+    }
 
-}
+    function landInformation(map, hasAtmo, hasLiquad, colors, url, regionsInfo, landmass) {
+        this.map = map;
+        this.hasAtmo = hasAtmo;
+        this.hasLiquad = hasLiquad;
+        this.colors = colors;
+        this.url = url;
+        this.regionsInfo = regionsInfo;
+        this.LandMass = landmass;
+    }
 
-function landInformation(map, hasAtmo, hasLiquad, colors, url, regionsInfo, landmass) {
-    this.map = map;
-    this.hasAtmo = hasAtmo;
-    this.hasLiquad = hasLiquad;
-    this.colors = colors;
-    this.url = url;
-    this.regionsInfo = regionsInfo;
-    this.LandMass = landmass;
-}
-
-function TerrainType(name, height) {
-    this.name = name;
-    this.height = height;
-};
+    function TerrainType(name, height) {
+        this.name = name;
+        this.height = height;
+    };

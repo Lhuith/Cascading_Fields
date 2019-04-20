@@ -59,6 +59,7 @@
 	<script type="text/javascript" src="js/Helpers/phpFunctions.js"></script>
 
 	<!-- Cascading Fields -->
+	<script type="text/javascript" src="js/Cascading_Fields/World.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Console.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Collision.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Input.js"></script>
@@ -99,7 +100,9 @@
 		<div id="instructions">
 			<span style="font-size:40px">Click to play</span>
 			<br />
-			(W, A, S, D = Move, SPACE = Jump, MOUSE = Look around)
+			(PUASED)
+			<br />
+			(W, A, S, D = Move, MOUSE = Look around)
 		</div>
 
 	</div>

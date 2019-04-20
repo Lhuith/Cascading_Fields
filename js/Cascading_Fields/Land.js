@@ -3,9 +3,11 @@ var octaves;
 var persistance;
 var lacunarity;
 var seed = 13;
+var textureSize = 512;
+
 var noiseScale;
 var offset = { x: 0, y: 0 };
-var textureSize = 512;
+
 var mouseDown = false;
 
 var mapScale = 50.0;
@@ -30,66 +32,66 @@ var landUniform =
 
 
 function createLandDataFinal(information, vertexShader, fragShader) {
-    console.log(information);
+    //console.log(information);
     var ShaderInfo = { billvertex: vertexShader, billfragment: fragShader};
-
-    var landInfo = new MapGenerator(information.octaves, information.persistance, information.lacunarity,
-        information.seed, information.noiseScale, information.offset, information.size, information.scale, information.gridsize, false, worldObjects,
-        collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
-
-    var dataTexture;
-
-    dataTexture = new THREE.DataTexture
-        (
-            Uint8Array.from(landInfo.map),
-            information.size,
-            information.size,
-            THREE.RGBFormat,
-            THREE.UnsignedByteType,
-        );
-
-    dataTexture.needsUpdate = true;
-
-    //Creating Land Information
-    landData = new landInformation(dataTexture, landInfo.hasAtmo,
-        landInfo.hasLiquad, landInfo.colors, landInfo.url,
-        landInfo.regionsInfo, landInfo.LandMass);
+//
+    //var landInfo = new MapGenerator(information.octaves, information.persistance, information.lacunarity,
+    //    information.seed, information.noiseScale, information.offset, information.size, information.scale, information.gridsize, false, worldObjects,
+    //    collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
+//
+    //var dataTexture;
+//
+    //dataTexture = new THREE.DataTexture
+    //    (
+    //        Uint8Array.from(landInfo.map),
+    //        information.size,
+    //        information.size,
+    //        THREE.RGBFormat,
+    //        THREE.UnsignedByteType,
+    //    );
+//
+    //dataTexture.needsUpdate = true;
+//
+    ////Creating Land Information
+    //landData = new landInformation(dataTexture, landInfo.hasAtmo,
+    //    landInfo.hasLiquad, landInfo.colors, landInfo.url,
+    //    landInfo.regionsInfo, landInfo.LandMass);
 
     extraDetial = new THREE.TextureLoader().load("img/Game_File/Map_Paint.png");
     extraDetial.magFilter = THREE.NearestFilter;
     extraDetial.minFilter = THREE.NearestFilter;
     extraDetial.wrapS = THREE.RepeatWrapping;
 
-    //Adding Land Masses to Scene
-    if (landData != undefined) {
-        landMassObject = new THREE.Object3D();
-
-        for (var i = 0; i < landData.LandMass.length; i++) {
-            var chunk = new THREE.Mesh(landData.LandMass[i],
-                landMaterial);
-
-
-            chunk.castShadow = true; //default is false
-            chunk.receiveShadow = true; //default
-            chunk.scale.set(1, 1, 1);
-
-            landMaterial.uniforms.texture.value = landData.map;
-            landMaterial.uniforms.extra.value = extraDetial;
-
-            landData.map.wrapS = THREE.RepeatWrapping;
-            landData.map.repeat.x = -1;
-
-            landMaterial.side = THREE.DoubleSide;
-            dirLight.target = landMassObject;
-            //var helper = new THREE.FaceNormalsHelper( chunk, 2, 0x00ff00, 1 );
-            landMassObject.add(chunk)
-            objects.push(chunk);
-            //MainScene.add(helper);
-        }
-
-        MainScene.add(landMassObject);
-    }
-
+    ////Adding Land Masses to Scene
+    //if (landData != undefined) {
+    //    landMassObject = new THREE.Object3D();
+//
+    //    for (var i = 0; i < landData.LandMass.length; i++) {
+    //        var chunk = new THREE.Mesh(landData.LandMass[i],
+    //            landMaterial);
+//
+//
+    //        chunk.castShadow = true; //default is false
+    //        chunk.receiveShadow = true; //default
+    //        chunk.scale.set(1, 1, 1);
+//
+    //        landMaterial.uniforms.texture.value = landData.map;
+    //        landMaterial.uniforms.extra.value = extraDetial;
+//
+    //        landData.map.wrapS = THREE.RepeatWrapping;
+    //        landData.map.repeat.x = -1;
+//
+    //        landMaterial.side = THREE.DoubleSide;
+    //        dirLight.target = landMassObject;
+    //        //var helper = new THREE.FaceNormalsHelper( chunk, 2, 0x00ff00, 1 );
+    //        landMassObject.add(chunk)
+    //        objects.push(chunk);
+    //        //MainScene.add(helper);
+    //    }
+//
+    //    MainScene.add(landMassObject);
+    //}
+//
     var texture, imagedata;
 
     var progress = document.createElement('div');

@@ -107,22 +107,12 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     bufferGeometry.addAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
 
     var geo = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
-
+    geo.name = "Island_" + Worldx.toString() +"_"+Worldy.toString();
     geo.mergeVertices();
     geo.computeFaceNormals();
     geo.computeVertexNormals();
 
     //CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
     return geo;
-}
-
-/*
- * Easing Functions - inspired from http://gizma.com/easing/
- * only considering the t value for the range [0, 1] => [0, 1]
- * source : https://gist.github.com/gre/1650294
- */
-
-function CalculateNormals() {
-
 }
 

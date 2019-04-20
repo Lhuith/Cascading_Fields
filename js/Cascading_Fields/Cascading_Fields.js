@@ -13,6 +13,9 @@ function init_cascding_fields(){
     Input_Init();
     LoadResources();
     Console_Init();
+    World_init();
+    CreatePlayerCollider(MainScene);
+    CreateBounds(MainScene);
 }
 
 

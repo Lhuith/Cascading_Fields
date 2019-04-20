@@ -128,12 +128,10 @@ function init() {
     //MainScene.add(shadowCam);
     Clouds.position.x = 1000;
 
-
-    CreatePlayerCollider(MainScene);
-    CreateBounds(MainScene);
+    
 
     var gridHelper = new THREE.GridHelper(1000, 20);
-    //MainScene.add(gridHelper);
+    MainScene.add(gridHelper);
 
     //camera.position.y = -40;
     container = document.getElementById('webGL-container');

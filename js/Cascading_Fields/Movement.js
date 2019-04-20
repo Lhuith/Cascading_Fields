@@ -38,8 +38,8 @@ function MovementInit(camera, textureSize, mapScale) {
 
 
     MainScene.add(controls.getObject());
-    controls.getObject().position.set((((textureSize / 2.0) * mapScale) - 125 * mapScale),
-        40, ((textureSize / 2.0) * mapScale) - 125 * mapScale);
+    //controls.getObject().position.set((((textureSize / 2.0) * mapScale) - 125 * mapScale),
+    //    40, ((textureSize / 2.0) * mapScale) - 125 * mapScale);
 
 
     raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
