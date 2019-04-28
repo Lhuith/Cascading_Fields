@@ -27,11 +27,11 @@
     
     
     function GenerateNoise2DMap(mapWidth, mapHeight, seed, scale, octaves, persistance, lacunarity, offset)
-    {
-        var  noiseMap =  new Array();
+    {   
+        var noiseMap =  new Array();
         
         var prng = new PRNGRandom(seed);//Math.random(seed);
-
+        console.log(prng);
         var octaveOffsets = new Array(octaves);
         
         var maxPossibleHeight = 0;

@@ -279,7 +279,7 @@ function ShowHideObjects(ObjectList, Threshold, doChildren = false, doDistance =
     }
 }
 
-function HandleCollisions(scene, camera, world){
+function HandleCollisions(){
 
     var raySampler = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, 1, 0), 0);
     
@@ -301,7 +301,7 @@ function HandleCollisions(scene, camera, world){
                 
                 var distance =  controls.getObject().position.distanceTo(currentP);
 
-                scene.add(outofbounds);
+                //scene.add(outofbounds);
 
                 if(distance < 200){
                     Soups[0].color.setXYZ(i, 0.0, 1.0, 0.0);
@@ -314,7 +314,7 @@ function HandleCollisions(scene, camera, world){
 
                     var pushed_vec = new THREE.Vector3(currentP.x + diffX, currentP.y, currentP.z + diffZ)
 
-                    var y = GetCharHeight(raySampler, pushed_vec);
+                    var y = 1;//GetCharHeight(raySampler, pushed_vec);
 
                   
                     Soups[0].offsets.setXYZ(

@@ -64,10 +64,6 @@
 			viewDirection = normalize((posWorld.xz - cameraPosition.xz));	
 			//---------------------------------------------------------
 
-			
-
-
-
 			colorPass = col.rgb;
 			framePass = animationFrame;
 			uvoffsetPass = uvoffset;

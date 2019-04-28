@@ -9,6 +9,14 @@ const FACEORIENTATIONS = [
 
 const FACEORIENTATIONSIDENTITY = new THREE.Quaternion(0, 0, 0, 1);
 
+const MapFileurl =[
+    'img/Game_File/trees.png',
+    'img/Game_File/structures.png',
+    'img/Game_File/critters.png',
+];
+const MapFileIndex =[];
+
+
 
 function Object_Frame(name) {
     this.name = name;
@@ -22,12 +30,7 @@ function Object_Frame(name) {
 //    this.Physical.position.copy(v); 
 //}
 
-function LoadResources(){
-    for(var i = 0; i < MapFileurl.length; i++){
-        var texture = new THREE.TextureLoader().load(MapFileurl[i]);
-        MapFileIndex.push(texture);
-    }
-}
+
 
 function ObjectSoup(name, offsets, scales, orientation, color, length){
     this.name = name;

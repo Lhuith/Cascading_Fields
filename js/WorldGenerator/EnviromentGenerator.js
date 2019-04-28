@@ -1,12 +1,5 @@
 
 
-const MapFileurl =[
-    'img/Game_File/trees.png',
-    'img/Game_File/structures.png',
-    'img/Game_File/critters.png',
-];
-const MapFileIndex =[];
-
 
 
 function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld, ShaderInformation, SpriteSheetSize, SpriteSize) {
@@ -96,7 +89,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
 
             //FetchTrees(SampledColor.getHex(), z, 1.0, x, ForestBuffer, EnviromentBuffer, raySampler, world, 0.2);
             //FetchEnviroment(SampledColor.getHex(), z, 1.0, x, EnviromentBuffer, raySampler);
-            FetchCritter(SampledColor.getHex(), z, 1.0, x, CreatureBuffer, raySampler);
+            //FetchCritter(SampledColor.getHex(), z, 1.0, x, CreatureBuffer, raySampler);
             //FetchElement(SampledColor.getHex(), z, 1.0, x, ElementBuffer, raySampler, 0.4);
             //FetchStructure(SampledColor.getHex(), z, 1.0, x, StructureBuffer, raySampler);
 
@@ -109,7 +102,7 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
     //Will change world objects to chunks, to switch them off and save memory
     //CreateInstance(world, ForestBuffer, SpriteSheetSize, ShaderInformation, 0, false, true);
     //CreateInstance(world, StructureBuffer, SpriteSheetSize, ShaderInformation, 1, false, true);
-    CreateInstance("Critters", animatedWorld, CreatureBuffer, SpriteSheetSize, ShaderInformation, 2, true, false);
+    //CreateInstance("Critters", animatedWorld, CreatureBuffer, SpriteSheetSize, ShaderInformation, 2, true, false);
     //CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true, false);
     //CreateInstance(animatedWorld, CreatureBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/creatures.png', true, true, true);
     //Soups.push(new ObjectSoup("Creatures", createtureSoupRaw.offsets, createtureSoupRaw.scales, createtureSoupRaw.orientation, createtureSoupRaw.color, createtureSoupRaw.length));
@@ -144,11 +137,12 @@ function PopulateBuffer(x, y, z, buffer, renderer){
     buffer.typeSwitch.push(renderer.typeSwitch);
 
     //keep track of number of objects
-    buffer.objectslength += 1;
+    //buffer.objectslength += 1;
 }
 
 function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, urlindex, Animate, is3D = false) {
 
+    //console.log(ShaderInformation);
     var vertex = ShaderInformation.billvertex;
     var fragment = ShaderInformation.billfragment;
 
@@ -186,8 +180,8 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
     geometry.addAttribute('animationFrame', animationFrameAttribute);
     geometry.addAttribute('typeSwitch', typeSwitchAttribute);
 
-    var texture = new THREE.TextureLoader().load(MapFileurl[urlindex]);;
-    //console.log(texture);
+    var texture = new THREE.TextureLoader().load(MapFileurl[urlindex]);
+
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
 
@@ -231,6 +225,7 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
     material.side = THREE.DoubleSide;
     mesh.frustumCulled = false;
     mesh.castShadow = true;
+    console.log(world);
     world.add(mesh);
 }
 

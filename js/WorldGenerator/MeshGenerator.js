@@ -1,4 +1,6 @@
 
+const OCEAN_FLOOR = -100;
+
 function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, 
     mapsize, gridsize, scale) {
 
@@ -31,7 +33,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     var uvs = [];
 
     var hPoint = 0;
-
+    
     for (iy = 0; iy < gridY1; iy++) {
 
         var worldCoordY = (Worldy * (ChunkSize) - (mapsize / 2.0));
@@ -55,15 +57,27 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             var index = Math.round(yMapIndex * (mapsize / scale) + xMapIndex);
 
             //console.log(mapsize);
+            rIndex = ((ix * ChunkSize + iy) * 4);
+            gIndex = ((ix * ChunkSize + iy) * 4) + 1;
+            bIndex = ((ix * ChunkSize + iy) * 4) + 2;
+            aIndex = ((ix * ChunkSize + iy) * 4) + 3;
 
-            hPoint = heightMap[(index)];
+            red = heightMap.data[rIndex];
+            green = heightMap.data[gIndex];
+            blue = heightMap.data[bIndex];
+            alpha = heightMap.data[aIndex];
 
-            if (finalP > 0.80) {
-                finalP = 0.80;
-            }
+            var SampledColor = new THREE.Color(red/255,green/255,blue/255,1.0);
+            var mag = Normalize(0,1,Math.sqrt(SampledColor.r * SampledColor.r + SampledColor.g * SampledColor.g + SampledColor.b * SampledColor.b));
+            //console.log(mag);
+            hPoint = mag;//heightMap[(index)];
+
 
             var finalP = EasingFunctions.easeInQuint(hPoint) * heightMultiplier;
-
+            //console.log(finalP);
+            if (finalP <= 0.1) {
+                finalP = OCEAN_FLOOR;
+            }
             var vector = new THREE.Vector3(x, finalP, y);
 
             vertices.push(vector.x, vector.y, vector.z);
@@ -79,9 +93,10 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
             var worldUVX = (Worldx / (gridsize));
             var worldUVY = (Worldy / (gridsize));
 
-            uvs.push((uvX + worldUVX));
-            uvs.push((uvY + worldUVY));
+            uvs.push(((uvX - 25) + ChunkSize) * - 1);
+            uvs.push((uvY + ChunkSize));
         }
+        
 
     }
     for (iy = 0; iy < gridY; iy++) {
@@ -111,7 +126,7 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
     geo.mergeVertices();
     geo.computeFaceNormals();
     geo.computeVertexNormals();
-
+    //console.log(geo);
     //CreateInstance(world, EnviromentBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
     return geo;
 }

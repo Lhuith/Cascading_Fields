@@ -29,7 +29,7 @@ function Input_Init() {
             case 13:
                 enter = true;
                 break;
-            case 192:
+            case 191:
                 Console_Open = !Console_Open;
                 break;
         }

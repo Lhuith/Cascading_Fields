@@ -49,7 +49,6 @@
 	<script type="text/javascript" src="js/Helpers/perlin.js"></script>
 
 	<script type="text/javascript" src="js/Helpers/MathUtils.js"></script>
-
 	<script type="text/javascript" src="js/Helpers/ShaderFunctions.js"></script>
 	<script type="text/javascript" src="js/Helpers/PlanetInfo.js"></script>
 	<script type="text/javascript" src="js/Loaders.js"></script>
@@ -69,7 +68,7 @@
 	<script type="text/javascript" src="js/Cascading_Fields/Clouds.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/World_QuadTree.js"></script>
 	<script type="text/javascript" src="js/Cascading_Fields/Cascading_Fields.js"></script>
-
+	<script type="text/javascript" src="js/Helpers/AntLionAsync.js"></script>
 	<!-- World Generator Map Creators-->
 
 	<script type="text/javascript" src="js/WorldGenerator/MapGenerators/Noise1D.js"></script>

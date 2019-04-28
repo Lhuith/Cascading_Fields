@@ -55,8 +55,6 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
                             b = b * currentHeight * 1.4;
                         }
                         var color = new THREE.Color(r, g, b, 1.0);
-
-                        //console.log();
                         colorMap[y * size + x] = color;
                     }
                     else {
@@ -74,7 +72,7 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
             finalmap[i + 2] = colorMap[i / 3].b;
         }
 
-        return heightmap;
+        return {color: finalmap, height: heightmap};
         //CreateLand(heightmap, scale, gridsize)
     }
 }

@@ -1,27 +1,27 @@
 
 var container, mapcontainer, stats, controls;
 var camera, mapCamera, MainScene, BackgroundScene, renderer, MapRenderer, clock, composer;
-var dirLight, angle;
+var dirLight;
 
-var worldObjects, animatedWorldObjects, objects = [];
+var worldObjects, objects = [];
 
 var rotation = 0;
 var mouse = { x: 0, y: 0 };
 
 //var characterList = [];
-
-var SpriteSheetSize = new THREE.Vector2(8, 8);
 var EnviromentalSpriteSheet;
 
 var timer = 0;
 var timeLimit = .25;
 var startTime = Date.now();
+var done;
 
 
+AntLionInit();
 init();
 animate();
 
-function DirectionLightInit(scene){
+function DirectionLightInit(scene) {
     dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
     var vector = new THREE.Vector3(750, 500, 1000);
     dirLight.position.set(vector);
@@ -46,7 +46,7 @@ function DirectionLightInit(scene){
     dirLight.position.set(1000, 1000, 1);
 }
 
-function CreateRenderer(){
+function CreateRenderer() {
     var webglrenderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
 
     webglrenderer.setSize(Math.round(window.innerWidth / resolution), Math.round(window.innerHeight / resolution));
@@ -66,7 +66,12 @@ function CreateRenderer(){
     return webglrenderer;
 }
 
-function EffectsInit(frontscene, backscene, renderer){
+function add_to_MainScene(object) {
+    console.log(object);
+    MainScene.add(object);
+}
+
+function EffectsInit(frontscene, backscene, renderer) {
     composer = new THREE.EffectComposer(renderer);
 
     var StarsRenderPass = new THREE.RenderPass(backscene, camera);
@@ -82,6 +87,13 @@ function EffectsInit(frontscene, backscene, renderer){
     composer.addPass(MainRenderPass);
 
     MainRenderPass.renderToScreen = true;
+
+    if (devicePixelRatio == 1)
+        composer.setSize(window.innerWidth / resolution, window.innerHeight / resolution);
+    else
+        composer.setSize(window.innerWidth, window.innerHeight);
+
+
 }
 
 function init() {
@@ -108,17 +120,15 @@ function init() {
 
 
     DirectionLightInit(MainScene);
-    MovementInit(camera, textureSize, mapScale);
+
 
     worldObjects = new THREE.Object3D();
     Clouds = new THREE.Object3D();
-    animatedWorldObjects = new THREE.Object3D();
 
     collisionCheck = new Array();
 
     MainScene.add(worldObjects);
     MainScene.add(Clouds);
-    MainScene.add(animatedWorldObjects);
     MainScene.add(SunMoonObject);
     SunMoonObject.rotation.x = 25;
 
@@ -128,7 +138,6 @@ function init() {
     //MainScene.add(shadowCam);
     Clouds.position.x = 1000;
 
-    
 
     var gridHelper = new THREE.GridHelper(1000, 20);
     MainScene.add(gridHelper);
@@ -137,37 +146,27 @@ function init() {
     container = document.getElementById('webGL-container');
     document.body.appendChild(container);
 
-    renderer = CreateRenderer ();
+    renderer = CreateRenderer();
     EffectsInit(MainScene, BackgroundScene, renderer);
 
     //Load Shaders and Setup SkyBox
-
-    if (devicePixelRatio == 1)
-        composer.setSize(window.innerWidth / resolution, window.innerHeight / resolution);
-    else
-        composer.setSize(window.innerWidth, window.innerHeight);
 
 
     window.addEventListener("resize", onWindowResize, false);
 
     stats = new Stats()
 
-    //stats.domElement.style.position = 'absolute'
-    //stats.domElement.style.left = '0px'
-    //stats.domElement.style.bottom = '0px'
-    //container.appendChild(stats.domElement)
+    stats.domElement.style.position = 'absolute'
+    stats.domElement.style.left = '0px'
+    stats.domElement.style.bottom = '0px'
+    container.appendChild(stats.domElement);
 
-    //LoadAssets();
-    ShaderLoader('js/Shaders/Land/Land.vs.glsl','js/Shaders/Land/Land.fs.glsl', setUpLand, true);
-    ShaderLoader('js/Shaders/Sky/Sky.vs.glsl', 'js/Shaders/Sky/Sky.fs.glsl', setUpSky, true);
-    SetUpSunAndMoon();
-    init_cascding_fields();
-    
+    cascading_fields_init(camera, MainScene);
 }
 
-function FogController() {
-    var fogFarValue = controls.getObject().position.y;
-}
+//function FogController() {
+//    var fogFarValue = controls.getObject().position.y;
+//}
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -183,55 +182,16 @@ function onWindowResize() {
 }
 
 function animate() {
-    //console.log(collisionCheck.length);
-
     stats.begin();
-    FogController()
-
-    //console.log(worldObjects);
     var delta = clock.getDelta();
     timer += delta;
-    DayNightCycle(delta);
-    //Landmass ChunkManagement
-    //ShowHideObjects(landMassObject, 2000, false, false, false);
-    AnimateClouds(delta);
-    //Scene and Collsion World Managment
-    //ShowHideObjects(worldObjects, 3000, true);
-    //DistanceCollisionManage(worldObjects, 300);
-    //SimpleCollision(delta);
 
-    //worldObjects.position.y += 0.02;
 
-    HandleCollisions(MainScene, camera, animatedWorldObjects);
-
-    angle += 0.1;
-    //mapCamera.rotation.x  += delta;
-    if (landMassObject !== undefined) {
-        dirLight.lookAt(landMassObject.position);
-        var elapsedMilliseconds = Date.now() - startTime;
-        var elapsedSeconds = elapsedMilliseconds / 1000.;
-    }
-
-    if (skyMaterial !== undefined) {
-        skyMaterial.uniforms.time.value = timer;
-    }
-
-    if (animatedWorldObjects.children.length != 0) {
-        //console.log(animatedWorldObjects.children.length);
-
-        for (var i = 0; i < animatedWorldObjects.children.length; i++) {
-            if (animatedWorldObjects.children[i] != undefined) {
-                animatedWorldObjects.children[i].material.uniforms.time.value = timer;
-            }
-        }
-    }
-
-    Movement(delta);
-    update_cascading_fields();
+    cascading_fields_update(delta);
     stats.end();
+
     requestAnimationFrame(animate);
     render();
-
 }
 
 function render() {

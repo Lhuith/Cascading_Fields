@@ -37,82 +37,86 @@ function Console_Init() {
 
 function Get_Console_Input() {
 
-    if (Console_Open) {
-        Console.style.display = "block";
-        var str = $(Console).val();
-        Console.focus();
-        controls.isLocked = false;
-        controls.dispatchEvent({ type: 'unlock' });
+    if (Console != undefined) {
 
-        if (str != oldstr) {
-            if (enter) {
 
-                str = str.replace(/(\r\n|\n|\r)/gm, "");
+        if (Console_Open) {
+            Console.style.display = "block";
+            var str = $(Console).val();
+            Console.focus();
+            controls.isLocked = false;
+            controls.dispatchEvent({ type: 'unlock' });
 
-                var commands = str.split(' ');
-                Push_To_Stream(str);
+            if (str != oldstr) {
+                if (enter) {
 
-                if (commands.join('') == "clear") {
-                    console.log("clearing");
-                    input_stream = [];
-                    Console.value = '';
-                    return;
-                } else if (commands[0] == "p") {
-                    console.log("p found");
+                    str = str.replace(/(\r\n|\n|\r)/gm, "");
 
-                    for (var i = 1; i < commands.length; i++) {
-                        //console.log(commands[i]);
-                        if (commands[i] == 'reset') {
-                            Reset_Player();
-                            Console_Exit(str);
-                            return;
+                    var commands = str.split(' ');
+                    Push_To_Stream(str);
+
+                    if (commands.join('') == "clear") {
+                        console.log("clearing");
+                        input_stream = [];
+                        Console.value = '';
+                        return;
+                    } else if (commands[0] == "p") {
+                        console.log("p found");
+
+                        for (var i = 1; i < commands.length; i++) {
+                            //console.log(commands[i]);
+                            if (commands[i] == 'reset') {
+                                Reset_Player();
+                                Console_Exit(str);
+                                return;
+                            }
+
+                            //if(commands[i] == 'reset'){
+                            //    Reset_Player();
+                            //    Push_To_Stream(str);
+                            //    controls.lock();
+                            //    Console.value = '';  
+                            //    Console_Open = false;
+                            //    return;
+                            //}
+                        }
+                    } else if (commands[0] == "b") {
+                        console.log("b found");
+                        for (var i = 1; i < commands.length; i++) {
+                            console.log(commands[i]);
                         }
 
-                        //if(commands[i] == 'reset'){
-                        //    Reset_Player();
-                        //    Push_To_Stream(str);
-                        //    controls.lock();
-                        //    Console.value = '';  
-                        //    Console_Open = false;
-                        //    return;
-                        //}
-                    }
-                } else if (commands[0] == "b") {
-                    console.log("b found");
-                    for (var i = 1; i < commands.length; i++) {
-                        console.log(commands[i]);
+                    } else if (commands.join('') == "sorry") {
+                        Push_To_Stream('its ok');
+                    } else if (commands.join('') == "love" || commands.join('') == "<3") {
+                        Push_To_Stream('me love ally <3');
+                    } else {
+                        if (str != '')
+                            Push_To_Stream('dont know what your on about mate');
                     }
 
-                } else if (commands.join('') == "sorry") {
-                    Push_To_Stream('its ok');
-                } else if (commands.join('') == "love" || commands.join('') == "<3") {
-                    Push_To_Stream('me love ally <3');
-                }else {
-                    if (str != '')
-                        Push_To_Stream('dont know what your on about mate');
+
+
+                    Console.value = '';
+                    Console_Output.scrollTop = Console_Output.scrollHeight;
                 }
 
-
-
-                Console.value = '';
-                Console_Output.scrollTop = Console_Output.scrollHeight;
+            } else {
             }
+            screenunlocked = false;
+            oldstr = str;
 
         } else {
-        }
-        screenunlocked = false;
-        oldstr = str;
+            Console.style.display = "none";
 
-    } else {
-        Console.style.display = "none";
-
-        if (!screenunlocked) {
-            screenunlocked = true;
-            if (!controls.isLocked) {
-                controls.lock();
+            if (!screenunlocked) {
+                screenunlocked = true;
+                if (!controls.isLocked) {
+                    controls.lock();
+                }
             }
-        }
 
+        }
     }
 }
 
@@ -126,16 +130,19 @@ function Console_Exit(str) {
 
 function Console_Ouput() {
 
-    if (Console_Open) {
-        Console_Output.style.display = "block";
-        //$('#Console_Output').val(input_stream);
-        Console_Output.value = input_stream.join("\n");
+    if (Console != undefined) {
+        if (Console_Open) {
+            Console_Output.style.display = "block";
+            //$('#Console_Output').val(input_stream);
+            Console_Output.value = input_stream.join("\n");
 
-        for (var i = 0; i < input_stream.length; i++) {
+            for (var i = 0; i < input_stream.length; i++) {
 
+            }
+        } else {
+            Console_Output.style.display = "none";
         }
-    } else {
-        Console_Output.style.display = "none";
+
     }
 
 }

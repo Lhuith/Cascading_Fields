@@ -5,8 +5,7 @@ function FetchCritter(hex, x, y, z, buffer, ray) {
         if (hex == CrittersMeta[i].hex) {
             y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
             //console.log("Zah?")
-            CrittersMeta[i].base.Decompose(x, y, z, buffer);//PopulateBuffer(x, y, z, buffer, CrittersMeta[i]);
-
+            CrittersMeta[i].base.Decompose(x, 1, z, buffer);//PopulateBuffer(x, y, z, buffer, CrittersMeta[i]);
         }
     }
 

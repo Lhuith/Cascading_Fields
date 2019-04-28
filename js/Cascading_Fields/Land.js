@@ -34,29 +34,28 @@ var landUniform =
 function createLandDataFinal(information, vertexShader, fragShader) {
     //console.log(information);
     var ShaderInfo = { billvertex: vertexShader, billfragment: fragShader};
-//
-    //var landInfo = new MapGenerator(information.octaves, information.persistance, information.lacunarity,
-    //    information.seed, information.noiseScale, information.offset, information.size, information.scale, information.gridsize, false, worldObjects,
-    //    collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
-//
-    //var dataTexture;
-//
-    //dataTexture = new THREE.DataTexture
-    //    (
-    //        Uint8Array.from(landInfo.map),
-    //        information.size,
-    //        information.size,
-    //        THREE.RGBFormat,
-    //        THREE.UnsignedByteType,
-    //    );
-//
-    //dataTexture.needsUpdate = true;
-//
-    ////Creating Land Information
-    //landData = new landInformation(dataTexture, landInfo.hasAtmo,
-    //    landInfo.hasLiquad, landInfo.colors, landInfo.url,
-    //    landInfo.regionsInfo, landInfo.LandMass);
 
+var landInfo = new MapGenerator(information.octaves, information.persistance, information.lacunarity,
+    information.seed, information.noiseScale, information.offset, information.size, information.scale, information.gridsize, false, worldObjects,
+    collisionCheck, ShaderInfo, SpriteSheetSize, SpriteSize);
+
+var dataTexture;
+
+dataTexture = new THREE.DataTexture
+    (
+        Uint8Array.from(landInfo.map),
+        information.size,
+        information.size,
+        THREE.RGBFormat,
+        THREE.UnsignedByteType,
+    );
+
+dataTexture.needsUpdate = true;
+
+//Creating Land Information
+landData = new landInformation(dataTexture, landInfo.hasAtmo,
+    landInfo.hasLiquad, landInfo.colors, landInfo.url,
+    landInfo.regionsInfo, landInfo.LandMass);
     extraDetial = new THREE.TextureLoader().load("img/Game_File/Map_Paint.png");
     extraDetial.magFilter = THREE.NearestFilter;
     extraDetial.minFilter = THREE.NearestFilter;
