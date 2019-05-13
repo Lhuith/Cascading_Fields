@@ -31,7 +31,7 @@
         var noiseMap =  new Array();
         
         var prng = new PRNGRandom(seed);//Math.random(seed);
-        console.log(prng);
+        //console.log(prng);
         var octaveOffsets = new Array(octaves);
         
         var maxPossibleHeight = 0;

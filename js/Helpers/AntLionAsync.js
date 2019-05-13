@@ -11,7 +11,7 @@ const AsycData = [];
 var DONE = false;
 
 const Async_Information = [
-    { name:"Instance_Shader",type: 'shader', vert: 'js/Shaders/BillBoard/BillBoard.vs.glsl', frag: 'js/Shaders/BillBoard/BillBoard.fs.glsl', extra: { amount: 2000, world: ANIM_WORLD_OBJECTS } },
+    { name:"Instance_Shader",type: 'shader', vert: 'js/Shaders/BillBoard/BillBoard.vs.glsl', frag: 'js/Shaders/BillBoard/BillBoard.fs.glsl', extra: { amount: 200, world: ANIM_WORLD_OBJECTS } },
     { name:"Sky_Shader",type: 'shader', vert: 'js/Shaders/Sky/Sky.vs.glsl', frag: 'js/Shaders/Sky/Sky.fs.glsl', extra: { } },
     { name:"Land_Shader",type: 'shader', vert: 'js/Shaders/Land/Land.vs.glsl', frag: 'js/Shaders/Land/Land.fs.glsl', extra: { } },
     { name:"Critter_Data",type: 'json', file: 'data/critters.json'},
@@ -60,7 +60,7 @@ function AntLionFall(i, data) {
 
 function AntLionDone(i, data) {
     AsycData.push(data);
-    console.log("zah?");
+    //console.log("zah?");
     cascding_fields_loaded(AsycData);
     DONE = true;
 }

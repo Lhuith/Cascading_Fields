@@ -72,7 +72,7 @@ uniform float fogFar;
 
 			vec4 final = max(ext, tex);
 
-			gl_FragColor = ((final * customColor)) * light;
+			gl_FragColor = ((final));
 
 		#ifdef USE_FOG
           #ifdef USE_LOGDEPTHBUF_EXT

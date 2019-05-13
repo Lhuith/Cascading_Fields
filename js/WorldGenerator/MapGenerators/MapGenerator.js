@@ -88,7 +88,10 @@ function MapGenerator(octaves, persistance, lacunarity, seed, noiseScale, offset
        //for (var y = 0; y < gridsize; y++)
        //    for (var x = 0; x < gridsize; x++) {
        //        //var meshData = ;
-       //        LandMass.push(GenerateTerrainMesh(h_map, (50.0 * scale), 1.0, detial, chunkSize / gridsize, x, y, size * scale, gridsize, scale));
+       //        LandMass.push(GenerateTerrainMesh(
+        //h_map, (50.0 * scale), 1.0, detial, chunkSize / gridsize, 
+       //x, y, size * scale, gridsize, scale));
+       
        //    }
 
        //return new landInformation(f_map, false, false, colors,

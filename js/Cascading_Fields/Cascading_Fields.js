@@ -28,15 +28,13 @@ function cascading_fields_init(camera, mainscene){
 
 //call functions who need things loaded in, like json files, shaders and textures
 function cascding_fields_loaded(data) {
-    console.log(data);
+    //console.log(data);
 
     LoadResources();
     setUpSky(true, data[3].vert, data[3].frag);
     //setUpLand(true, data[2].vert, data[2].frag);
 
     World_init(data);
-
-
 }
 
 function cascading_fields_update(delta) {

@@ -67,7 +67,7 @@ function CreateRenderer() {
 }
 
 function add_to_MainScene(object) {
-    console.log(object);
+    //console.log(object);
     MainScene.add(object);
 }
 
@@ -114,13 +114,10 @@ function init() {
     mapCamera.position.y = 1000;
 
     MainScene = new THREE.Scene();
-
     //MainScene.background = new THREE.Color(0x42c5ff);
     MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 10000);
 
-
     DirectionLightInit(MainScene);
-
 
     worldObjects = new THREE.Object3D();
     Clouds = new THREE.Object3D();
@@ -138,8 +135,7 @@ function init() {
     //MainScene.add(shadowCam);
     Clouds.position.x = 1000;
 
-
-    var gridHelper = new THREE.GridHelper(1000, 20);
+    var gridHelper = new THREE.GridHelper(1000, 16);
     MainScene.add(gridHelper);
 
     //camera.position.y = -40;
