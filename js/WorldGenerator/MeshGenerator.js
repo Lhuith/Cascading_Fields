@@ -45,15 +45,17 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 			var grid_x = Math.floor(xIndex * tile_size) + ix;
 			var grid_y = Math.floor(yIndex * tile_size) + iy;
 
-			var rIndex = ((grid_y * (256) + grid_x) * 4);
+			var rIndex = ((grid_y * ((mapsize/scale) + 1) + grid_x) * 4);
 
 			var height_p = heightMap.data[rIndex]/255;
 
-		
+
 			var finalP = EasingFunctions.easeInQuint(height_p) * heightMultiplier;
 			
-			if(height_p <= 0){
-				finalP = - 100;
+			if(height_p <= 0.2){
+				finalP = - 21;
+			} else if(height_p < 0.31){
+				finalP = - 0.5;
 			}
 
 

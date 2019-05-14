@@ -32,15 +32,17 @@ function World_Generate(temp_data) {
 
    var maps = MapGenerator(5, 1.9, 0.21, SEED, 1, new THREE.Vector2(0,0), TEXTURE_RESOLUTION);
  
-   WORLD_OBJECT.add(CreateLandTile(0, 0, temp_data, temp_data[0].texture_data, temp_data[0].texture));
-    //for (var x = 0; x < W_NUM_TILES; x++)
-    //    for (var y = 0; y < W_NUM_TILES; y++) {
-//
-    //        
-    //    }
+
+    for (var x = 0; x < W_NUM_TILES; x++)
+        for (var y = 0; y < W_NUM_TILES; y++) {
+            if(x == 1 && y == 1){
+                WORLD_OBJECT.add(CreateLandTile(x, y, temp_data, temp_data[0].texture_data, temp_data[0].texture));
+            } else
+                WORLD_OBJECT.add(CreateLandTile(x, y, temp_data, temp_data[1].texture_data, temp_data[1].texture));
+        }
 
     add_to_MainScene(WORLD_OBJECT);
-
+    console.log(temp_data);
     //console.log(WORLD_OBJECT);
     //CreateCreatures(temp_data[4].extra, temp_data[4].vert, temp_data[4].frag)
 }
@@ -54,10 +56,10 @@ function CreateLandTile(worldx, worldy, temp_data, height, texture) {
             THREE.UniformsLib['lights'],
             THREE.UniformsLib['fog'],
             landUniform]),
-        vertexShader: temp_data[2].vert,
-        fragmentShader: temp_data[2].frag,
+        vertexShader: temp_data[3].vert,
+        fragmentShader: temp_data[3].frag,
         lights: true,
-        wireframe: true,
+        wireframe: false,
         fog: true
     });
 
@@ -66,18 +68,19 @@ function CreateLandTile(worldx, worldy, temp_data, height, texture) {
     var detial = ((chunkSize / TILE_GRID_SIZE) / W_TILE_SCALE) * 4;
 
     var half_chunk = (chunkSize)/2;
+    var full_size = (chunkSize) * TILE_GRID_SIZE;
 
-    var full_size = (chunkSize - 1) * TILE_GRID_SIZE;
-
-    //console.log(height);
+    var full_world_size = ((chunkSize) * TILE_GRID_SIZE * W_NUM_TILES);
 
     for (var y = 0; y < TILE_GRID_SIZE; y++)
         for (var x = 0; x < TILE_GRID_SIZE; x++) {
+            var world_pos_x = (worldx * full_size) + full_size/2 - full_world_size/2;
+            var world_pos_y = (worldy * full_size) + full_size/2 - full_world_size/2;
 
             var chunkgeo = GenerateTerrainMesh(
                 height, 40, 1.0, detial, chunkSize / TILE_GRID_SIZE,
-                ((x) * W_TILE_SIZE * W_TILE_SCALE) + half_chunk - full_size/2,
-                ((y) * W_TILE_SIZE * W_TILE_SCALE) + half_chunk - full_size/2,
+                (((x) * chunkSize) + half_chunk - (full_size-1)/2) + world_pos_x,
+                (((y) * chunkSize) + half_chunk - (full_size-1)/2) + world_pos_y,
                 chunkSize, TILE_GRID_SIZE, W_TILE_SCALE, x, y);
 
             var chunk = new THREE.Mesh(chunkgeo, material);

@@ -16,6 +16,7 @@ const Async_Information = [
     { name:"Land_Shader",type: 'shader', vert: 'js/Shaders/Land/Land.vs.glsl', frag: 'js/Shaders/Land/Land.fs.glsl', extra: { } },
     { name:"Critter_Data",type: 'json', file: 'data/critters.json'},
     { name:"World_Map_00",type: 'texture', file: 'img/World/Crab_Island.png'},
+    { name:"World_Map_00",type: 'texture', file: 'img/World/Main_Island.png'},
 ];
 
 //Big HeadAche

@@ -31,7 +31,7 @@ function cascding_fields_loaded(data) {
     //console.log(data);
 
     LoadResources();
-    setUpSky(true, data[3].vert, data[3].frag);
+    setUpSky(true, data[4].vert, data[4].frag);
     //setUpLand(true, data[2].vert, data[2].frag);
 
     World_init(data);
