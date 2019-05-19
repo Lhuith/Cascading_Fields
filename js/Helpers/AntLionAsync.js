@@ -15,8 +15,11 @@ const Async_Information = [
     { name:"Sky_Shader",type: 'shader', vert: 'js/Shaders/Sky/Sky.vs.glsl', frag: 'js/Shaders/Sky/Sky.fs.glsl', extra: { } },
     { name:"Land_Shader",type: 'shader', vert: 'js/Shaders/Land/Land.vs.glsl', frag: 'js/Shaders/Land/Land.fs.glsl', extra: { } },
     { name:"Critter_Data",type: 'json', file: 'data/critters.json'},
-    { name:"World_Map_00",type: 'texture', file: 'img/World/Crab_Island.png'},
-    { name:"World_Map_00",type: 'texture', file: 'img/World/Main_Island.png'},
+    { name:"World_Map_Crab_Isle",type: 'texture', file: 'img/World/Crab_Island.png'},
+    { name:"World_Map_Crab_Isle_color",type: 'texture', file: 'img/World/Crab_Island_color.png'},
+    { name:"World_Map_Main",type: 'texture', file: 'img/World/Main_Island.png'},
+    { name:"World_Map_Water",type: 'texture', file: 'img/World/water_tile.png'},
+    { name:"World_Water_Level",type: 'texture', file: 'img/World/water_level_color.png'},
 ];
 
 //Big HeadAche
@@ -57,6 +60,15 @@ function AntLionFall(i, data) {
         JsonAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionFall, i - 1);
     } else if (Async_Information[i].type == 'texture')
         TextureAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionFall, i - 1);
+}
+
+function GetData(nameKey){
+    for(var i = 0; i < AsycData.length; i++){
+        if(AsycData[i].name == nameKey)
+        return AsycData[i];
+    }
+
+    console.log("No Object Matches Name Given.");
 }
 
 function AntLionDone(i, data) {

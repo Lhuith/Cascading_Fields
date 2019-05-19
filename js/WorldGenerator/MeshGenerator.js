@@ -1,7 +1,7 @@
 
 const OCEAN_FLOOR = -100;
 
-function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, 
+function GenerateTileMesh(heightMap, heightMultiplier, _heightCurve, levelOfDetial, ChunkSize, Worldx, Worldy, 
     mapsize, gridsize, scale, xIndex, yIndex) {
 
     var bufferGeometry = new THREE.BufferGeometry();
@@ -49,13 +49,10 @@ function GenerateTerrainMesh(heightMap, heightMultiplier, _heightCurve, levelOfD
 
 			var height_p = heightMap.data[rIndex]/255;
 
-
 			var finalP = EasingFunctions.easeInQuint(height_p) * heightMultiplier;
 			
-			if(height_p <= 0.2){
-				finalP = - 21;
-			} else if(height_p < 0.31){
-				finalP = - 0.5;
+			if(finalP <= 0.1){
+				finalP = - 100;
 			}
 
 
