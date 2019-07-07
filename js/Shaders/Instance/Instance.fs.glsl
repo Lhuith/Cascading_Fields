@@ -14,7 +14,7 @@
 		varying vec2 framePass;
 		varying vec2 uvoffsetPass;
 		varying vec2 spritesheetsizePass;
-
+		uniform vec3 SunLightPosition;
 		addShadow
 		addDither
 		
@@ -35,12 +35,12 @@
 
 			if (tex.a != 1.0) 
 			discard;
-        float depth = gl_FragCoord.z / gl_FragCoord.w;
+        	float depth = gl_FragCoord.z / gl_FragCoord.w;
 			gl_FragColor = tex * vec4(colorPass,1.0- depth ) * vec4(fogColor,1.0);;
 
      
 		
-          float fogFactor = smoothstep( fogNear, fogFar, depth );
+          float fogFactor = smoothstep( fogNear, fogFar, depth * 6.0);
           gl_FragColor.rgb = mix( gl_FragColor.rgb, fogColor, fogFactor );
 
 

@@ -11,15 +11,16 @@ const AsycData = [];
 var DONE = false;
 
 const Async_Information = [
-    { name:"Instance_Shader",type: 'shader', vert: 'js/Shaders/BillBoard/BillBoard.vs.glsl', frag: 'js/Shaders/BillBoard/BillBoard.fs.glsl', extra: { amount: 200, world: ANIM_WORLD_OBJECTS } },
-    { name:"Sky_Shader",type: 'shader', vert: 'js/Shaders/Sky/Sky.vs.glsl', frag: 'js/Shaders/Sky/Sky.fs.glsl', extra: { } },
-    { name:"Land_Shader",type: 'shader', vert: 'js/Shaders/Land/Land.vs.glsl', frag: 'js/Shaders/Land/Land.fs.glsl', extra: { } },
+    { name:"Instance_Shader",type: 'shader', vert: 'js/Shaders/BillBoard/BillBoard.vs.glsl', frag: 'js/Shaders/BillBoard/BillBoard.fs.glsl', extra: {wf:false, trans:false, anim:false} },
+    { name:"Cloud_Shader",type: 'shader', vert: 'js/Shaders/Cloud/Cloud.vs.glsl', frag: 'js/Shaders/Cloud/Cloud.fs.glsl', extra: {wf:false, trans:true, anim:false} },
+    { name:"Sky_Shader",type: 'shader', vert: 'js/Shaders/Sky/Sky.vs.glsl', frag: 'js/Shaders/Sky/Sky.fs.glsl', extra: {wf:false, trans:false, anim:false} },
+    { name:"Land_Shader",type: 'shader', vert: 'js/Shaders/Land/Land.vs.glsl', frag: 'js/Shaders/Land/Land.fs.glsl', extra: {wf:false, trans:true, anim:false}  },
+    { name:"Water_Shader",type: 'shader', vert: 'js/Shaders/Water/Water.vs.glsl', frag: 'js/Shaders/Water/Water.fs.glsl', extra:  {wf:false, trans:true, anim:true}  },
     { name:"Critter_Data",type: 'json', file: 'data/critters.json'},
-    { name:"World_Map_Crab_Isle",type: 'texture', file: 'img/World/Crab_Island.png'},
-    { name:"World_Map_Crab_Isle_color",type: 'texture', file: 'img/World/Crab_Island_color.png'},
     { name:"World_Map_Main",type: 'texture', file: 'img/World/Main_Island.png'},
-    { name:"World_Map_Water",type: 'texture', file: 'img/World/water_tile.png'},
-    { name:"World_Water_Level",type: 'texture', file: 'img/World/water_level_color.png'},
+    { name:"Crab_Isle",type: 'island_textures', color_file: 'img/World/Crab_Island_color.png', height_file: 'img/World/Crab_Island.png', detail_file: 'img/World/Crab_Island_detail.png'},
+    { name:"Water_Tile",type: 'island_textures', color_file: 'img/World/water_tile.png', height_file: 'img/World/water_level_color.png', detail_file: 'img/World/Crab_Island_detail.png'},
+    { name:"Sun",type: 'light', properties: {hex:0xffffff, intesanity:11.1, pos:{x:0, y:1000, z:0}} },
 ];
 
 //Big HeadAche
@@ -44,6 +45,22 @@ function AntLionFall(i, data) {
             JsonAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionDone, i - 1);
         else if (Async_Information[i].type == 'texture')
             TextureAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionDone, i - 1);
+        else if (Async_Information[i].type == 'island_textures'){
+            IslandTexturesAntLionLoader(
+                Async_Information[i].name, 
+                Async_Information[i].color_file, 
+                Async_Information[i].height_file, 
+                Async_Information[i].detail_file, AntLionDone, i - 1);
+        }
+        else if(Async_Information[i].type == 'light'){
+            LightAntLionLoader(
+                Async_Information[i].name,
+                Async_Information[i].properties.hex,
+                Async_Information[i].properties.intesity,
+                Async_Information[i].properties.pos, AntLionFall, i - 1
+            )
+        }
+
 
         return;
     }
@@ -58,9 +75,25 @@ function AntLionFall(i, data) {
             i - 1);
     } else if(Async_Information[i].type == 'json'){
         JsonAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionFall, i - 1);
-    } else if (Async_Information[i].type == 'texture')
+    } else if (Async_Information[i].type == 'texture'){
         TextureAntLionLoader(Async_Information[i].name, Async_Information[i].file, AntLionFall, i - 1);
+    } else if (Async_Information[i].type == 'island_textures') {
+        IslandTexturesAntLionLoader(
+            Async_Information[i].name, 
+            Async_Information[i].color_file, 
+            Async_Information[i].height_file, 
+            Async_Information[i].detail_file, AntLionFall, i - 1);
+    }
+    else if(Async_Information[i].type == 'light'){
+        LightAntLionLoader(
+            Async_Information[i].name,
+            Async_Information[i].properties.hex,
+            Async_Information[i].properties.intesity,
+            Async_Information[i].properties.pos, AntLionFall, i - 1
+        )
+    }
 }
+
 
 function GetData(nameKey){
     for(var i = 0; i < AsycData.length; i++){
@@ -84,7 +117,43 @@ function TextureAntLionLoader(name, url, onLoad, i, onProgress, onError){
         texture.magFilter = THREE.NearestFilter;
         texture.minFilter = THREE.NearestFilter;
         onLoad(i, {name:name, texture: texture, texture_data:imagedata}, onProgress, onError)
+    });
+}
+
+function LightAntLionLoader(name, hex, intesity, pos, onLoad, i, onProgress, onError){
+    new_light = new THREE.DirectionalLight(hex, intesity);
+    new_light.position.set(pos.x, pos.y, pos.z);
+    new_light.name = name;
+    
+    onLoad(i, {name: name, light: new_light}, onProgress, onError);
+}
+
+
+function IslandTexturesAntLionLoader(name, urlc, urlh, urld, onLoad, i, onProgress, onError){
+    texture_c = new THREE.TextureLoader().load(urlc, function (event) {
+        texture_h = new THREE.TextureLoader().load(urlh, function (event) {
+            texture_d = new THREE.TextureLoader().load(urld, function (event) {
+
+        imagedata = getImageData(texture_h.image);    
+        detial_data = getImageData(texture_d.image); 
+
+        texture_c.magFilter = THREE.NearestFilter;
+        texture_c.minFilter = THREE.NearestFilter;
+
+        texture_h.magFilter = THREE.NearestFilter;
+        texture_h.minFilter = THREE.NearestFilter;
         
+        detial_data.magFilter = THREE.NearestFilter;
+        detial_data.minFilter = THREE.NearestFilter;
+
+        texture_d.magFilter = THREE.NearestFilter;
+        texture_d.minFilter = THREE.NearestFilter;
+        
+       
+        onLoad(i, {name:name, color: texture_c, height:imagedata, detail: detial_data, detail_test: texture_d}, onProgress, onError)
+
+            })
+        })
     });
 }
 

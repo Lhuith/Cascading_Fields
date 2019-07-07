@@ -24,6 +24,7 @@ var landUniform =
     paletteSize: { type: "i", value: 8 },
     texture: { type: "t", value: null },
     extra: { type: "t", value: null },
+    time: { type: "f", value: 1.0 },
     lightpos: { type: 'v3', value: new THREE.Vector3(0, 30, 20) },
     noTexture: { type: "i", value: 0 },
     customColorSwitch: { type: "i", value: 1 },

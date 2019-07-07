@@ -1,28 +1,36 @@
-function FetchElement(hex, x, y, z, buffer, ray, chance){
-    var y;
-
-    for(var i = 0; i < Element.length; i++){
-        if(hex == Element[i].mapHexCode && (randomRange(0, 10) <= chance)){
-            y = GetCharHeight(ray, new THREE.Vector3(x, 0, z));
-            PopulateBuffer(x, y, z, buffer, Element[i]);
-        }
-    }
-}
-
-var Element = [
-    new Object_Frame 
-    (
-        "Fire",
-        0x838383,
-        [
-            MapToSS(0, 0),
-        ],
-        new THREE.Vector3(75, 75, 75),
-        new THREE.Vector2(7, 7),
-        [
-            new THREE.Color(0xF9B11F),
-        ],
-        new THREE.Vector3(75, 75, 75),
-        FACEORIENTATIONS[0],
-    ),
-];
+//function FetchElement(hex, x, y, z, buffer, ray){
+//    var y;
+//
+//    for (var i = 0; i < ElementsMeta.length; i++) {
+//        if (hex == ElementsMeta[i].hex) {
+//            face = GetCharHeightAndOrientation(ray, new THREE.Vector3(x, 0, z), 1);
+//            //console.log("Zah?")
+//            ElementsMeta[i].base.Decompose(x, y, z, facedata.axis, facedata.radians, buffer);
+//        }
+//    }
+//}
+//
+//
+//var Cloud = new Object_Frame
+//    (
+//        "Cloud",
+//        FACEORIENTATIONS[0],
+//        null
+//    );
+//
+//Cloud.addComponent(
+//    new Decomposer([
+//        MapToSS(0, 1),
+//    ],
+//        new THREE.Vector3(200, 200, 200),
+//        new THREE.Vector2(3, 1),
+//        [
+//            new THREE.Color(0xe5e5e5)
+//        ],
+//        new THREE.Vector3(0, 0, 0),
+//        0,
+//        Cloud));
+//
+//var ElementsMeta = [
+//{ hex: 0xffffff, base: Cloud },
+//];

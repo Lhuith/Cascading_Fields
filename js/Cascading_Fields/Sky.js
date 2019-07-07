@@ -103,8 +103,9 @@ function DayNightCycle(delta) {
     //console.log("Night: " + night + " Dawn: " + dawn + " Day: " + day + " Dusk: " + dusk )
     SunMoonObject.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
     var rot =  ((day_to_night * 360) - 90)
-    dirLight.rotation.set(rot,rot, rot);
+    //dirLight.rotation.set(rot,rot, rot);
     //console.log(dirLight.rotation.x);
+    //SunLight.position.set(sun)
     if (skyBox != undefined) {
         skyBox.rotation.z = ((day_to_night * 360) - 90) * Math.PI / 180;
         //skyBox.material.uniforms.alpha.value = D_N_Time;
@@ -160,7 +161,7 @@ function SetSkyColor(d_n_time) {
 
 
 function SetUpSunAndMoon() {
-
+    DirectionLightInit();
 
     var sheet = new THREE.TextureLoader().load("img/Game_File/enviromental_SpriteSheet.png");
     sheet.magFilter = THREE.NearestFilter;
@@ -176,10 +177,17 @@ function SetUpSunAndMoon() {
     var sunMaterial = new THREE.SpriteMaterial({ map: sheet, color: 0xffffff });
     Sun = new THREE.Sprite(sunMaterial);
     Sun.scale.set(size, size, size);
-
+    
     sunMaterial.map.offset = new THREE.Vector2(indexX * 7, indexY * 7);
     sunMaterial.map.repeat = new THREE.Vector2(indexX, indexY);
     Sun.position.set(SkyPosX, 100, 0);
+
+
+    if(SunLight != undefined){
+            SunLight.position.set(Sun.position.x, Sun.position.y, Sun.position.z);
+        SunMoonObject.add(SunLight);
+    }
+
 
     SunMoonObject.add(Sun);
     // 

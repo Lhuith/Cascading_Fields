@@ -111,19 +111,31 @@ function GenerateEnviromentalDecal(scale, size, imagedata, world, animatedWorld,
 }
 
 
-function PopulateBuffer(x, y, z, buffer, renderer){
-    //store index maybe?
+function PopulateBuffer(position, orient, scale, buffer, renderer){
 
     var yOffets = (renderer.size.y) / 2.0;
 
-    buffer.scales.push(renderer.size.x, renderer.size.y, renderer.size.z);
+    buffer.scales.push(scale.x, scale.y, scale.z);
 
-    buffer.vector.set(x, y, z, 0).normalize();
+    buffer.vector.set(position.x, position.y, position.z, 0).normalize();
 
-    buffer.offsets.push(x + buffer.vector.x + renderer.posOffsets.x, y + buffer.vector.y + yOffets + renderer.posOffsets.y, z + buffer.vector.z + renderer.posOffsets.z);
-    buffer.vector.set(x, y, z).normalize();
+    buffer.offsets.push(
+        position.x + buffer.vector.x + renderer.posOffsets.x, 
+        position.y + buffer.vector.y + yOffets + renderer.posOffsets.y, 
+        position.z + buffer.vector.z + renderer.posOffsets.z);
 
-    buffer.orientations.push(renderer.orientation.x, renderer.orientation.y, renderer.orientation.z, renderer.orientation.w);
+    buffer.vector.set(position.x, position.y, position.z).normalize();
+
+    //console.log(orient);
+
+    //var rotation = new THREE.Quaternion().setFromEuler(renderer.orientation);
+//
+    //var newRot = orient.multiply(rotation);
+    //newRot.normalize();
+
+    //-------- Orientation -------
+    buffer.orientations.push(orient.x, orient.y, orient.z, orient.w);
+    //-------- Orientation -------
 
     var col = renderer.colors[randomRangeRound(0, renderer.colors.length - 1)];
     buffer.colors.push(col.r, col.g, col.b);
@@ -136,18 +148,18 @@ function PopulateBuffer(x, y, z, buffer, renderer){
 
     buffer.typeSwitch.push(renderer.typeSwitch);
 
+    buffer.normals.push(0.0, 1.0, 0.0);
+
+
     //keep track of number of objects
     //buffer.objectslength += 1;
 }
 
-function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, urlindex, Animate, is3D = false) {
-
-    //console.log(ShaderInformation);
-    var vertex = ShaderInformation.billvertex;
-    var fragment = ShaderInformation.billfragment;
+function CreateInstance(id, world, buffer, SpriteSheetSize, shader, urlindex, Animate, is3D = false) {
 
     var bufferGeometry = new THREE.PlaneBufferGeometry(1, 1, 1); //new THREE.BoxBufferGeometry( 2, 2, 2 );
     bufferGeometry.castShadow = true;
+
     var geometry = new THREE.InstancedBufferGeometry();
     geometry.index = bufferGeometry.index;
     geometry.attributes.position = bufferGeometry.attributes.position;
@@ -160,7 +172,8 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
     scaleAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.scales), 3);
     animationFrameAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.animationFrame), 2);
     typeSwitchAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.typeSwitch), 1);
-    
+    normalsAttribute = new THREE.InstancedBufferAttribute(new Float32Array(buffer.normals), 3);
+
     Soups.push(
         {
             id: id,
@@ -179,6 +192,7 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
     geometry.addAttribute('scaleInstance', scaleAttribute);
     geometry.addAttribute('animationFrame', animationFrameAttribute);
     geometry.addAttribute('typeSwitch', typeSwitchAttribute);
+    geometry.addAttribute('normal', normalsAttribute);
 
     var texture = new THREE.TextureLoader().load(MapFileurl[urlindex]);
 
@@ -193,6 +207,7 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
 
     if(is3D)
         is3DSwitch = 1.0;
+    console.log(new THREE.Object3D().normalMatrix);
 
     var instanceUniforms = {
         map: { value: texture },
@@ -200,84 +215,44 @@ function CreateInstance(id, world, buffer, SpriteSheetSize, ShaderInformation, u
         spriteSheetY: { type: "f", value: SpriteSheetSize.y },
         animationSwitch: { type: "f", value: animationSwitch },
         is3D: { type: "f", value: is3DSwitch },
-        time: { type: "f", value: 1.0 }
+        time: { type: "f", value: 1.0 },
+        //normalMatrix: { type: "m3v", value: ""}
     }
 
     var material = new THREE.RawShaderMaterial({
         uniforms:
             THREE.UniformsUtils.merge([
-                THREE.UniformsLib['light'],
+                THREE.UniformsLib['lights'],
                 THREE.UniformsLib['fog'],
                 instanceUniforms
             ]),
 
-        vertexShader: vertex,
-        fragmentShader: fragment,
+        vertexShader: shader.vert,
+        fragmentShader: shader.frag,
+        wireframe: shader.extra.wf,
+        transparent: shader.extra.trans,
         fog: true,
+        lights: true,
     });
 
     mesh = new THREE.Mesh(geometry, material);
     // object3d.castShadow = true;
     material.uniforms.map.value = texture;
-    material.uniforms.map.repeat = new THREE.Vector2(1 / SpriteSheetSize.x, 1 / SpriteSheetSize.y);
+    //material.uniforms.map.repeat = new THREE.Vector2(2 / SpriteSheetSize.x, 2 / SpriteSheetSize.y);
     material.uniforms.spriteSheetX.value = SpriteSheetSize.x;
     material.uniforms.spriteSheetY.value = SpriteSheetSize.y;
+
+    //var test_obj = new THREE.Object3D();
+    //test_obj
+
+   // material.uniforms.normalMatrix.value = test_obj.normalMatrix;
+
     material.side = THREE.DoubleSide;
     mesh.frustumCulled = false;
     mesh.castShadow = true;
-    console.log(world);
+    
+    //var helper = new THREE.VertexNormalsHelper( mesh, 21, 0x00ff00, 20 );
+   // world.add(helper);
     world.add(mesh);
 }
 
-function PopulateCloudBuffers(x, y, z, buffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, hex, multiplyScalar) {
-
-    w = 0;
-    var scaleX = 100 * multiplyScalar;//randomRange(5, 70);
-    var scaleY = 100 * multiplyScalar;//scaleX;//randomRange(5, 70);
-    var scaleZ = 100 * multiplyScalar;//randomRange(5, 70);
-
-    var yOffets = 1;//(scaleY) / 2.0;
-
-    buffer.scales.push(scaleX, scaleX, scaleZ);
-
-    buffer.vector.set(x, y, z, 0).normalize();
-    //EnviVector.multiplyScalar(1); // move out at least 5 units from center in current direction
-    buffer.offsets.push(x + buffer.vector.x, y + buffer.vector.y + yOffets, z + buffer.vector.z);
-    buffer.vector.set(x, y, z, w).normalize();
-    buffer.orientations.push(0, 0, 0, 0);
-
-    var col = new THREE.Color(hex);
-
-    var indexX = 1 / (SpriteSheetSizeX);
-    var indexY = 1 / (SpriteSheetSizeY);
-
-    buffer.uvoffsets.push(indexX * 0, indexY * 4);
-    buffer.colors.push(col.r, col.g, col.b);
-    buffer.animationFrame.push(0, 0);
-}
-
-function GenerateClouds(CloudsHolder, size, ShaderInformation, SpriteSheetSize, SpriteSize) {
-    var cloudhex = [0xA8BFD2, 0x849FB2, 0xCFD2E7];
-    var SpriteSheetSizeX = SpriteSheetSize.x;//4.0;
-    var SpriteSheetSizeY = SpriteSheetSize.y;//2.0;
-
-    var CloudBuffer = {
-        offsets: [],
-        orientations: [],
-        vector: new THREE.Vector4(),
-        scales: [],
-        colors: [],
-        uvoffsets: []
-    }
-    var scale = 85.0;
-
-    for (var i = 0; i < size; i++)
-        for (var j = 0; j < size; j++) {
-
-            var x = ((i * scale) - (size * scale) / 2.0);
-            var z = ((j * scale) - (size * scale) / 2.0);
-            PopulateCloudBuffers(x, 850 + randomRange(-264, 264), z, CloudBuffer, SpriteSheetSizeX, SpriteSheetSizeY, SpriteSize, 0x849FB2, randomRange(1, 4));
-        }
-
-    CreateInstance(CloudsHolder, CloudBuffer, SpriteSheetSize, SpriteSize, ShaderInformation, 'img/Game_File/enviromental_SpriteSheet.png', true);
-}

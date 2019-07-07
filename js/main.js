@@ -21,30 +21,7 @@ AntLionInit();
 init();
 animate();
 
-function DirectionLightInit(scene) {
-    dirLight = new THREE.DirectionalLight(0xffffff, 1.4);
-    var vector = new THREE.Vector3(750, 500, 1000);
-    dirLight.position.set(vector);
 
-    dirLight.shadow.camera.near = 0.01;
-    dirLight.castShadow = true;
-
-    var d = 550;
-
-    dirLight.shadow.camera.left = -d;
-    dirLight.shadow.camera.right = d;
-    dirLight.shadow.camera.top = d;
-    dirLight.shadow.camera.bottom = -d;
-
-    dirLight.shadow.mapSize.width = 512;
-    dirLight.shadow.mapSize.height = 512;
-
-    dirLight.shadow.camera.far = 2500;
-    dirLight.shadow.bias = -0.01;
-
-    scene.add(dirLight);
-    dirLight.position.set(1000, 1000, 1);
-}
 
 function CreateRenderer() {
     var webglrenderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
@@ -117,8 +94,6 @@ function init() {
     //MainScene.background = new THREE.Color(0x42c5ff);
     MainScene.fog = new THREE.Fog(0x42c5ff, 0.0025, 10000);
 
-    DirectionLightInit(MainScene);
-
     worldObjects = new THREE.Object3D();
     Clouds = new THREE.Object3D();
 
@@ -129,14 +104,18 @@ function init() {
     MainScene.add(SunMoonObject);
     SunMoonObject.rotation.x = 25;
 
-    MainScene.add(mapCamera);
+
+    //directionalLight.target = test_object;
+
     //mapCamera.lookAt(controls.getObject());
     //var shadowCam = new THREE.CameraHelper(dirLight.shadow.camera);
     //MainScene.add(shadowCam);
     Clouds.position.x = 1000;
 
     var gridHelper = new THREE.GridHelper(1000, 16);
-    MainScene.add(gridHelper);
+    //MainScene.add(gridHelper);
+
+    //MainScene.add(helper);
 
     //camera.position.y = -40;
     container = document.getElementById('webGL-container');
@@ -178,12 +157,14 @@ function onWindowResize() {
 }
 
 function animate() {
+
+
     stats.begin();
     var delta = clock.getDelta();
     timer += delta;
 
 
-    cascading_fields_update(delta);
+    cascading_fields_update(delta, camera);
     stats.end();
 
     requestAnimationFrame(animate);
@@ -191,7 +172,7 @@ function animate() {
 }
 
 function render() {
-    //renderer.render(MainScene, camera);
+    renderer.render(MainScene, camera);
     composer.render();
     //MapRenderer.render(MainScene, mapCamera);
 

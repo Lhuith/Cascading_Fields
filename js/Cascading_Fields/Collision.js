@@ -117,7 +117,7 @@ function GetCharHeight(raycaster, vector) {
     raycaster.ray.origin.copy(NewVector);
     raycaster.ray.origin.y -= 1;
 
-    var intersections = raycaster.intersectObjects(objects);
+    var intersections = raycaster.intersectObjects(WORLD_PHYSICAL);
 
     var onObject = intersections.length > 0;
     var height = 0;
@@ -132,54 +132,89 @@ function GetCharHeight(raycaster, vector) {
     return height;
 }
 
-function GetCharHeightAndOrientation(raycaster, vector) {
 
-    var NewVector = new THREE.Vector3(
-        vector.x,
-        0,
-        vector.z);
+function GetHeightSingle(raycaster, vector, geo, old_y) {
 
-    raycaster.ray.origin.copy(NewVector);
-    raycaster.ray.origin.y -= 1;
+    raycaster = new THREE.Raycaster(
+        new THREE.Vector3(vector.x, 0, vector.z), 
+        new THREE.Vector3(0, -1.0, 0), 1, 100);
 
-    var intersections = raycaster.intersectObjects(objects);
+    //var arrowHelper = new THREE.ArrowHelper( 
+    //    raycaster.ray.direction, raycaster.ray.origin, 100, 0xff0000);
+    //add_to_MainScene(arrowHelper);
+    
+    var intersections = raycaster.intersectObject(geo, true);
 
     var onObject = intersections.length > 0;
     var height = 0;
-    var axs = new THREE.Vector3(0, 1, 0);
+    var axis_pass = new THREE.Vector3(0, 1, 0);
     var rads = 1.0;
 
+    axis_pass = new THREE.Vector3(0, 1, 0);
 
+    if (intersections.length > 0) {
+        var firstIntersectedObject  = intersections[0];
+        // this will give you the first intersected Object if there are multiple.
+        height = firstIntersectedObject.point.y;
+        //console.log(firstIntersectedObject);
+     } else {
+         height = old_y;
+     }
 
-    if (intersections[0] !== undefined) {
-        height = intersections[0].point.y;
+    return { y: height, axis: axis_pass, radians:rads};//radians: rads };
+}
 
-        if (intersections[2] !== undefined) {
-            var vec = intersections[2].face.normal.clone();
+function GetCharHeightAndOrientation(raycaster, vector, old_y) {
 
-            var up = new THREE.Vector3(0, 1, 0);
+    var raycaster = new THREE.Raycaster(
+        new THREE.Vector3(vector.x, 0, vector.z), 
+        new THREE.Vector3(0, 1.0, 0));
 
-            // we want the cone to point in the direction of the face normal
-            // determine an axis to rotate around
-            // cross will not work if vec == +up or -up, so there is a special case
-            if (vec.y == 1 || vec.y == -1) {
-                var axis = new THREE.Vector3(1, 0, 0);
-            } else {
-                var axis = new THREE.Vector3().crossVectors(up, vec);
-            }
+    var arrowHelper = new THREE.ArrowHelper( 
+        raycaster.ray.direction, raycaster.ray.origin, 100, 0xff0000 );
+    add_to_MainScene(arrowHelper);
+    
+    var intersections = raycaster.intersectObjects(WORLD_PHYSICAL);
 
-            //determine the amount to rotate
-            var radians = Math.acos(vec.dot(up));
+    var onObject = intersections.length > 0;
+    var height = 0;
+    var axis_pass = new THREE.Vector3(0, 1, 0);
+    var rads = 1.0;
 
-            axs = axis;
-            rads = radians;
-        }
-    }
-    else {
-        height = 40;
+    axis_pass = new THREE.Vector3(0, 1, 0);
 
-    }
-    return { y: height, axis: axs, radians: rads };
+    if (intersections.length > 0) {
+        var firstIntersectedObject  = intersections[0];
+        // this will give you the first intersected Object if there are multiple.
+        height = firstIntersectedObject.point.y;
+        //console.log(firstIntersectedObject);
+     } else {
+         height = -100;
+     }
+
+    return { y: height, axis: axis_pass, radians:rads};//radians: rads };
+}
+
+function orientAlongNormal(object, coords, normal, scalar) {
+
+    var up = new THREE.Vector3(0, 0, 1);
+    object.up = up;//Z axis up
+
+    //create a point to lookAt
+    var newPoint = new THREE.Vector3(
+        coords.x + normal.x,
+        coords.y + normal.y,
+        coords.z + normal.z
+    );
+
+        //aim object in direction of vector "normal" using lookAt
+    object.lookAt(newPoint ); 
+
+	//in this case the cone model is a bit wrong so we have to rotate it by 90 degrees
+	object.rotateX( 0.5*Math.PI );
+  
+  //put object to coords
+	object.position.addVectors(coords, normal.clone().multiplyScalar(scalar));
 }
 
 function GetHeight() {
@@ -192,9 +227,8 @@ function GetHeight() {
     raycaster_U.ray.origin.copy(vector);
     raycaster_U.ray.origin.y -= 1;
 
-    var intersections = raycaster_U.intersectObjects(objects);
+    var intersections = raycaster_U.intersectObjects(WORLD_PHYSICAL);
 
-    var onObject = intersections.length > 0;
     var height = 0;
 
     if (intersections[0] !== undefined)
@@ -288,11 +322,11 @@ function HandleCollisions(){
         var currentP = new THREE.Vector3();
         var currentS = new THREE.Vector3();
         var currentC = new THREE.Vector3();
-
+        
         if(Soups[0] != undefined){
-            //console.log(critters.offsets);
+            //console.log(Soups[0] );
             for(var i = 0; i < Soups[0].offsets.count; i++){
-
+                //console.log(i);
                 //scene.updateMatrixWorld();
 
                 currentP.fromArray(Soups[0].offsets.array, i * 3);
@@ -306,7 +340,6 @@ function HandleCollisions(){
                 if(distance < 200){
                     Soups[0].color.setXYZ(i, 0.0, 1.0, 0.0);
                     
-
                     var diffX = currentP.x - controls.getObject().position.x;
                     var diffZ = currentP.z - controls.getObject().position.z;
                     
